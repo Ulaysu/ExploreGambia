@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "aU5WCfdWN2gIk1rOYSLf7/EfvYqaPZzZ8UN7EKoqspM=",
+  "Source": "ExploreGambia.API",
+  "BasePath": "_content/ExploreGambia.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
