@@ -25,7 +25,23 @@ namespace ExploreGambia.API.Controllers
         {
             var payments = await paymentRepository.GetAllPaymentsAsync();
 
-            return Ok(mapper.Map<List<TourDto>>(payments));
+            return Ok(mapper.Map<List<PaymentDto>>(payments));
+        }
+
+        // Get Payment By Id Get: api/Payments/{id}
+        [HttpGet]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> GetPaymentGuideById([FromRoute] Guid id)
+        {
+
+            var payment = await paymentRepository.GetPaymentById(id);
+
+            if (payment == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(mapper.Map<PaymentDto>(payment));
         }
     }
 }
