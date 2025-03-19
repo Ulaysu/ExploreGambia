@@ -1,1 +1,8 @@
-    .vs/
+  bin/
+obj/
+*.log
+*.user
+*.vs/
+*.dll
+.env
+
