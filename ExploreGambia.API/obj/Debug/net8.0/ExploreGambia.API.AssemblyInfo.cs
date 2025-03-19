@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ExploreGambia.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e6c1797670fc5299d6bcf35a9cc3dbbf9de987aa")]
 [assembly: System.Reflection.AssemblyProductAttribute("ExploreGambia.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ExploreGambia.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

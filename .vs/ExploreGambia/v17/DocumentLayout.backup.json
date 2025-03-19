@@ -1,69 +1,72 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\",
+  "WorkspaceRootPath": "C:\\Users\\User\\Desktop\\ExploreGambia\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\controllers\\bookingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\controllers\\bookingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\repositories\\bookingrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\repositories\\bookingrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\controllers\\tourguidecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\controllers\\tourguidecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\controllers\\tourscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\controllers\\tourscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\models\\domain\\booking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\models\\domain\\booking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\models\\dtos\\updatebookingrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\models\\dtos\\updatebookingrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\mapping\\automapperprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\mapping\\automapperprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\models\\dtos\\bookingdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\dotnet\\sdk\\9.0.201\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\repositories\\bookingrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\repositories\\bookingrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\controllers\\tourguidecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\controllers\\tourguidecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\controllers\\paymentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\controllers\\tourscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\controllers\\tourscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\models\\domain\\booking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\models\\domain\\booking.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\models\\dtos\\updatebookingrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\models\\dtos\\updatebookingrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\mapping\\automapperprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\mapping\\automapperprofiles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\models\\dtos\\bookingdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\models\\dtos\\bookingdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\models\\dtos\\addbookingrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\models\\dtos\\addbookingrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\models\\dtos\\addbookingrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\repositories\\itourrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\repositories\\itourrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\repositories\\itourrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\models\\dtos\\updatetourrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\models\\dtos\\updatetourrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\models\\dtos\\updatetourrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\models\\dtos\\addtourrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\models\\dtos\\addtourrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\models\\dtos\\addtourrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\repositories\\itourguiderepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\repositories\\itourguiderepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\repositories\\itourguiderepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\mama\\desktop\\exploregambia\\exploregambia\\exploregambia.api\\models\\domain\\tourguide.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|c:\\users\\user\\desktop\\exploregambia\\exploregambia.api\\models\\domain\\tourguide.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CCB727DB-C740-4E85-8762-F8208CAA3621}|ExploreGambia.API\\ExploreGambia.API.csproj|solutionrelative:exploregambia.api\\models\\domain\\tourguide.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -74,204 +77,228 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "UpdateBookingRequestDto.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\UpdateBookingRequestDto.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\DTOs\\UpdateBookingRequestDto.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\UpdateBookingRequestDto.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Models\\DTOs\\UpdateBookingRequestDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-15T06:44:04.474Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Program.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Program.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Program.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-15T06:35:59.161Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "AddBookingRequestDto.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\AddBookingRequestDto.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\DTOs\\AddBookingRequestDto.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\AddBookingRequestDto.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Models\\DTOs\\AddBookingRequestDto.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAuwAcAAAApAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-14T05:57:33.457Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "BookingDto.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\BookingDto.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\DTOs\\BookingDto.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\BookingDto.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Models\\DTOs\\BookingDto.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAAAAQAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-14T05:48:16.602Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "BookingController.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Controllers\\BookingController.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Controllers\\BookingController.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Controllers\\BookingController.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Controllers\\BookingController.cs",
-              "ViewState": "AgIAAFgAAAAAAAAAAAAAAGQAAAA3AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-13T11:26:56.287Z",
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\appsettings.json",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\appsettings.json",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\appsettings.json",
+              "RelativeToolTip": "ExploreGambia.API\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-03-18T17:36:16.068Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "TourGuideController.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Controllers\\TourGuideController.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Controllers\\TourGuideController.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Controllers\\TourGuideController.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Controllers\\TourGuideController.cs",
-              "ViewState": "AgIAAEAAAAAAAAAAAAAAAEUAAAA7AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-10T10:17:17.526Z"
+              "Title": "Microsoft.PackageDependencyResolution.targets",
+              "DocumentMoniker": "C:\\Program Files\\dotnet\\sdk\\9.0.201\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\Program Files\\dotnet\\sdk\\9.0.201\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
+              "ToolTip": "C:\\Program Files\\dotnet\\sdk\\9.0.201\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
+              "RelativeToolTip": "..\\..\\..\\..\\Program Files\\dotnet\\sdk\\9.0.201\\Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.PackageDependencyResolution.targets",
+              "ViewState": "AgIAAP0AAAAAAAAAAAApwAkBAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2025-03-18T14:05:54.503Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "BookingRepository.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Repositories\\BookingRepository.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Repositories\\BookingRepository.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Repositories\\BookingRepository.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Repositories\\BookingRepository.cs",
-              "ViewState": "AgIAAAcAAAAAAAAAAAAAAD4AAABWAAAAAAAAAA==",
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Program.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Program.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Program.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-13T10:51:30.74Z"
+              "WhenOpened": "2025-03-15T06:35:59.161Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "Booking.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\Domain\\Booking.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\Domain\\Booking.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\Domain\\Booking.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Models\\Domain\\Booking.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAAABIAAAAnAAAAAAAAAA==",
+              "DocumentIndex": 8,
+              "Title": "UpdateBookingRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\UpdateBookingRequestDto.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\DTOs\\UpdateBookingRequestDto.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\UpdateBookingRequestDto.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Models\\DTOs\\UpdateBookingRequestDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-15T07:05:33.501Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "PaymentsController.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Controllers\\PaymentsController.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Controllers\\PaymentsController.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Controllers\\PaymentsController.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Controllers\\PaymentsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-15T17:02:15.366Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ToursController.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Controllers\\ToursController.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Controllers\\ToursController.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Controllers\\ToursController.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Controllers\\ToursController.cs",
-              "ViewState": "AgIAAGEAAAAAAAAAAAAQwGkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-10T10:17:33.702Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "AutoMapperProfiles.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Mapping\\AutoMapperProfiles.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Mapping\\AutoMapperProfiles.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Mapping\\AutoMapperProfiles.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Mapping\\AutoMapperProfiles.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAwwBIAAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-12T11:12:53.951Z"
+              "WhenOpened": "2025-03-15T06:44:04.474Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 11,
-              "Title": "ITourRepository.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Repositories\\ITourRepository.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Repositories\\ITourRepository.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Repositories\\ITourRepository.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Repositories\\ITourRepository.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABEAAAAtAAAAAAAAAA==",
+              "Title": "AddBookingRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\AddBookingRequestDto.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\DTOs\\AddBookingRequestDto.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\AddBookingRequestDto.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Models\\DTOs\\AddBookingRequestDto.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAuwAcAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-13T10:59:59.465Z"
+              "WhenOpened": "2025-03-14T05:57:33.457Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "AddTourRequestDto.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\AddTourRequestDto.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\DTOs\\AddTourRequestDto.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\AddTourRequestDto.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Models\\DTOs\\AddTourRequestDto.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAAABkAAAA2AAAAAAAAAA==",
+              "DocumentIndex": 10,
+              "Title": "BookingDto.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\BookingDto.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\DTOs\\BookingDto.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\BookingDto.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Models\\DTOs\\BookingDto.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAIBJwAQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-12T11:10:28.578Z"
+              "WhenOpened": "2025-03-14T05:48:16.602Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "TourGuideController.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Controllers\\TourGuideController.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Controllers\\TourGuideController.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Controllers\\TourGuideController.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Controllers\\TourGuideController.cs",
+              "ViewState": "AgIAAD0AAAAAAAAAAIBJwEUAAAA7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-10T10:17:17.526Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "BookingRepository.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Repositories\\BookingRepository.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Repositories\\BookingRepository.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Repositories\\BookingRepository.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Repositories\\BookingRepository.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAEBUwD4AAABWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-13T10:51:30.74Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Booking.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\Domain\\Booking.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\Domain\\Booking.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\Domain\\Booking.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Models\\Domain\\Booking.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAEBTwBIAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-15T07:05:33.501Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "PaymentsController.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Controllers\\PaymentsController.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Controllers\\PaymentsController.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Controllers\\PaymentsController.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Controllers\\PaymentsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-15T17:02:15.366Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ToursController.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Controllers\\ToursController.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Controllers\\ToursController.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Controllers\\ToursController.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Controllers\\ToursController.cs",
+              "ViewState": "AgIAAGEAAAAAAAAAAAAQwGkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-10T10:17:33.702Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "AutoMapperProfiles.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Mapping\\AutoMapperProfiles.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Mapping\\AutoMapperProfiles.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Mapping\\AutoMapperProfiles.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Mapping\\AutoMapperProfiles.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAwwBIAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-12T11:12:53.951Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 12,
-              "Title": "UpdateTourRequestDto.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\UpdateTourRequestDto.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\DTOs\\UpdateTourRequestDto.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\UpdateTourRequestDto.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Models\\DTOs\\UpdateTourRequestDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAA1AAAAAAAAAA==",
+              "Title": "ITourRepository.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Repositories\\ITourRepository.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Repositories\\ITourRepository.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Repositories\\ITourRepository.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Repositories\\ITourRepository.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAABQwBEAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-12T11:07:35.503Z"
+              "WhenOpened": "2025-03-13T10:59:59.465Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 14,
-              "Title": "ITourGuideRepository.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Repositories\\ITourGuideRepository.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Repositories\\ITourGuideRepository.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Repositories\\ITourGuideRepository.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Repositories\\ITourGuideRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Title": "AddTourRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\AddTourRequestDto.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\DTOs\\AddTourRequestDto.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\AddTourRequestDto.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Models\\DTOs\\AddTourRequestDto.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAABQwBkAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-12T10:35:33.727Z"
+              "WhenOpened": "2025-03-12T11:10:28.578Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "UpdateTourRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\UpdateTourRequestDto.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\DTOs\\UpdateTourRequestDto.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\DTOs\\UpdateTourRequestDto.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Models\\DTOs\\UpdateTourRequestDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-12T11:07:35.503Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 15,
-              "Title": "TourGuide.cs",
-              "DocumentMoniker": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\Domain\\TourGuide.cs",
-              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\Domain\\TourGuide.cs",
-              "ToolTip": "C:\\Users\\MAMA\\Desktop\\ExploreGambia\\ExploreGambia\\ExploreGambia.API\\Models\\Domain\\TourGuide.cs",
-              "RelativeToolTip": "ExploreGambia.API\\Models\\Domain\\TourGuide.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "Title": "ITourGuideRepository.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Repositories\\ITourGuideRepository.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Repositories\\ITourGuideRepository.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Repositories\\ITourGuideRepository.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Repositories\\ITourGuideRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-10T10:09:09.484Z"
+              "WhenOpened": "2025-03-12T10:35:33.727Z",
+              "EditorCaption": ""
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "TourGuide.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\Domain\\TourGuide.cs",
+              "RelativeDocumentMoniker": "ExploreGambia.API\\Models\\Domain\\TourGuide.cs",
+              "ToolTip": "C:\\Users\\User\\Desktop\\ExploreGambia\\ExploreGambia.API\\Models\\Domain\\TourGuide.cs",
+              "RelativeToolTip": "ExploreGambia.API\\Models\\Domain\\TourGuide.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAABQwA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-10T10:09:09.484Z",
+              "EditorCaption": ""
             }
           ]
         }
