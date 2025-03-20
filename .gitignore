@@ -1,8 +1,83 @@
+# Ignore Visual Studio and build files
+.vscode/
+.vs/
+*.suo
+*.user
+*.cache
+*.csproj.user
+*.sln.docstates
+*.dbmdl
+
+# Ignore build output
 bin/
 obj/
-*.log
-*.user
-*.vs/
+*.pdb
+*.exe
 *.dll
-*.env
+*.log
+*.log.*
 
+# Ignore NuGet packages
+*.nupkg
+packages/
+.nuget/
+
+# Ignore user secrets and environment files
+appsettings.json
+appsettings.Development.json
+secrets.json
+.env
+
+# Ignore database and migration files
+*.mdf
+*.ldf
+*.sqlite
+Migrations/
+
+# Ignore temporary files and logs
+*.tmp
+*.temp
+*.pid
+*.swp
+*.swo
+*.bak
+
+# Ignore Rider / JetBrains IDE files
+.idea/
+*.dotCover
+
+# Ignore Resharper files
+_ReSharper*/
+
+# Ignore AutoMapper configuration files (if any)
+*.AutoMapper/
+
+# Ignore dependency lock files (if you're using NuGet lock)
+packages.lock.json
+
+# Ignore Docker files (if using Docker)
+docker-compose.override.yml
+
+# Ignore coverage reports
+coverage/
+*.coverage
+*.coveragexml
+TestResults/
+
+# Ignore node_modules if using Vue.js (since you use Vue for frontend)
+node_modules/
+
+# Ignore npm/yarn lock files
+package-lock.json
+yarn.lock
+
+# Ignore generated files by Swagger
+swagger/
+wwwroot/swagger/
+
+# Ignore macOS specific files
+.DS_Store
+._*
+
+# Ignore Linux specific files
+*.swp
