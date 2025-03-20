@@ -5,6 +5,13 @@ obj/
 *.vs/
 *.dll
 *.env
+################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
 
+/.vs/ExploreGambia/FileContentIndex
 /ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.AssemblyInfo.cs
 /ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.AssemblyInfoInputs.cache
+/ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.assets.cache
+/ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.GeneratedMSBuildEditorConfig.editorconfig
+/ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.csproj.AssemblyReference.cache
