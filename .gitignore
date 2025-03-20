@@ -6,3 +6,5 @@ obj/
 *.dll
 *.env
 
+/ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.AssemblyInfo.cs
+/ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.AssemblyInfoInputs.cache
