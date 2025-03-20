@@ -1,17 +1,68 @@
+# Ignore build output directories
 bin/
 obj/
+
+# Ignore log files
 *.log
+
+# Ignore user-specific files
 *.user
 *.vs/
-*.dll
-*.env
-################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
 
-/.vs/ExploreGambia/FileContentIndex
+# Ignore Visual Studio temporary files
+.vs/
+
+# Ignore build and debug output
+*.dll
+*.exe
+*.pdb
+*.app
+*.o
+*.so
+*.a
+
+# Ignore configuration files for Visual Studio
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Ignore local environment files (e.g., environment variables, sensitive data)
+*.env
+
+# Ignore specific Visual Studio-generated files
+/.vs/ExploreGambia
 /ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.AssemblyInfo.cs
 /ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.AssemblyInfoInputs.cache
 /ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.assets.cache
 /ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.GeneratedMSBuildEditorConfig.editorconfig
 /ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.csproj.AssemblyReference.cache
+
+# Ignore NuGet packages directory (can be restored through `nuget restore`)
+.nuget/
+
+# Ignore ASP.NET temporary files and caches
+# (remove these lines if not using ASP.NET)
+*/App_Data/
+*/App_Themes/
+*/bin/
+*/obj/
+*/Properties/
+
+# Ignore local test results
+TestResults/
+
+# Ignore JetBrains Rider and ReSharper files
+.idea/
+.reSharper/
+
+# Ignore common editor files (e.g., VSCode, Sublime, etc.)
+.vscode/
+.idea/
+
+# Ignore Docker-specific files if working with Docker
+docker-compose.override.yml
+
+# Ignore any other files that shouldn't be versioned
+*.swp
+*.swo
+
