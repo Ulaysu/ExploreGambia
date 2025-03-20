@@ -31,7 +31,7 @@ namespace ExploreGambia.API.Controllers
         // Get Payment By Id Get: api/Payments/{id}
         [HttpGet]
         [Route("{id:Guid}")]
-        public async Task<IActionResult> GetPaymentGuideById([FromRoute] Guid id)
+        public async Task<IActionResult> GetPaymentById([FromRoute] Guid id)
         {
 
             var payment = await paymentRepository.GetPaymentById(id);
@@ -43,5 +43,22 @@ namespace ExploreGambia.API.Controllers
 
             return Ok(mapper.Map<PaymentDto>(payment));
         }
+
+        // Create Payment
+        [HttpPost]
+
+        public async Task<IActionResult> CreatePayment([FromBody] AddPaymentRequestDto addPaymentRequestDto)
+        {
+            var payment = mapper.Map<Payment>(addPaymentRequestDto);
+
+            payment = await paymentRepository.CreatePaymentAsync(payment);
+
+            var paymentDto = mapper.Map<PaymentDto>(payment);
+
+
+            return CreatedAtAction(nameof(GetPaymentById), new { id = paymentDto.PaymentId }, paymentDto);
+        }
+
+        
     }
 }

@@ -25,6 +25,8 @@ namespace ExploreGambia.API.Mapping
 
             CreateMap<Payment, PaymentDto>().ReverseMap();
 
+            CreateMap<AddPaymentRequestDto, Payment>().ReverseMap();
+
 
 
 

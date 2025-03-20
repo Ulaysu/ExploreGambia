@@ -16,8 +16,22 @@ namespace ExploreGambia.API.Repositories
         // CREATE 
         public async Task<Payment> CreatePaymentAsync(Payment payment)
         {
+            var existingBooking = await context.Bookings.FirstOrDefaultAsync(x => x.BookingId == payment.BookingId);
+
+            if (existingBooking == null) 
+            { 
+                throw new InvalidOperationException("Booking does not exist.");
+            }
+
             await context.Payments.AddAsync(payment);
             await context.SaveChangesAsync();
+
+            // If payment is successful, update booking status
+            if (payment.IsSuccessful)
+            {
+                existingBooking.Status = BookingStatus.Confirmed;
+                await context.SaveChangesAsync();
+            }
 
             return payment;
         }
