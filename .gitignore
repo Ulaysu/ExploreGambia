@@ -3,3 +3,21 @@
 ################################################################################
 
 /.vs/ExploreGambia/FileContentIndex
+/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/CodeChunks.db
+/ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.assets.cache
+/ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.AssemblyInfoInputs.cache
+*.json
+/ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.GeneratedMSBuildEditorConfig.editorconfig
+/ExploreGambia.API/obj/Release/net8.0/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.AssemblyInfo.cs
+/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.AssemblyInfoInputs.cache
+/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.assets.cache
+/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.csproj.AssemblyReference.cache
+/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.GeneratedMSBuildEditorConfig.editorconfig
+/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.GlobalUsings.g.cs
+/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/CodeChunks.db-shm
+/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/CodeChunks.db-wal
+/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/SemanticSymbols.db
+/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/SemanticSymbols.db-shm
+/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/SemanticSymbols.db-wal
+/.vs/slnx.sqlite
