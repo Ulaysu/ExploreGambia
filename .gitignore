@@ -1,23 +1,83 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
+﻿# Ignore Visual Studio and build files
+.vscode/
+.vs/
+*.suo
+*.user
+*.cache
+*.csproj.user
+*.sln.docstates
+*.dbmdl
 
-/.vs/ExploreGambia/FileContentIndex
-/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/CodeChunks.db
-/ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.assets.cache
-/ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.AssemblyInfoInputs.cache
-*.json
-/ExploreGambia.API/obj/Debug/net8.0/ExploreGambia.API.GeneratedMSBuildEditorConfig.editorconfig
-/ExploreGambia.API/obj/Release/net8.0/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs
-/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.AssemblyInfo.cs
-/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.AssemblyInfoInputs.cache
-/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.assets.cache
-/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.csproj.AssemblyReference.cache
-/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.GeneratedMSBuildEditorConfig.editorconfig
-/ExploreGambia.API/obj/Release/net8.0/ExploreGambia.API.GlobalUsings.g.cs
-/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/CodeChunks.db-shm
-/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/CodeChunks.db-wal
-/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/SemanticSymbols.db
-/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/SemanticSymbols.db-shm
-/.vs/ExploreGambia/CopilotIndices/17.13.439.2385/SemanticSymbols.db-wal
-/.vs/slnx.sqlite
+# Ignore build output
+bin/
+obj/
+*.pdb
+*.exe
+*.dll
+*.log
+*.log.*
+
+# Ignore NuGet packages
+*.nupkg
+packages/
+.nuget/
+
+# Ignore user secrets and environment files
+appsettings.json
+appsettings.Development.json
+secrets.json
+.env
+
+# Ignore database and migration files
+*.mdf
+*.ldf
+*.sqlite
+Migrations/
+
+# Ignore temporary files and logs
+*.tmp
+*.temp
+*.pid
+*.swp
+*.swo
+*.bak
+
+# Ignore Rider / JetBrains IDE files
+.idea/
+*.dotCover
+
+# Ignore Resharper files
+_ReSharper*/
+
+# Ignore AutoMapper configuration files (if any)
+*.AutoMapper/
+
+# Ignore dependency lock files (if you're using NuGet lock)
+packages.lock.json
+
+# Ignore Docker files (if using Docker)
+docker-compose.override.yml
+
+# Ignore coverage reports
+coverage/
+*.coverage
+*.coveragexml
+TestResults/
+
+# Ignore node_modules if using Vue.js (since you use Vue for frontend)
+node_modules/
+
+# Ignore npm/yarn lock files
+package-lock.json
+yarn.lock
+
+# Ignore generated files by Swagger
+swagger/
+wwwroot/swagger/
+
+# Ignore macOS specific files
+.DS_Store
+._*
+
+# Ignore Linux specific files
+*.swp

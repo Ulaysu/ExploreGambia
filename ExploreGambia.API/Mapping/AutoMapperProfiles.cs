@@ -10,13 +10,24 @@ namespace ExploreGambia.API.Mapping
         {
             CreateMap<Tour, TourDto>().ReverseMap();
             CreateMap<Tour, AddTourRequestDto>().ReverseMap();
+
             CreateMap<Tour, UpdateTourRequestDto>().ReverseMap();
+
             CreateMap<TourGuide, TourGuideDto>().ReverseMap();
+
             CreateMap<TourGuide, AddTourGuideRequestDto>().ReverseMap();
+
             CreateMap<TourGuide, UpdateTourGuideRequestDto>().ReverseMap();
+
             CreateMap<Booking, BookingDto>().ReverseMap();
+
             CreateMap<AddBookingRequestDto, Booking>().ReverseMap();
-            
+
+            CreateMap<Payment, PaymentDto>().ReverseMap();
+
+            CreateMap<AddPaymentRequestDto, Payment>().ReverseMap();
+
+
 
 
 
