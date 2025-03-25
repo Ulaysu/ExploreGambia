@@ -35,6 +35,9 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddDbContext<ExploreGambiaDbContext>(options => 
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddDbContext<ExploreGambiaAuthDbContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
+
 // Bind environment variables
 builder.Configuration.AddEnvironmentVariables();
 
