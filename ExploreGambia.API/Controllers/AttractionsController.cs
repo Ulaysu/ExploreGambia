@@ -10,7 +10,7 @@ namespace ExploreGambia.API.Controllers
     [ApiController]
     public class AttractionsController : ControllerBase
     {
-        private readonly ExploreGambiaDbContext _context;
+        /*private readonly ExploreGambiaDbContext _context;
         public AttractionsController(ExploreGambiaDbContext context)
         {
             _context = context;
@@ -30,7 +30,7 @@ namespace ExploreGambia.API.Controllers
             var attraction = await _context.Attractions.FindAsync(id);
             if (attraction == null) return NotFound();
             return Ok(attraction);
-        }
+        }*/
 
 
     }
