@@ -23,7 +23,7 @@ namespace ExploreGambia.API.Models.Domain
     }
 
 
-
+    %
 
     // Enum for Booking Status
     public enum BookingStatus
