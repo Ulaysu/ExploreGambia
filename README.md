@@ -77,7 +77,7 @@ ExploreGambia API provides a robust backend for managing tours, bookings, paymen
 
 6. **Access the API**
 
-   - Base URL: `https://localhost:5001` or `http://localhost:5000`
+   - Base URL: `https://localhost:7297`
    - Swagger Documentation: [`https://localhost:44331/swagger`](https://localhost:44331/swagger)
 
 ## Usage
@@ -90,7 +90,7 @@ To run the application, use the following command:
 dotnet run
 ```
 
-The API will be available at `https://localhost:5001` or `http://localhost:5000`.
+The API will be available at `https://localhost:7297`.
 
 ### Swagger
 
@@ -121,11 +121,6 @@ Swagger is enabled for API documentation. You can access it at: [`https://localh
 - `POST /api/payments` - Create a new payment
 - `PUT /api/payments/{id}` - Update a payment
 - `DELETE /api/payments/{id}` - Delete a payment
-
-### Attractions
-
-- `GET /api/attractions` - Get all attractions
-- `GET /api/attractions/{id}` - Get an attraction by ID
 
 ### Tour Guides
 
@@ -250,7 +245,7 @@ public class TourGuide {
 
 ## Seeding Data
 
-To seed initial data into the database, the `DatabaseSeeder` class is used. This class is called during the application startup to ensure the database is populated with initial data.
+To seed initial data into the database, the `DataSeeder` class is used. This class is called during the application startup to ensure the database is populated with initial data.
 
 ## Contributing
 
