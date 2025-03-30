@@ -53,9 +53,13 @@ namespace ExploreGambia.API.Repositories
         public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
         {
             var existingBooking = await context.Bookings
-                .Include(b => b.Tour).FirstOrDefaultAsync(x => x.BookingId == id);
+                .FirstOrDefaultAsync(x => x.BookingId == id);
 
             if (existingBooking == null) return null;
+
+            // Fetch the updated Tour from the database
+            var tour = await context.Tours.FirstOrDefaultAsync(t => t.TourId == booking.TourId);
+            if (tour == null) return null; // Handle case where the new tour doesn't exist
 
             existingBooking.TourId = booking.TourId;
             existingBooking.BookingDate = booking.BookingDate;

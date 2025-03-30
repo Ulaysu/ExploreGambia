@@ -94,6 +94,8 @@ namespace ExploreGambia.API.Controllers
         {
             var booking = mapper.Map<Booking>(updateBookingRequestDto);
 
+            
+
             booking = await bookingRepository.UpdateBookingAsync(id, booking);
             if (booking == null)
             {
