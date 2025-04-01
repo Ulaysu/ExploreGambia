@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExploreGambia.API.Models.Domain
 {
     public class Booking
     {
+        [Key]
         public Guid BookingId { get; set; } // Primary Key
         public Guid TourId { get; set; } // Foreign Key (FK) to Tour
         

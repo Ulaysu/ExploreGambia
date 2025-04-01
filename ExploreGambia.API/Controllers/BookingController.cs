@@ -89,12 +89,11 @@ namespace ExploreGambia.API.Controllers
             return CreatedAtAction(nameof(GetBookingById), new { id = bookingDto.BookingId }, bookingDto);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBooking(Guid id, UpdateBookingRequestDto updateBookingRequestDto)
+        [HttpPut]
+        [Route("{id:guid}")]
+        public async Task<IActionResult> UpdateBooking([FromRoute] Guid id, UpdateBookingRequestDto updateBookingRequestDto)
         {
             var booking = mapper.Map<Booking>(updateBookingRequestDto);
-
-            
 
             booking = await bookingRepository.UpdateBookingAsync(id, booking);
             if (booking == null)
@@ -105,10 +104,10 @@ namespace ExploreGambia.API.Controllers
             return Ok(mapper.Map<BookingDto>(booking)); 
         }
 
-        // Delete Tour
+        // Delete Booking
         [HttpDelete]
         [Route("{id:Guid}")]
-        // [Authorize(Roles = "Writer")]
+        // 
         public async Task<IActionResult> DeleteBooking([FromRoute] Guid id)
         {
             var booking = await bookingRepository.DeleteBookingAsync(id);
