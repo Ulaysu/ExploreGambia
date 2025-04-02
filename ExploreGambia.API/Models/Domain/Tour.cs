@@ -25,10 +25,8 @@ namespace ExploreGambia.API.Models.Domain
         // Bookings relationship
         public List<Booking> Bookings { get; set; } = new List<Booking>();
 
-        // Many-to-Many Relationship
-        public List<TourAttraction> TourAttractions { get; set; } = new List<TourAttraction>();
-
-        public List<Review> Reviews { get; set; } = new List<Review>();
+       
+        
 
 
 

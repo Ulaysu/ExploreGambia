@@ -17,37 +17,10 @@ namespace ExploreGambia.API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("ExploreGambia.API.Models.Domain.Attraction", b =>
-                {
-                    b.Property<Guid>("AttractionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("AttractionId");
-
-                    b.ToTable("Attractions");
-                });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Booking", b =>
                 {
@@ -108,36 +81,6 @@ namespace ExploreGambia.API.Migrations
                     b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("ExploreGambia.API.Models.Domain.Review", b =>
-                {
-                    b.Property<Guid>("ReviewId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ReviewDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("TourId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ReviewId");
-
-                    b.HasIndex("TourId");
-
-                    b.ToTable("Reviews");
-                });
-
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Tour", b =>
                 {
                     b.Property<Guid>("TourId")
@@ -184,21 +127,6 @@ namespace ExploreGambia.API.Migrations
                     b.HasIndex("TourGuideId");
 
                     b.ToTable("Tours");
-                });
-
-            modelBuilder.Entity("ExploreGambia.API.Models.Domain.TourAttraction", b =>
-                {
-                    b.Property<Guid>("TourId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AttractionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TourId", "AttractionId");
-
-                    b.HasIndex("AttractionId");
-
-                    b.ToTable("TourAttraction");
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.TourGuide", b =>
@@ -253,17 +181,6 @@ namespace ExploreGambia.API.Migrations
                     b.Navigation("Booking");
                 });
 
-            modelBuilder.Entity("ExploreGambia.API.Models.Domain.Review", b =>
-                {
-                    b.HasOne("ExploreGambia.API.Models.Domain.Tour", "Tour")
-                        .WithMany("Reviews")
-                        .HasForeignKey("TourId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tour");
-                });
-
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Tour", b =>
                 {
                     b.HasOne("ExploreGambia.API.Models.Domain.TourGuide", "TourGuide")
@@ -275,30 +192,6 @@ namespace ExploreGambia.API.Migrations
                     b.Navigation("TourGuide");
                 });
 
-            modelBuilder.Entity("ExploreGambia.API.Models.Domain.TourAttraction", b =>
-                {
-                    b.HasOne("ExploreGambia.API.Models.Domain.Attraction", "Attraction")
-                        .WithMany("TourAttractions")
-                        .HasForeignKey("AttractionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ExploreGambia.API.Models.Domain.Tour", "Tour")
-                        .WithMany("TourAttractions")
-                        .HasForeignKey("TourId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Attraction");
-
-                    b.Navigation("Tour");
-                });
-
-            modelBuilder.Entity("ExploreGambia.API.Models.Domain.Attraction", b =>
-                {
-                    b.Navigation("TourAttractions");
-                });
-
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Booking", b =>
                 {
                     b.Navigation("Payments");
@@ -307,10 +200,6 @@ namespace ExploreGambia.API.Migrations
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Tour", b =>
                 {
                     b.Navigation("Bookings");
-
-                    b.Navigation("Reviews");
-
-                    b.Navigation("TourAttractions");
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.TourGuide", b =>
