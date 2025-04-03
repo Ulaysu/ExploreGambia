@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Repositories;
@@ -7,7 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ExploreGambia.API.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]  // Specify API version
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     public class PaymentsController : ControllerBase
     {
@@ -59,6 +61,41 @@ namespace ExploreGambia.API.Controllers
             return CreatedAtAction(nameof(GetPaymentById), new { id = paymentDto.PaymentId }, paymentDto);
         }
 
-        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdatePayment(Guid id, UpdatePaymentRequestDto updatePaymentRequestDto)
+        {
+            var payment = mapper.Map<Payment>(updatePaymentRequestDto);
+
+            payment = await paymentRepository.UpdatePaymentAsync(id, payment);
+            if (payment == null)
+            {
+                return NotFound("Payment not found.");
+            }
+
+            return Ok(mapper.Map<PaymentDto>(payment));
+        }
+
+        // Delete Payment
+        [HttpDelete]
+        [Route("{id:Guid}")]
+        // [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteBooking([FromRoute] Guid id)
+        {
+            var payment = await paymentRepository.DeletePaymentAsync(id);
+
+            if (payment == null)
+            {
+                return NotFound();
+            }
+
+            // return deleted Payment back
+            // Convert Domain Model to DTO
+            var paymentDto = mapper.Map<PaymentDto>(payment);
+
+
+            return Ok(payment);
+
+
+        }
     }
 }

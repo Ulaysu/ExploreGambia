@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
@@ -9,7 +10,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExploreGambia.API.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]  // Specify API version
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     public class ToursController : ControllerBase
     {
