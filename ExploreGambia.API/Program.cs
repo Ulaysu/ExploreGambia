@@ -2,12 +2,14 @@ using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using ExploreGambia.API.Data;
 using ExploreGambia.API.Mapping;
+using ExploreGambia.API.Middleware;
 using ExploreGambia.API.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -16,6 +18,19 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// Configure Serilog
+var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/ExploreGambia_Log.txt", rollingInterval: RollingInterval.Minute)
+    .MinimumLevel.Information()
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
+
+
+
 
 builder.Services.AddControllers();
 
@@ -147,7 +162,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddScoped<DataSeeder>();
 
+
+
 var app = builder.Build();
+
+
 
 // Apply migrations and seed data
 using (var scope = app.Services.CreateScope())
@@ -163,6 +182,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<GlobalExceptionHandler>();
 
 app.UseHttpsRedirection();
 
