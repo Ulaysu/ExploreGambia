@@ -13,6 +13,7 @@ using Serilog;
 using System;
 using System.Text;
 using System.Text.Json.Serialization;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Configure Serilog
 var logger = new LoggerConfiguration()
     .WriteTo.Console()
-    .WriteTo.File("Logs/ExploreGambia_Log.txt", rollingInterval: RollingInterval.Minute)
+    .WriteTo.File("Logs/ExploreGambia_Log.txt", rollingInterval: RollingInterval.Day)
     .MinimumLevel.Information()
     .CreateLogger();
 
@@ -80,7 +81,7 @@ builder.Services.AddSwaggerGen(options =>
                     Type = ReferenceType.SecurityScheme,
                     Id = JwtBearerDefaults.AuthenticationScheme
                 },
-                Scheme = "Oauth2",
+                Scheme = JwtBearerDefaults.AuthenticationScheme,
                 Name = JwtBearerDefaults.AuthenticationScheme,
                 In = ParameterLocation.Header
             },
@@ -126,7 +127,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 // Add DbContext
 builder.Services.AddDbContext<ExploreGambiaDbContext>(options => 
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+ 
 builder.Services.AddDbContext<ExploreGambiaAuthDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
 
@@ -154,9 +155,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            //ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidAudiences = new[] { builder.Configuration["Jwt:Audience"] },
             IssuerSigningKey = key
 
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                {
+                    Log.Warning("Expired JWT Token.");
+                    context.Response.Headers["WWW-Authenticate"] = "Bearer, error=\"expired_token\"";
+                }
+                else if (context.Exception.GetType() == typeof(SecurityTokenInvalidSignatureException) || context.Exception.GetType() == typeof(SecurityTokenException))
+                {
+                    Log.Warning("Invalid JWT Token.");
+                    context.Response.Headers["WWW-Authenticate"] = "Bearer, error=\"invalid_token\"";
+                }
+                else
+                {
+                    Log.Error(context.Exception, "JWT Authentication failed.");
+                }
+                return Task.CompletedTask;
+            },
         };
     });
 

@@ -12,7 +12,7 @@ namespace ExploreGambia.API.Controllers
     [ApiVersion("1.0")]  // Specify API version
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
-    //[Authorize]
+   
     public class BookingController : ControllerBase
     {
         private readonly IBookingRepository bookingRepository;
@@ -26,6 +26,7 @@ namespace ExploreGambia.API.Controllers
             this.mapper = mapper;
         }
 
+        [Authorize(Roles = "User")]
         [HttpGet]
         public async Task<IActionResult> GetAllBookings()
         {
