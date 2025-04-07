@@ -50,11 +50,10 @@ namespace ExploreGambia.API.Repositories
         }
 
         // UPDATE 
-        public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
+        /*public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
         {
-            var formattedId = id.ToString().Trim().ToLower();
-            var existingBooking = await context.Bookings.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.BookingId.ToString().ToLower() == formattedId);
+            
+            var existingBooking = await GetBookingById(id);
 
 
   
@@ -67,7 +66,7 @@ namespace ExploreGambia.API.Repositories
             existingBooking.TourId = booking.TourId;
             existingBooking.BookingDate = booking.BookingDate;
             existingBooking.NumberOfPeople = booking.NumberOfPeople;
-            existingBooking.TotalAmount = booking.NumberOfPeople * booking.Tour.Price;
+            existingBooking.TotalAmount = booking.NumberOfPeople * tour.Price;
             existingBooking.Status = booking.Status;
 
 
@@ -75,6 +74,45 @@ namespace ExploreGambia.API.Repositories
 
             return existingBooking;
 
+        }*/
+
+        // UPDATE
+        public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
+        {
+            var existingBooking = await GetBookingById(id);
+
+            if (existingBooking == null) return null;
+
+            // Update basic properties
+            existingBooking.BookingDate = booking.BookingDate;
+            existingBooking.NumberOfPeople = booking.NumberOfPeople;
+            existingBooking.Status = booking.Status;
+
+            // Conditionally update TourId and TotalAmount if a valid, different TourId is provided
+            if (booking.TourId != Guid.Empty && booking.TourId != existingBooking.TourId)
+            {
+                var tour = await context.Tours.FindAsync(booking.TourId);
+                if (tour == null)
+                {
+                    return null;  
+                }
+                existingBooking.TourId = booking.TourId;
+                existingBooking.TotalAmount = booking.NumberOfPeople * tour.Price;
+            }
+            else
+            {
+                // Recalculate TotalAmount based on the existing Tour if TourId wasn't changed or not provided
+                var tour = await context.Tours.FindAsync(existingBooking.TourId);
+                if (tour != null)
+                {
+                    existingBooking.TotalAmount = booking.NumberOfPeople * tour.Price;
+                }
+               
+               
+            }
+
+            await context.SaveChangesAsync();
+            return existingBooking;
         }
     }
 }
