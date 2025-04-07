@@ -95,21 +95,59 @@ namespace ExploreGambia.API.Controllers
             return CreatedAtAction(nameof(GetBookingById), new { id = bookingDto.BookingId }, bookingDto);
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpPut]
-        [Route("{id:guid}")]
+         [HttpPut]
+         [Route("{id:guid}")]
+         public async Task<IActionResult> UpdateBooking([FromRoute] Guid id, [FromBody] UpdateBookingRequestDto updateBookingRequestDto)
+         {
+             var booking = mapper.Map<Booking>(updateBookingRequestDto);
+
+             booking = await bookingRepository.UpdateBookingAsync(id, booking);
+             if (booking == null)
+             {
+                 return NotFound("Booking not found.");
+             }
+
+             return Ok(mapper.Map<BookingDto>(booking)); 
+         }
+
+       /* [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateBooking([FromRoute] Guid id, UpdateBookingRequestDto updateBookingRequestDto)
         {
-            var booking = mapper.Map<Booking>(updateBookingRequestDto);
+            // 1. Retrieve the existing booking from the database using the ID from the route.
+            var existingBooking = await bookingRepository.GetBookingById(id);
 
-            booking = await bookingRepository.UpdateBookingAsync(id, booking);
-            if (booking == null)
+            if (existingBooking == null)
             {
                 return NotFound("Booking not found.");
             }
 
-            return Ok(mapper.Map<BookingDto>(booking)); 
-        }
+            // 2. Update the properties of the existing booking with values from the DTO.
+            existingBooking.NumberOfPeople = updateBookingRequestDto.NumberOfPeople;
+            existingBooking.Status = updateBookingRequestDto.Status;
+
+            // 3. (Optional) If you want to allow updating the BookingDate:
+            // existingBooking.BookingDate = updateBookingRequestDto.BookingDate; // Add this to your DTO if needed
+
+            // 4. Fetch the associated Tour to recalculate the TotalAmount.
+            var tour = await tourRepository.GetTourById(existingBooking.TourId); // Assuming you have a Tour repository
+
+            if (tour == null)
+            {
+                return BadRequest("Associated Tour not found."); // Handle the case where the tour might be deleted
+            }
+
+            existingBooking.TotalAmount = existingBooking.NumberOfPeople * tour.Price;
+
+            // 5. Call the repository to update the *existing* booking.
+            var updatedBooking = await bookingRepository.UpdateBookingAsync(existingBooking);
+
+            if (updatedBooking == null) // This check might not be necessary now as you fetched it first
+            {
+                return NotFound("Booking not found.");
+            }
+
+            return Ok(mapper.Map<BookingDto>(updatedBooking));
+        }*/
 
         // Delete Booking
         [Authorize(Roles = "Admin")]
