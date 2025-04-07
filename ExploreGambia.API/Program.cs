@@ -14,6 +14,7 @@ using System;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.JsonWebTokens;
+using ExploreGambia.API.CustomActionFilters;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +30,12 @@ var logger = new LoggerConfiguration()
 
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
+
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidateModelAttribute>(); // Add the global filter here
+});
 
 
 
@@ -196,7 +203,7 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var seeder = services.GetRequiredService<DataSeeder>();
-    await seeder.SeedAsync(); // Call the async method to seed dat
+    await seeder.SeedAsync(); // Call the async method to seed data
 }
 
 // Configure the HTTP request pipeline.
