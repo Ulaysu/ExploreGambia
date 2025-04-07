@@ -49,18 +49,18 @@ namespace ExploreGambia.API.Repositories
 
         }
 
-       
-
-        // UPDATE
+        // UPDATE 
         public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
         {
             var existingBooking = await GetBookingById(id);
 
+  
             if (existingBooking == null) return null;
 
             // Update basic properties
             existingBooking.BookingDate = booking.BookingDate;
             existingBooking.NumberOfPeople = booking.NumberOfPeople;
+            existingBooking.TotalAmount = booking.NumberOfPeople * booking.Tour.Price;
             existingBooking.Status = booking.Status;
 
             // Conditionally update TourId and TotalAmount if a valid, different TourId is provided
@@ -88,6 +88,7 @@ namespace ExploreGambia.API.Repositories
 
             await context.SaveChangesAsync();
             return existingBooking;
+
         }
     }
 }
