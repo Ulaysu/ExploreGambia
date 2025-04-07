@@ -84,7 +84,7 @@ namespace ExploreGambia.API.Controllers
                 }
             }
 
-            return BadRequest("Username or password incorrect");
+            return Unauthorized("Username or password incorrect");
         }
 
 
