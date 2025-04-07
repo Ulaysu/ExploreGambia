@@ -4,6 +4,7 @@ using ExploreGambia.API.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace ExploreGambia.API.Controllers
 {
@@ -46,10 +47,27 @@ namespace ExploreGambia.API.Controllers
                     {
                         return Ok("User was registered! Please login.");
                     }
+                    else
+                    {
+                        // Logging the error if adding roles failed
+                        Log.Error("Failed to add roles '{Roles}' to user '{Username}'. Errors: {@Errors}",
+                                  string.Join(",", registerRequestDto.Roles),
+                                  registerRequestDto.Username,
+                                  identityResult.Errors);
+                        return StatusCode(StatusCodes.Status500InternalServerError, "Failed to assign roles during registration.");
+                    }
                 }
             }
+            else
+            {
+                // Logging the errors that occurred during user creation
+                Log.Error("User registration failed for '{Username}'. Errors: {@Errors}",
+                          registerRequestDto.Username,
+                          identityResult.Errors);
+               
+            }
+            return Unauthorized("Something went wrong during registration.");
 
-            return BadRequest("Something went wrong");
         }
 
         // POST: /api/Auth/Login
