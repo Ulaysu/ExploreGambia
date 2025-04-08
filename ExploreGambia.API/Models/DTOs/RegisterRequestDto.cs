@@ -5,7 +5,7 @@ namespace ExploreGambia.API.Models.DTOs
     public class RegisterRequestDto
     {
         [Required]
-        [DataType(DataType.EmailAddress)]
+        [EmailAddress]
         public string Username { get; set; }
 
         [Required]

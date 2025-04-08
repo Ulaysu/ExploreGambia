@@ -5,7 +5,7 @@ namespace ExploreGambia.API.Models.DTOs
     public class LoginRequestDto
     {
         [Required]
-        [DataType(DataType.EmailAddress)]
+        [EmailAddress]
         public string Username { get; set; }
 
 
