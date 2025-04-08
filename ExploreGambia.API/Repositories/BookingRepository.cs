@@ -55,6 +55,56 @@ namespace ExploreGambia.API.Repositories
             var existingBooking = await GetBookingById(id);
 
   
+  
+            if (existingBooking == null) return null;
+
+            var tour = await context.Tours.FirstOrDefaultAsync(x => x.TourId == booking.TourId);
+
+            if (tour == null) return null;
+
+            existingBooking.TourId = booking.TourId;
+            existingBooking.BookingDate = booking.BookingDate;
+            existingBooking.NumberOfPeople = booking.NumberOfPeople;
+            existingBooking.TotalAmount = booking.NumberOfPeople * tour.Price;
+            existingBooking.Status = booking.Status;
+
+
+            await context.SaveChangesAsync();
+
+            return existingBooking;
+
+        }*/
+
+        // UPDATE
+        public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
+        {
+            var existingBooking = await GetBookingById(id);
+
+  
+            if (existingBooking == null) return null;
+
+            var tour = await context.Tours.FirstOrDefaultAsync(x => x.TourId == booking.TourId);
+
+            if (tour == null) return null;
+
+            existingBooking.TourId = booking.TourId;
+            existingBooking.BookingDate = booking.BookingDate;
+            existingBooking.NumberOfPeople = booking.NumberOfPeople;
+            existingBooking.TotalAmount = booking.NumberOfPeople * tour.Price;
+            existingBooking.Status = booking.Status;
+
+
+            await context.SaveChangesAsync();
+
+            return existingBooking;
+
+        }*/
+
+        // UPDATE
+        public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
+        {
+            var existingBooking = await GetBookingById(id);
+
             if (existingBooking == null) return null;
 
             // Update basic properties
