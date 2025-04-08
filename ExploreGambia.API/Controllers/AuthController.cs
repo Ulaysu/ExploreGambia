@@ -28,6 +28,10 @@ namespace ExploreGambia.API.Controllers
         [Route("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
         {
+            if (!ModelState.IsValid) 
+            {
+                return BadRequest(ModelState);
+            }
             var identityUser = new IdentityUser
             {
                 UserName = registerRequestDto.Username,
