@@ -15,11 +15,14 @@ namespace ExploreGambia.API.Controllers
     {
         private readonly IPaymentRepository paymentRepository;
         private readonly IMapper mapper;
+        private readonly ILogger<PaymentsController> logger;
 
-        public PaymentsController(IPaymentRepository paymentRepository, IMapper mapper)
+        public PaymentsController(IPaymentRepository paymentRepository, IMapper mapper, 
+            ILogger<PaymentsController> logger)
         {
             this.paymentRepository = paymentRepository;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         [HttpGet]
@@ -85,15 +88,24 @@ namespace ExploreGambia.API.Controllers
 
             if (payment == null)
             {
+                logger.LogWarning($"Payment with ID '{id}' not found for deletion.");
                 return NotFound();
             }
 
             // return deleted Payment back
             // Convert Domain Model to DTO
-            var paymentDto = mapper.Map<PaymentDto>(payment);
+            //var paymentDto = mapper.Map<PaymentDto>(payment);
 
 
-            return Ok(payment);
+            //return Ok(payment);
+
+            // Log the successful deletion, including non-sensitive information
+            logger.LogInformation($"Payment with ID '{id}' deleted successfully. Associated Booking ID: '{payment.BookingId}'.");
+
+            // NOT returning the entire payment object due to PII concerns
+
+            // Optionally return a success message or a minimal DTO without sensitive data
+            return Ok(new { Message = $"Payment with ID '{id}' deleted successfully." });
 
 
         }
