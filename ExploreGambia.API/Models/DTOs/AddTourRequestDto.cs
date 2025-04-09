@@ -1,28 +1,44 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ExploreGambia.API.Validations;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExploreGambia.API.Models.DTOs
 {
     public class AddTourRequestDto
     {
-        public Guid TourGuideId { get; set; }  
+        [Required(ErrorMessage = "TourGuideId is required.")]
+        [GuidNotEmpty(ErrorMessage = "TourGuideId cannot be an empty GUID.")]
+        public Guid TourGuideId { get; set; }
 
-        public string Title { get; set; } = string.Empty; 
+        [Required(ErrorMessage = "Title is required.")]
+        [MaxLength(255, ErrorMessage = "Title cannot exceed 255 characters.")]
+        public string Title { get; set; } = string.Empty;
 
-        public string Description { get; set; } = string.Empty; 
+        [Required(ErrorMessage = "Description is required.")]
+        public string Description { get; set; } = string.Empty;
 
-        public string Location { get; set; } = string.Empty; 
+        [Required(ErrorMessage = "Location is required.")]
+        [MaxLength(255, ErrorMessage = "Location cannot exceed 255 characters.")]
+        public string Location { get; set; } = string.Empty;
 
-        [Precision(18, 2)]
-        public decimal Price { get; set; }  
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0.")]
+        [Precision(18, 2)] // EF Core attribute, validation handled by [Range]
+        public decimal Price { get; set; }
 
-        public int MaxParticipants { get; set; } 
+        [Range(1, int.MaxValue, ErrorMessage = "Max Participants must be at least 1.")]
+        public int MaxParticipants { get; set; }
 
-        public DateTime StartDate { get; set; } 
+        [Required(ErrorMessage = "Start Date is required.")]
+        public DateTime StartDate { get; set; }
 
-        public DateTime EndDate { get; set; } 
+        [Required(ErrorMessage = "End Date is required.")]
+        [DateGreaterThan("StartDate", ErrorMessage = "End Date must be greater than Start Date.")]
+        public DateTime EndDate { get; set; }
 
-        public string ImageUrl { get; set; } = string.Empty; 
+        [MaxLength(2048, ErrorMessage = "Image URL cannot exceed 2048 characters.")]
+        public string ImageUrl { get; set; } = string.Empty;
 
-        public bool IsAvailable { get; set; } = true; 
+        public bool IsAvailable { get; set; } = true;
+
     }
 }
