@@ -104,8 +104,8 @@ namespace ExploreGambia.API.Controllers
              booking = await bookingRepository.UpdateBookingAsync(id, booking);
              if (booking == null)
              {
-                 return NotFound("Booking not found.");
-             }
+                return NotFound("Could not update booking. Check if the Booking ID is correct and if the specified Tour ID exists.");
+            }
 
              return Ok(mapper.Map<BookingDto>(booking)); 
          }
