@@ -1,10 +1,14 @@
-﻿using ExploreGambia.API.Models.Domain;
+﻿using System.ComponentModel.DataAnnotations;
+using ExploreGambia.API.Models.Domain;
 
 namespace ExploreGambia.API.Models.DTOs
 {
     public class UpdateBookingRequestDto
     {
-        public int NumberOfPeople { get; set; } 
+        [Range(1, int.MaxValue, ErrorMessage = "Number of people must be at least 1.")]
+        public int NumberOfPeople { get; set; }
+
+        [EnumDataType(typeof(BookingStatus), ErrorMessage = "Invalid booking status.")]
         public BookingStatus Status { get; set; }
     }
 }
