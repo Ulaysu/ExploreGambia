@@ -36,9 +36,35 @@ namespace ExploreGambia.API.Repositories
         }
 
         // Get all Tours
-        public async Task<List<Tour>> GetAllAsync(string? sortBy = null, bool isAscending = true)
+        public async Task<List<Tour>> GetAllAsync(string? sortBy = null, bool isAscending = true, string? location = null, decimal? minPrice = null, decimal? maxPrice = null, DateTime? startDate = null, DateTime? endDate = null)
         {
             IQueryable<Tour> tours = context.Tours.Include("TourGuide");
+
+            // Apply filtering
+            if (!string.IsNullOrWhiteSpace(location))
+            {
+                tours = tours.Where(t => t.Location.ToLower() == location.ToLower());
+            }
+
+            if (minPrice.HasValue)
+            {
+                tours = tours.Where(t => t.Price >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                tours = tours.Where(t => t.Price <= maxPrice.Value);
+            }
+
+            if (startDate.HasValue)
+            {
+                tours = tours.Where(t => t.StartDate >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                tours = tours.Where(t => t.EndDate <= endDate.Value);
+            }
 
             // Apply sorting if sortBy parameter is provided
             if (!string.IsNullOrWhiteSpace(sortBy))

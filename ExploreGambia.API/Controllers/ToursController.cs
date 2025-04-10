@@ -28,10 +28,16 @@ namespace ExploreGambia.API.Controllers
         // Get All Tours
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TourDto>>> GetAllToursAsync(
-          [FromQuery] string? sortBy,
-          [FromQuery] bool? isAscending)
+           [FromQuery] string? sortBy,
+            [FromQuery] bool? isAscending,
+            [FromQuery] string? location,
+            [FromQuery] decimal? minPrice,
+            [FromQuery] decimal? maxPrice,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate)
         {
-            var tourDomainModel = await tourRepository.GetAllAsync(sortBy, isAscending ?? true); // Default to ascending if not provided
+            var tourDomainModel = await tourRepository.GetAllAsync(sortBy, isAscending ?? true,
+                location, minPrice, maxPrice, startDate, endDate); // Default to ascending if not provided
 
             return Ok(mapper.Map<List<TourDto>>(tourDomainModel));
         }
