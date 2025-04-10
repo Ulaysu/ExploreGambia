@@ -1,14 +1,19 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExploreGambia.API.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]  // Specify API version
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [Authorize]
+   
     public class BookingController : ControllerBase
     {
         private readonly IBookingRepository bookingRepository;
@@ -22,6 +27,7 @@ namespace ExploreGambia.API.Controllers
             this.mapper = mapper;
         }
 
+        [Authorize(Roles = "User, Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllBookings()
         {
@@ -33,6 +39,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         // Get Tour By Id
+        [Authorize(Roles = "User, Admin")]
         [HttpGet]
         [Route("{id:guid}")]
         public async Task<ActionResult<Booking>> GetBookingById([FromRoute] Guid id)
@@ -48,6 +55,7 @@ namespace ExploreGambia.API.Controllers
             return Ok(mapper.Map<BookingDto>(booking));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateBooking([FromBody] AddBookingRequestDto addBookingRequestDto)
         {
@@ -87,8 +95,10 @@ namespace ExploreGambia.API.Controllers
             return CreatedAtAction(nameof(GetBookingById), new { id = bookingDto.BookingId }, bookingDto);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBooking(Guid id, UpdateBookingRequestDto updateBookingRequestDto)
+        [Authorize(Roles = "Admin")]
+        [HttpPut]
+        [Route("{id:guid}")]
+        public async Task<IActionResult> UpdateBooking([FromRoute] Guid id, UpdateBookingRequestDto updateBookingRequestDto)
         {
             var booking = mapper.Map<Booking>(updateBookingRequestDto);
 
@@ -101,10 +111,11 @@ namespace ExploreGambia.API.Controllers
             return Ok(mapper.Map<BookingDto>(booking)); 
         }
 
-        // Delete Tour
+        // Delete Booking
+        [Authorize(Roles = "Admin")]
         [HttpDelete]
         [Route("{id:Guid}")]
-        // [Authorize(Roles = "Writer")]
+        // 
         public async Task<IActionResult> DeleteBooking([FromRoute] Guid id)
         {
             var booking = await bookingRepository.DeleteBookingAsync(id);

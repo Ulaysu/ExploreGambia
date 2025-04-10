@@ -12,17 +12,15 @@ namespace ExploreGambia.API.Repositories
         {
             this.context = context;
         }
-
-        // CREATE 
         public async Task<Booking> CreateBookingAsync(Booking booking)
         {
             await context.Bookings.AddAsync(booking);
             await context.SaveChangesAsync();
 
             return booking;
+
         }
 
-        // DELETE
         public async Task<Booking?> DeleteBookingAsync(Guid id)
         {
             var existingBooking = await context.Bookings.FirstOrDefaultAsync(x => x.BookingId == id);
@@ -33,12 +31,13 @@ namespace ExploreGambia.API.Repositories
             await context.SaveChangesAsync();
 
             return existingBooking;
+
         }
 
-        // Get all Bookings
         public async Task<List<Booking>> GetAllBookingsAsync()
         {
-            return await context.Bookings.ToListAsync();
+           return await context.Bookings.ToListAsync();
+
         }
 
         public async Task<Booking?> GetBookingById(Guid id)
@@ -47,15 +46,23 @@ namespace ExploreGambia.API.Repositories
             if (booking == null) return null;
 
             return booking;
+
         }
 
         // UPDATE 
         public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
         {
-            var existingBooking = await context.Bookings
-                .Include(b => b.Tour).FirstOrDefaultAsync(x => x.BookingId == id);
+            var formattedId = id.ToString().Trim().ToLower();
+            var existingBooking = await context.Bookings.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.BookingId.ToString().ToLower() == formattedId);
 
+
+  
             if (existingBooking == null) return null;
+
+            var tour = await context.Tours.FirstOrDefaultAsync(x => x.TourId == booking.TourId);
+
+            if (tour == null) return null;
 
             existingBooking.TourId = booking.TourId;
             existingBooking.BookingDate = booking.BookingDate;
@@ -63,9 +70,11 @@ namespace ExploreGambia.API.Repositories
             existingBooking.TotalAmount = booking.NumberOfPeople * booking.Tour.Price;
             existingBooking.Status = booking.Status;
 
+
             await context.SaveChangesAsync();
 
             return existingBooking;
+
         }
     }
 }
