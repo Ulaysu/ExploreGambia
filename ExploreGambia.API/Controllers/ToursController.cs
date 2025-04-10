@@ -34,10 +34,12 @@ namespace ExploreGambia.API.Controllers
             [FromQuery] decimal? minPrice,
             [FromQuery] decimal? maxPrice,
             [FromQuery] DateTime? startDate,
-            [FromQuery] DateTime? endDate)
+            [FromQuery] DateTime? endDate,
+             [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
             var tourDomainModel = await tourRepository.GetAllAsync(sortBy, isAscending ?? true,
-                location, minPrice, maxPrice, startDate, endDate); // Default to ascending if not provided
+                location, minPrice, maxPrice, startDate, endDate, pageNumber, pageSize); // Default to ascending if not provided
 
             return Ok(mapper.Map<List<TourDto>>(tourDomainModel));
         }
