@@ -36,9 +36,37 @@ namespace ExploreGambia.API.Repositories
         }
 
         // Get all Tours
-        public async Task<List<Tour>> GetAllAsync()
+        public async Task<List<Tour>> GetAllAsync(string? sortBy = null, bool isAscending = true)
         {
-            return await context.Tours.ToListAsync();
+            IQueryable<Tour> tours = context.Tours.Include("TourGuide");
+
+            // Apply sorting if sortBy parameter is provided
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                switch (sortBy.ToLower())
+                {
+                    case "title":
+                        tours = isAscending ? tours.OrderBy(t => t.Title) : tours.OrderByDescending(t => t.Title);
+                        break;
+                    case "price":
+                        tours = isAscending ? tours.OrderBy(t => t.Price) : tours.OrderByDescending(t => t.Price);
+                        break;
+                    case "startdate":
+                        tours = isAscending ? tours.OrderBy(t => t.StartDate) : tours.OrderByDescending(t => t.StartDate);
+                        break;
+                    case "enddate":
+                        tours = isAscending ? tours.OrderBy(t => t.EndDate) : tours.OrderByDescending(t => t.EndDate);
+                        break;
+                    case "location":
+                        tours = isAscending ? tours.OrderBy(t => t.Location) : tours.OrderByDescending(t => t.Location);
+                        break;
+                    
+                    default:
+                        break;
+                }
+            }
+
+            return await tours.ToListAsync();
         }
 
         public async Task<Tour?> GetTourById(Guid id)

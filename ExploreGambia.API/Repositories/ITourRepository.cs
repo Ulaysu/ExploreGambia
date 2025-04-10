@@ -4,7 +4,8 @@ namespace ExploreGambia.API.Repositories
 {
     public interface ITourRepository
     {
-        Task<List<Tour>> GetAllAsync();
+        Task<List<Tour>> GetAllAsync(string? sortBy = null, bool isAscending = true);
+
 
 
         Task<Tour?> GetTourById(Guid id);
