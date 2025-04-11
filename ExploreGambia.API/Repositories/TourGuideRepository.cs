@@ -34,9 +34,26 @@ namespace ExploreGambia.API.Repositories
         }
 
         // Get a list of all TourGuides
-        public async Task<List<TourGuide>> GetAllAsync()
+        public async Task<List<TourGuide>> GetAllAsync(string? sortBy = null, bool isAscending = true)
         {
-            return await context.TourGuides.ToListAsync();
+            IQueryable<TourGuide> tourGuides = context.TourGuides.Include("Tours");
+
+            // Apply sorting if sortBy parameter is provided
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy.ToLower())
+                {
+                    case "fullname":
+                        tourGuides = isAscending ? tourGuides.OrderBy(tg => tg.FullName) : tourGuides.OrderByDescending(tg => tg.FullName); 
+                        break;
+                    case "availability":
+                        tourGuides = isAscending ? tourGuides.OrderBy(tg => tg.IsAvailable) : tourGuides.OrderByDescending(tg => tg.IsAvailable);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return await tourGuides.ToListAsync();
         }
 
         // Get a TourGuide by Id
