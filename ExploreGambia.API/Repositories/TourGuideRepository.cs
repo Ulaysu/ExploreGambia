@@ -1,6 +1,7 @@
 ﻿using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ExploreGambia.API.Repositories
 {
@@ -34,9 +35,16 @@ namespace ExploreGambia.API.Repositories
         }
 
         // Get a list of all TourGuides
-        public async Task<List<TourGuide>> GetAllAsync(string? sortBy = null, bool isAscending = true)
+        public async Task<List<TourGuide>> GetAllAsync(string? sortBy = null, bool isAscending = true, string? searchTerm = null)
         {
             IQueryable<TourGuide> tourGuides = context.TourGuides.Include("Tours");
+
+
+            // Filtering
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                tourGuides = tourGuides.Where(tg => tg.FullName.ToLower().Contains(searchTerm.ToLower()));
+            }
 
             // Apply sorting if sortBy parameter is provided
             if (!string.IsNullOrEmpty(sortBy))
