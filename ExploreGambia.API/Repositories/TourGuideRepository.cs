@@ -35,9 +35,10 @@ namespace ExploreGambia.API.Repositories
         }
 
         // Get a list of all TourGuides
-        public async Task<List<TourGuide>> GetAllAsync(string? sortBy = null, bool isAscending = true, string? searchTerm = null)
+        public async Task<List<TourGuide>> GetAllAsync(string? sortBy = null, bool isAscending = true, string? searchTerm = null, int pageNumber = 1, int pageSize = 10)
         {
             IQueryable<TourGuide> tourGuides = context.TourGuides.Include("Tours");
+
 
 
             // Filtering
@@ -61,7 +62,9 @@ namespace ExploreGambia.API.Repositories
                         break;
                 }
             }
-            return await tourGuides.ToListAsync();
+
+            // Apply pagination
+            return await tourGuides.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
         }
 
         // Get a TourGuide by Id
