@@ -12,7 +12,7 @@ namespace ExploreGambia.API.Controllers
     [ApiVersion("1.0")]  // Specify API version
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
    
     public class BookingController : ControllerBase
     {
@@ -27,7 +27,7 @@ namespace ExploreGambia.API.Controllers
             this.mapper = mapper;
         }
 
-        [Authorize(Roles = "User, Admin")]
+        //[Authorize(Roles = "User, Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllBookings()
         {
@@ -39,7 +39,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         // Get Tour By Id
-        [Authorize(Roles = "User, Admin")]
+        //[Authorize(Roles = "User, Admin")]
         [HttpGet]
         [Route("{id:guid}")]
         public async Task<ActionResult<Booking>> GetBookingById([FromRoute] Guid id)
@@ -55,7 +55,7 @@ namespace ExploreGambia.API.Controllers
             return Ok(mapper.Map<BookingDto>(booking));
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateBooking([FromBody] AddBookingRequestDto addBookingRequestDto)
         {
@@ -112,7 +112,7 @@ namespace ExploreGambia.API.Controllers
 
        
         // Delete Booking
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpDelete]
         [Route("{id:Guid}")]
         // 
