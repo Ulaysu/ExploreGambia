@@ -113,8 +113,8 @@ namespace ExploreGambia.API.Repositories
             existingBooking.TotalAmount = booking.NumberOfPeople * booking.Tour.Price;
             existingBooking.Status = booking.Status;
 
-            // Conditionally update TourId and TotalAmount if a valid, different TourId is provided
-            if (booking.TourId != Guid.Empty && booking.TourId != existingBooking.TourId)
+            // Update TourId and TotalAmount if a valid TourID is provided
+            if (booking.TourId != Guid.Empty)
             {
                 var tour = await context.Tours.FindAsync(booking.TourId);
                 if (tour == null)
@@ -124,17 +124,7 @@ namespace ExploreGambia.API.Repositories
                 existingBooking.TourId = booking.TourId;
                 existingBooking.TotalAmount = booking.NumberOfPeople * tour.Price;
             }
-            else
-            {
-                // Recalculate TotalAmount based on the existing Tour if TourId wasn't changed or not provided
-                var tour = await context.Tours.FindAsync(existingBooking.TourId);
-                if (tour != null)
-                {
-                    existingBooking.TotalAmount = booking.NumberOfPeople * tour.Price;
-                }
-               
-               
-            }
+           
 
             await context.SaveChangesAsync();
             return existingBooking;
