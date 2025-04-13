@@ -12,7 +12,7 @@ namespace ExploreGambia.API.Controllers
     [ApiVersion("1.0")]  // Specify API version
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
-    //[Authorize]
+    // [Authorize]
    
     public class BookingController : ControllerBase
     {
@@ -47,11 +47,7 @@ namespace ExploreGambia.API.Controllers
 
             var booking = await bookingRepository.GetBookingById(id);
 
-            if (booking == null)
-            {
-                return NotFound();
-            }
-
+            
             return Ok(mapper.Map<BookingDto>(booking));
         }
 
