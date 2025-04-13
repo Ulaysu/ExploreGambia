@@ -1,6 +1,7 @@
 ﻿using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
 using Microsoft.EntityFrameworkCore;
+using ExploreGambia.API.Exceptions;
 
 namespace ExploreGambia.API.Repositories
 {
@@ -25,7 +26,7 @@ namespace ExploreGambia.API.Repositories
         {
             var existingBooking = await context.Bookings.FirstOrDefaultAsync(x => x.BookingId == id);
 
-            if (existingBooking == null) return null;
+            if (existingBooking == null) throw new BookingNotFoundException(id);
 
             context.Bookings.Remove(existingBooking);
             await context.SaveChangesAsync();
@@ -43,7 +44,7 @@ namespace ExploreGambia.API.Repositories
         public async Task<Booking?> GetBookingById(Guid id)
         {
             var booking = await context.Bookings.Include(b => b.Tour).FirstOrDefaultAsync(x => x.BookingId == id);
-            if (booking == null) return null;
+            if (booking == null) throw new BookingNotFoundException(id);
 
             return booking;
 
@@ -56,7 +57,7 @@ namespace ExploreGambia.API.Repositories
         {
             var existingBooking = await GetBookingById(id);
 
-            if (existingBooking == null) return null;
+            if (existingBooking == null) throw new BookingNotFoundException(id);
 
             // Update basic properties
             existingBooking.BookingDate = booking.BookingDate;
@@ -69,7 +70,7 @@ namespace ExploreGambia.API.Repositories
                 var tour = await context.Tours.FindAsync(booking.TourId);
                 if (tour == null)
                 {
-                    return null;  
+                    throw new TourNotFoundException(booking.TourId);  
                 }
                 existingBooking.TourId = booking.TourId;
                 existingBooking.TotalAmount = booking.NumberOfPeople * tour.Price;
