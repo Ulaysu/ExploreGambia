@@ -7,10 +7,12 @@ namespace ExploreGambia.API.Repositories
     public class BookingRepository : IBookingRepository
     {
         private readonly ExploreGambiaDbContext context;
+        private readonly ILogger<BookingRepository> logger;
 
-        public BookingRepository(ExploreGambiaDbContext context)
+        public BookingRepository(ExploreGambiaDbContext context, ILogger<BookingRepository> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
         public async Task<Booking> CreateBookingAsync(Booking booking)
         {
@@ -34,9 +36,32 @@ namespace ExploreGambia.API.Repositories
 
         }
 
-        public async Task<List<Booking>> GetAllBookingsAsync()
+        public async Task<List<Booking>> GetAllBookingsAsync(string? sortBy = null, bool isAscending = true)
         {
-           return await context.Bookings.ToListAsync();
+           IQueryable<Booking> bookings = context.Bookings.Include(b => b.Tour);
+
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                switch (sortBy.ToLower())
+                {
+                    case "bookingdate":
+                        bookings = isAscending ? bookings.OrderBy(b => b.BookingDate) : bookings.OrderByDescending(b => b.BookingDate);
+                        break;
+                    case "totalamount":
+                        bookings = isAscending ? bookings.OrderBy(b => b.TotalAmount) : bookings.OrderByDescending(b => b.TotalAmount);
+                        break;
+                    case "numberofpeople":
+                        bookings = isAscending ? bookings.OrderBy(b => b.NumberOfPeople) : bookings.OrderByDescending(b => b.NumberOfPeople);
+                        break;
+                    case "status":
+                        bookings = isAscending ? bookings.OrderBy(b => b.Status) : bookings.OrderByDescending(b => b.Status);
+                        break;
+                    default:
+                        logger.LogWarning($"Received unknown sortBy parameter: '{sortBy}'. No sorting applied to bookings.");
+                        break;
+                }
+            }
+            return await bookings.ToListAsync();
 
         }
 
