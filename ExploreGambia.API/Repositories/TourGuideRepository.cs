@@ -8,10 +8,12 @@ namespace ExploreGambia.API.Repositories
     public class TourGuideRepository : ITourGuideRepository
     {
         private readonly ExploreGambiaDbContext context;
+        private readonly ILogger<TourGuideRepository> logger;
 
-        public TourGuideRepository(ExploreGambiaDbContext  context)
+        public TourGuideRepository(ExploreGambiaDbContext  context, ILogger<TourGuideRepository> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
         public async Task<TourGuide> CreateTourGuideAsync(TourGuide tourGuide)
         {
@@ -59,6 +61,7 @@ namespace ExploreGambia.API.Repositories
                         tourGuides = isAscending ? tourGuides.OrderBy(tg => tg.IsAvailable) : tourGuides.OrderByDescending(tg => tg.IsAvailable);
                         break;
                     default:
+                        logger.LogWarning($"Received unknown sortBy parameter: '{sortBy}'. No sorting applied.");
                         break;
                 }
             }
