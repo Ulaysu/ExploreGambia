@@ -38,7 +38,7 @@ namespace ExploreGambia.API.Repositories
 
         public async Task<List<Booking>> GetAllBookingsAsync(BookingStatus? status = null, 
             DateTime? bookingDateFrom = null, DateTime? bookingDateTo = null, string? sortBy = null, 
-            bool isAscending = true)
+            bool isAscending = true, int pageNumber = 1, int pageSize = 10)
         {
            IQueryable<Booking> bookings = context.Bookings.Include(b => b.Tour);
 
@@ -81,7 +81,8 @@ namespace ExploreGambia.API.Repositories
                         break;
                 }
             }
-            return await bookings.ToListAsync();
+            // Apply pagination
+            return await bookings.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
         }
 
