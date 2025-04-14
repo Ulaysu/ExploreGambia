@@ -6,7 +6,7 @@ namespace ExploreGambia.API.Repositories
     {
         Task<List<Booking>> GetAllBookingsAsync(BookingStatus? status = null,
             DateTime? bookingDateFrom = null, DateTime? bookingDateTo = null, string? sortBy = null, 
-            bool isAscending = true);
+            bool isAscending = true, int pageNumber = 1, int pageSize = 10);
 
 
         Task<Booking?> GetBookingById(Guid id);
