@@ -4,7 +4,7 @@ namespace ExploreGambia.API.Repositories
 {
     public interface IBookingRepository
     {
-        Task<List<Booking>> GetAllBookingsAsync();
+        Task<List<Booking>> GetAllBookingsAsync(string? sortBy = null, bool isAscending = true);
 
 
         Task<Booking?> GetBookingById(Guid id);
