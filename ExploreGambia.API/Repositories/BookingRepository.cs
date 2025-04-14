@@ -36,10 +36,30 @@ namespace ExploreGambia.API.Repositories
 
         }
 
-        public async Task<List<Booking>> GetAllBookingsAsync(string? sortBy = null, bool isAscending = true)
+        public async Task<List<Booking>> GetAllBookingsAsync(BookingStatus? status = null, 
+            DateTime? bookingDateFrom = null, DateTime? bookingDateTo = null, string? sortBy = null, 
+            bool isAscending = true)
         {
            IQueryable<Booking> bookings = context.Bookings.Include(b => b.Tour);
 
+            // Apply filtering
+            if (status.HasValue)
+            {
+                bookings = bookings.Where(b => b.Status == status.Value);
+            }
+
+            if (bookingDateFrom.HasValue)
+            {
+                bookings = bookings.Where(b => b.BookingDate >= bookingDateFrom.Value);
+            }
+
+            if (bookingDateTo.HasValue)
+            {
+                // Consider if you want inclusive or exclusive end date
+                bookings = bookings.Where(b => b.BookingDate <= bookingDateTo.Value.AddDays(1).AddTicks(-1)); // Inclusive
+            }
+
+            // Apply sorting if sortBy parameter is provided
             if (!string.IsNullOrWhiteSpace(sortBy))
             {
                 switch (sortBy.ToLower())
