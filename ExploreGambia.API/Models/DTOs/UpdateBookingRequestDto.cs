@@ -1,14 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using ExploreGambia.API.Models.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExploreGambia.API.Models.DTOs
 {
     public class UpdateBookingRequestDto
     {
-        [Range(1, int.MaxValue, ErrorMessage = "Number of people must be at least 1.")]
-        public int NumberOfPeople { get; set; }
+       public Guid TourId { get; set; } // Foreign Key (FK) to Tour
 
-        [EnumDataType(typeof(BookingStatus), ErrorMessage = "Invalid booking status.")]
-        public BookingStatus Status { get; set; }
+        public DateTime BookingDate { get; set; } = DateTime.UtcNow; // Timestamp
+        public int NumberOfPeople { get; set; } // Number of participants
+
+        
+        public BookingStatus Status { get; set; } = BookingStatus.Pending;
     }
 }
