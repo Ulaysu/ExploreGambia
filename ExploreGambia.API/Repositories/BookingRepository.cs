@@ -50,7 +50,9 @@ namespace ExploreGambia.API.Repositories
 
         }
 
-        // UPDATE 
+       
+
+        // UPDATE
         public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
         {
             var existingBooking = await GetBookingById(id);
@@ -75,43 +77,17 @@ namespace ExploreGambia.API.Repositories
             return existingBooking;
 
         }*/
+            var existingBooking = await GetBookingById(id);
 
         // UPDATE
         public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
         {
             var existingBooking = await GetBookingById(id);
-
-  
-            if (existingBooking == null) return null;
-
-            var tour = await context.Tours.FirstOrDefaultAsync(x => x.TourId == booking.TourId);
-
-            if (tour == null) return null;
-
-            existingBooking.TourId = booking.TourId;
-            existingBooking.BookingDate = booking.BookingDate;
-            existingBooking.NumberOfPeople = booking.NumberOfPeople;
-            existingBooking.TotalAmount = booking.NumberOfPeople * tour.Price;
-            existingBooking.Status = booking.Status;
-
-
-            await context.SaveChangesAsync();
-
-            return existingBooking;
-
-        }*/
-
-        // UPDATE
-        public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
-        {
-            var existingBooking = await GetBookingById(id);
-
             if (existingBooking == null) throw new BookingNotFoundException(id);
 
             // Update basic properties
             existingBooking.BookingDate = booking.BookingDate;
             existingBooking.NumberOfPeople = booking.NumberOfPeople;
-            existingBooking.TotalAmount = booking.NumberOfPeople * booking.Tour.Price;
             existingBooking.Status = booking.Status;
 
             // Update TourId and TotalAmount if a valid TourID is provided
@@ -129,7 +105,6 @@ namespace ExploreGambia.API.Repositories
 
             await context.SaveChangesAsync();
             return existingBooking;
-
         }
     }
 }
