@@ -37,7 +37,7 @@ namespace ExploreGambia.API.Repositories
         // Get a list of all TourGuides
         public async Task<List<TourGuide>> GetAllAsync(string? sortBy = null, bool isAscending = true, string? searchTerm = null, int pageNumber = 1, int pageSize = 10)
         {
-            IQueryable<TourGuide> tourGuides = context.TourGuides.Include("Tours");
+            IQueryable<TourGuide> tourGuides = context.TourGuides.Include(x => x.Tours);
 
 
 
