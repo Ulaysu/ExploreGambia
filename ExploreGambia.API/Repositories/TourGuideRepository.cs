@@ -46,7 +46,8 @@ namespace ExploreGambia.API.Repositories
             // Filtering
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                tourGuides = tourGuides.Where(tg => tg.FullName.ToLowerInvariant().Contains(searchTerm.ToLowerInvariant()));
+                string pattern = $"%{searchTerm}%";
+                tourGuides = tourGuides.Where(tg => EF.Functions.Like(tg.FullName, pattern));
             }
 
             // Apply sorting if sortBy parameter is provided
