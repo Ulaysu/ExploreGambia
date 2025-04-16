@@ -1,6 +1,7 @@
 ﻿using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
 using Microsoft.EntityFrameworkCore;
+using ExploreGambia.API.Exceptions;
 
 namespace ExploreGambia.API.Repositories
 {
@@ -18,10 +19,8 @@ namespace ExploreGambia.API.Repositories
         {
             var existingBooking = await context.Bookings.FirstOrDefaultAsync(x => x.BookingId == payment.BookingId);
 
-            if (existingBooking == null) 
-            { 
-                throw new InvalidOperationException("Booking does not exist.");
-            }
+            if (existingBooking == null) throw new BookingNotFoundException(payment.BookingId);
+           
 
             await context.Payments.AddAsync(payment);
             await context.SaveChangesAsync();
@@ -41,7 +40,7 @@ namespace ExploreGambia.API.Repositories
         {
             var existingPayment = await context.Payments.FirstOrDefaultAsync(x => x.PaymentId == id);
 
-            if (existingPayment == null) return null;
+            if (existingPayment == null) throw new PaymentNotFoundException(id);
 
             context.Payments.Remove(existingPayment);
             await context.SaveChangesAsync();
@@ -58,7 +57,7 @@ namespace ExploreGambia.API.Repositories
         public async Task<Payment?> GetPaymentById(Guid id)
         {
             var payment = await context.Payments.FirstOrDefaultAsync(x => x.PaymentId == id);
-            if (payment == null) return null;
+            if (payment == null) throw new PaymentNotFoundException(id);
 
             return payment;
         }
@@ -68,7 +67,7 @@ namespace ExploreGambia.API.Repositories
         {
             var existingPayment = await context.Payments.FirstOrDefaultAsync(x => x.PaymentId == id);
 
-            if (existingPayment == null) return null;
+            if (existingPayment == null) throw new PaymentNotFoundException(id);
 
             existingPayment.BookingId = payment.BookingId;
             existingPayment.PaymentMethod = payment.PaymentMethod;
