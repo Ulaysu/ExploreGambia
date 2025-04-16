@@ -1,4 +1,5 @@
-﻿using ExploreGambia.API.Data;
+﻿using System.Globalization;
+using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,10 +8,12 @@ namespace ExploreGambia.API.Repositories
     public class PaymentRepository : IPaymentRepository
     {
         private readonly ExploreGambiaDbContext context;
+        private readonly ILogger<PaymentRepository> logger;
 
-        public PaymentRepository(ExploreGambiaDbContext context)
+        public PaymentRepository(ExploreGambiaDbContext context, ILogger<PaymentRepository> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
 
         // CREATE 
@@ -50,9 +53,36 @@ namespace ExploreGambia.API.Repositories
         }
 
         // Get all Payments
-        public async Task<List<Payment>> GetAllPaymentsAsync()
+        public async Task<List<Payment>> GetAllPaymentsAsync(string? sortBy = null, bool isAscending = true)
         {
-            return await context.Payments.ToListAsync();
+            var payments = context.Payments.AsQueryable();
+
+             
+
+            // Apply Sorting 
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                switch (sortBy.ToLowerInvariant())
+                {
+                    case "paymentdate":
+                        payments = isAscending ? payments.OrderBy(p => p.PaymentDate) : payments.OrderByDescending(p => p.PaymentDate);
+                        break;
+                    case "amount":
+                        payments = isAscending ? payments.OrderBy(p => p.Amount) : payments.OrderByDescending(p => p.Amount);
+                        break;
+                    case "paymentmethod":
+                        payments = isAscending ? payments.OrderBy(p => p.PaymentMethod) : payments.OrderByDescending(p => p.PaymentMethod);
+                        break;
+                    case "issuccessful":
+                        payments = isAscending ? payments.OrderBy(p => p.IsSuccessful) : payments.OrderByDescending(p => p.IsSuccessful);
+                        break;
+                    default:
+                        logger.LogWarning($"Received unknown sortBy parameter: '{sortBy}'. No sorting applied to payments.");
+                        break;
+                }
+            }
+
+            return await payments.ToListAsync();
         }
 
         public async Task<Payment?> GetPaymentById(Guid id)

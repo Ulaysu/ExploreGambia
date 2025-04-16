@@ -23,9 +23,9 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPayments()
+        public async Task<IActionResult> GetAllPayments([FromQuery] string? sortBy, [FromQuery] bool? isAscending)
         {
-            var payments = await paymentRepository.GetAllPaymentsAsync();
+            var payments = await paymentRepository.GetAllPaymentsAsync(sortBy, isAscending ?? true);
 
             return Ok(mapper.Map<List<PaymentDto>>(payments));
         }
