@@ -1,6 +1,7 @@
 ﻿using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
 using Microsoft.EntityFrameworkCore;
+using ExploreGambia.API.Exceptions;
 
 namespace ExploreGambia.API.Repositories
 {
@@ -25,7 +26,7 @@ namespace ExploreGambia.API.Repositories
         {
             var existingTourGuide = await context.TourGuides.FirstOrDefaultAsync(x => x.TourGuideId == id);
 
-            if (existingTourGuide == null) return null;
+            if (existingTourGuide == null) throw new TourGuideNotFoundException(id);
 
             context.TourGuides.Remove(existingTourGuide);
             await context.SaveChangesAsync();
@@ -43,7 +44,7 @@ namespace ExploreGambia.API.Repositories
         public async Task<TourGuide?> GetTourGuideByIdAsync(Guid id)
         {
             var tourGuide = await context.TourGuides.FirstOrDefaultAsync(x => x.TourGuideId == id);
-            if (tourGuide == null) return null;
+            if (tourGuide == null) throw new TourGuideNotFoundException(id);
 
             return tourGuide;
         }
@@ -53,7 +54,7 @@ namespace ExploreGambia.API.Repositories
         {
             var existingTourGuide = await context.TourGuides.FirstOrDefaultAsync(x => x.TourGuideId == id);
 
-            if (existingTourGuide == null) return null;
+            if (existingTourGuide == null) throw new TourGuideNotFoundException(id);
 
             existingTourGuide.FullName = tourGuide.FullName;
             existingTourGuide.PhoneNumber = tourGuide.PhoneNumber;

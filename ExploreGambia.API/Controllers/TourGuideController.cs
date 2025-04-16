@@ -39,10 +39,7 @@ namespace ExploreGambia.API.Controllers
 
             var tourGuide = await tourGuideRepository.GetTourGuideByIdAsync(id);
 
-            if (tourGuide == null)
-            {
-                return NotFound();
-            }
+          
 
             return Ok(mapper.Map<TourGuideDto>(tourGuide));
         }
@@ -73,7 +70,7 @@ namespace ExploreGambia.API.Controllers
 
             tourGuideDomainModel = await tourGuideRepository.UpdateTourGuideAsync(id, tourGuideDomainModel);
 
-            if (tourGuideDomainModel == null) return NotFound();
+           
 
             // Convert Domain Model to DTO
             var tourGuideDto = mapper.Map<TourGuideDto>(tourGuideDomainModel);
@@ -90,12 +87,6 @@ namespace ExploreGambia.API.Controllers
         {
             var tourGuideModel = await tourGuideRepository.DeleteTourGuideAsync(id);
 
-            if (tourGuideModel == null)
-            {
-                return NotFound();
-            }
-
-            // return deleted TourGuide back
             // Convert Domain Model to DTO
             var tourGuideDto = mapper.Map<TourGuideDto>(tourGuideModel );
 
