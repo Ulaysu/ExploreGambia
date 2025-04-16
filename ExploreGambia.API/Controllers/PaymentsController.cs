@@ -41,11 +41,6 @@ namespace ExploreGambia.API.Controllers
 
             var payment = await paymentRepository.GetPaymentById(id);
 
-            if (payment == null)
-            {
-                return NotFound();
-            }
-
             return Ok(mapper.Map<PaymentDto>(payment));
         }
 
@@ -70,11 +65,8 @@ namespace ExploreGambia.API.Controllers
             var payment = mapper.Map<Payment>(updatePaymentRequestDto);
 
             payment = await paymentRepository.UpdatePaymentAsync(id, payment);
-            if (payment == null)
-            {
-                return NotFound("Payment not found.");
-            }
-
+            
+           
             return Ok(mapper.Map<PaymentDto>(payment));
         }
 
@@ -86,18 +78,6 @@ namespace ExploreGambia.API.Controllers
         {
             var payment = await paymentRepository.DeletePaymentAsync(id);
 
-            if (payment == null)
-            {
-                logger.LogWarning($"Payment with ID '{id}' not found for deletion.");
-                return NotFound();
-            }
-
-            // return deleted Payment back
-            // Convert Domain Model to DTO
-            //var paymentDto = mapper.Map<PaymentDto>(payment);
-
-
-            //return Ok(payment);
 
             // Log the successful deletion, including non-sensitive information
             logger.LogInformation($"Payment with ID '{id}' deleted successfully. Associated Booking ID: '{payment.BookingId}'.");
