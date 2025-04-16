@@ -1,4 +1,5 @@
 ﻿using ExploreGambia.API.Data;
+using ExploreGambia.API.Exceptions;
 using ExploreGambia.API.Models.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,7 +28,7 @@ namespace ExploreGambia.API.Repositories
         {
             var existingTour = await context.Tours.FirstOrDefaultAsync(x => x.TourId == id);
 
-            if (existingTour == null) return null;
+            if (existingTour == null) throw new TourNotFoundException(id);
 
             context.Tours.Remove(existingTour);
             await context.SaveChangesAsync();
@@ -44,7 +45,7 @@ namespace ExploreGambia.API.Repositories
         public async Task<Tour?> GetTourById(Guid id)
         {
             var tour = await context.Tours.FirstOrDefaultAsync(x => x.TourId == id);
-            if (tour == null) return null;
+            if (tour == null) throw new TourNotFoundException(id);
 
             return tour;
         }
@@ -54,7 +55,7 @@ namespace ExploreGambia.API.Repositories
         {
             var existingTour = await context.Tours.FirstOrDefaultAsync(x => x.TourId == id);
 
-            if (existingTour == null) return null;
+            if (existingTour == null) throw new TourNotFoundException(id);
 
             existingTour.Title = tour.Title;
             existingTour.Description = tour.Description;
