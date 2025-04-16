@@ -53,11 +53,35 @@ namespace ExploreGambia.API.Repositories
         }
 
         // Get all Payments
-        public async Task<List<Payment>> GetAllPaymentsAsync(string? sortBy = null, bool isAscending = true)
+        public async Task<List<Payment>> GetAllPaymentsAsync(string? paymentMethod = null,
+            DateTime? paymentDateFrom = null,
+            DateTime? paymentDateTo = null,
+            bool? isSuccessful = null, string? sortBy = null, bool isAscending = true)
         {
-            var payments = context.Payments.AsQueryable();
+            var payments = context.Payments.Include(p=> p.Booking).AsQueryable();
 
-             
+            // Apply Filtering
+            if (!string.IsNullOrWhiteSpace(paymentMethod))
+            {
+                string pattern = $"%{paymentMethod}%";
+                payments = payments.Where(p => EF.Functions.Like(p.PaymentMethod, pattern));
+            }
+
+            if (paymentDateFrom.HasValue)
+            {
+                payments = payments.Where(p => p.PaymentDate >= paymentDateFrom.Value);
+            }
+
+            if (paymentDateTo.HasValue)
+            {
+                payments = payments.Where(p => p.PaymentDate <= paymentDateTo.Value.AddDays(1).AddTicks(-1)); // Inclusive
+            }
+
+            if (isSuccessful.HasValue)
+            {
+                payments = payments.Where(p => p.IsSuccessful == isSuccessful.Value);
+            }
+
 
             // Apply Sorting 
             if (!string.IsNullOrWhiteSpace(sortBy))
