@@ -56,7 +56,8 @@ namespace ExploreGambia.API.Repositories
         public async Task<List<Payment>> GetAllPaymentsAsync(string? paymentMethod = null,
             DateTime? paymentDateFrom = null,
             DateTime? paymentDateTo = null,
-            bool? isSuccessful = null, string? sortBy = null, bool isAscending = true)
+            bool? isSuccessful = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1,
+            int pageSize = 10)
         {
             var payments = context.Payments.Include(p=> p.Booking).AsQueryable();
 
@@ -106,7 +107,7 @@ namespace ExploreGambia.API.Repositories
                 }
             }
 
-            return await payments.ToListAsync();
+            return await payments.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
         }
 
         public async Task<Payment?> GetPaymentById(Guid id)

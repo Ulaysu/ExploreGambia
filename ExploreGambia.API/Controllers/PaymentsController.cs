@@ -26,9 +26,10 @@ namespace ExploreGambia.API.Controllers
         public async Task<IActionResult> GetAllPayments([FromQuery] string? paymentMethod,
     [FromQuery] DateTime? paymentDateFrom,
     [FromQuery] DateTime? paymentDateTo,
-    [FromQuery] bool? isSuccessful, [FromQuery] string? sortBy, [FromQuery] bool? isAscending)
+    [FromQuery] bool? isSuccessful, [FromQuery] string? sortBy, [FromQuery] bool? isAscending,
+    [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var payments = await paymentRepository.GetAllPaymentsAsync(paymentMethod, paymentDateFrom, paymentDateTo, isSuccessful, sortBy, isAscending ?? true);
+            var payments = await paymentRepository.GetAllPaymentsAsync(paymentMethod, paymentDateFrom, paymentDateTo, isSuccessful, sortBy, isAscending ?? true, pageNumber, pageSize);
 
             return Ok(mapper.Map<List<PaymentDto>>(payments));
         }
