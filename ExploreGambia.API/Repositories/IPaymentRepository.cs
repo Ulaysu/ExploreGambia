@@ -5,7 +5,11 @@ namespace ExploreGambia.API.Repositories
     public interface IPaymentRepository
     {
         Task<Payment> CreatePaymentAsync(Payment payment);
-        Task<List<Payment>> GetAllPaymentsAsync();
+        Task<List<Payment>> GetAllPaymentsAsync(string? paymentMethod = null,
+            DateTime? paymentDateFrom = null,
+            DateTime? paymentDateTo = null,
+            bool? isSuccessful = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1,
+            int pageSize = 10);
         Task<Payment?> GetPaymentById(Guid id);
         Task<Payment?> UpdatePaymentAsync(Guid id, Payment payment);
         Task<Payment?> DeletePaymentAsync(Guid id);

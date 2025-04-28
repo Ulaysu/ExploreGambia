@@ -1,4 +1,5 @@
-﻿using ExploreGambia.API.Data;
+﻿using System.Globalization;
+using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,10 +8,12 @@ namespace ExploreGambia.API.Repositories
     public class PaymentRepository : IPaymentRepository
     {
         private readonly ExploreGambiaDbContext context;
+        private readonly ILogger<PaymentRepository> logger;
 
-        public PaymentRepository(ExploreGambiaDbContext context)
+        public PaymentRepository(ExploreGambiaDbContext context, ILogger<PaymentRepository> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
 
         // CREATE 
@@ -50,9 +53,61 @@ namespace ExploreGambia.API.Repositories
         }
 
         // Get all Payments
-        public async Task<List<Payment>> GetAllPaymentsAsync()
+        public async Task<List<Payment>> GetAllPaymentsAsync(string? paymentMethod = null,
+            DateTime? paymentDateFrom = null,
+            DateTime? paymentDateTo = null,
+            bool? isSuccessful = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1,
+            int pageSize = 10)
         {
-            return await context.Payments.ToListAsync();
+            var payments = context.Payments.Include(p=> p.Booking).AsQueryable();
+
+            // Apply Filtering
+            if (!string.IsNullOrWhiteSpace(paymentMethod))
+            {
+                string pattern = $"%{paymentMethod}%";
+                payments = payments.Where(p => EF.Functions.Like(p.PaymentMethod, pattern));
+            }
+
+            if (paymentDateFrom.HasValue)
+            {
+                payments = payments.Where(p => p.PaymentDate >= paymentDateFrom.Value);
+            }
+
+            if (paymentDateTo.HasValue)
+            {
+                payments = payments.Where(p => p.PaymentDate <= paymentDateTo.Value.AddDays(1).AddTicks(-1)); // Inclusive
+            }
+
+            if (isSuccessful.HasValue)
+            {
+                payments = payments.Where(p => p.IsSuccessful == isSuccessful.Value);
+            }
+
+
+            // Apply Sorting 
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                switch (sortBy.ToLowerInvariant())
+                {
+                    case "paymentdate":
+                        payments = isAscending ? payments.OrderBy(p => p.PaymentDate) : payments.OrderByDescending(p => p.PaymentDate);
+                        break;
+                    case "amount":
+                        payments = isAscending ? payments.OrderBy(p => p.Amount) : payments.OrderByDescending(p => p.Amount);
+                        break;
+                    case "paymentmethod":
+                        payments = isAscending ? payments.OrderBy(p => p.PaymentMethod) : payments.OrderByDescending(p => p.PaymentMethod);
+                        break;
+                    case "issuccessful":
+                        payments = isAscending ? payments.OrderBy(p => p.IsSuccessful) : payments.OrderByDescending(p => p.IsSuccessful);
+                        break;
+                    default:
+                        logger.LogWarning($"Received unknown sortBy parameter: '{sortBy}'. No sorting applied to payments.");
+                        break;
+                }
+            }
+
+            return await payments.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
         }
 
         public async Task<Payment?> GetPaymentById(Guid id)
