@@ -39,13 +39,7 @@ namespace ExploreGambia.API.Controllers
         [Route("{id:guid}")]
         public async Task<ActionResult<Tour>> GetTourById([FromRoute] Guid id)
         {
-
             var tour = await tourRepository.GetTourById(id);
-
-            if(tour == null)
-            {
-                return NotFound();
-            }
 
             return Ok(mapper.Map<TourDto>(tour));
         }
@@ -77,8 +71,6 @@ namespace ExploreGambia.API.Controllers
 
             tourDomainModel = await tourRepository.UpdateTourAsync(id, tourDomainModel);
 
-            if (tourDomainModel == null) return NotFound();
-
             // Convert Domain Model to DTO
             var tourDto = mapper.Map<TourDto>(tourDomainModel);
 
@@ -94,10 +86,6 @@ namespace ExploreGambia.API.Controllers
         {
             var tourDomainModel = await tourRepository.DeleteTourAsync(id);
 
-            if (tourDomainModel == null)
-            {
-                return NotFound();
-            }
 
             // return deleted Tour back
             // Convert Domain Model to DTO
