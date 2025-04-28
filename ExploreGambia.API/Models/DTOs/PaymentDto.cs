@@ -17,7 +17,5 @@ namespace ExploreGambia.API.Models.DTOs
         public DateTime PaymentDate { get; set; }
 
         public bool IsSuccessful { get; set; }
-
-        public Booking Booking { get; set; }
     }
 }

@@ -8,10 +8,12 @@ namespace ExploreGambia.API.Repositories
     public class TourGuideRepository : ITourGuideRepository
     {
         private readonly ExploreGambiaDbContext context;
+        private readonly ILogger<TourGuideRepository> logger;
 
-        public TourGuideRepository(ExploreGambiaDbContext  context)
+        public TourGuideRepository(ExploreGambiaDbContext  context, ILogger<TourGuideRepository> logger)
         {
             this.context = context;
+            this.logger = logger;
         }
         public async Task<TourGuide> CreateTourGuideAsync(TourGuide tourGuide)
         {
@@ -35,9 +37,38 @@ namespace ExploreGambia.API.Repositories
         }
 
         // Get a list of all TourGuides
-        public async Task<List<TourGuide>> GetAllAsync()
+        public async Task<List<TourGuide>> GetAllAsync(string? sortBy = null, bool isAscending = true, string? searchTerm = null, int pageNumber = 1, int pageSize = 10)
         {
-            return await context.TourGuides.ToListAsync();
+            IQueryable<TourGuide> tourGuides = context.TourGuides.Include(x => x.Tours);
+
+
+
+            // Filtering
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                string pattern = $"%{searchTerm}%";
+                tourGuides = tourGuides.Where(tg => EF.Functions.Like(tg.FullName, pattern));
+            }
+
+            // Apply sorting if sortBy parameter is provided
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy.ToLower())
+                {
+                    case "fullname":
+                        tourGuides = isAscending ? tourGuides.OrderBy(tg => tg.FullName) : tourGuides.OrderByDescending(tg => tg.FullName); 
+                        break;
+                    case "availability":
+                        tourGuides = isAscending ? tourGuides.OrderBy(tg => tg.IsAvailable) : tourGuides.OrderByDescending(tg => tg.IsAvailable);
+                        break;
+                    default:
+                        logger.LogWarning($"Received unknown sortBy parameter: '{sortBy}'. No sorting applied.");
+                        break;
+                }
+            }
+
+            // Apply pagination
+            return await tourGuides.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
         }
 
         // Get a TourGuide by Id

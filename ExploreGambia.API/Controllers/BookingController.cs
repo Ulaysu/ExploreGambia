@@ -29,9 +29,12 @@ namespace ExploreGambia.API.Controllers
 
         //[Authorize(Roles = "User, Admin")]
         [HttpGet]
-        public async Task<IActionResult> GetAllBookings()
+        public async Task<IActionResult> GetAllBookings([FromQuery] BookingStatus? status,
+    [FromQuery] DateTime? bookingDateFrom, [FromQuery] DateTime? bookingDateTo, [FromQuery] string? sortBy,
+            [FromQuery] bool? isAscending, [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 10)
         {
-            var bookings = await bookingRepository.GetAllBookingsAsync();
+            var bookings = await bookingRepository.GetAllBookingsAsync(status, bookingDateFrom, bookingDateTo, sortBy, isAscending ?? true, pageNumber, pageSize);
 
             return Ok(mapper.Map<List<BookingDto>>(bookings));
 

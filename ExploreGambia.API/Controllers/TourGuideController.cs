@@ -24,9 +24,11 @@ namespace ExploreGambia.API.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAllTourGuidesAsync()
+        public async Task<IActionResult> GetAllTourGuidesAsync([FromQuery] string? sortBy,
+            [FromQuery] bool? isAscending, [FromQuery] string? searchTerm, [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var tourGuideDomainModel = await tourGuideRepository.GetAllAsync();
+            var tourGuideDomainModel = await tourGuideRepository.GetAllAsync(sortBy, isAscending ?? true, searchTerm, pageNumber, pageSize);
 
             return Ok(mapper.Map<List<TourGuideDto>>(tourGuideDomainModel));
         }
