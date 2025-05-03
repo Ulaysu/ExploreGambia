@@ -41,7 +41,7 @@ namespace ExploreGambia.API.Repositories
         // DELETE
         public async Task<Payment?> DeletePaymentAsync(Guid id)
         {
-            var existingPayment = await context.Payments.FirstOrDefaultAsync(x => x.PaymentId == id);
+            var existingPayment = await context.Payments.Include(p => p.Booking).ThenInclude(b => b.Tour).FirstOrDefaultAsync(x => x.PaymentId == id);
 
             if (existingPayment == null) throw new PaymentNotFoundException(id);
 
@@ -58,7 +58,7 @@ namespace ExploreGambia.API.Repositories
             bool? isSuccessful = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1,
             int pageSize = 10)
         {
-            var payments = context.Payments.Include(p=> p.Booking).AsQueryable();
+            var payments = context.Payments.Include(p=> p.Booking).ThenInclude(b => b.Tour).AsQueryable();
 
             // Apply Filtering
             if (!string.IsNullOrWhiteSpace(paymentMethod))
@@ -111,7 +111,7 @@ namespace ExploreGambia.API.Repositories
 
         public async Task<Payment?> GetPaymentById(Guid id)
         {
-            var payment = await context.Payments.FirstOrDefaultAsync(x => x.PaymentId == id);
+            var payment = await context.Payments.Include(p => p.Booking).ThenInclude(b => b.Tour).FirstOrDefaultAsync(x => x.PaymentId == id);
             if (payment == null) throw new PaymentNotFoundException(id);
 
             return payment;
@@ -120,7 +120,7 @@ namespace ExploreGambia.API.Repositories
         // UPDATE 
         public async Task<Payment?> UpdatePaymentAsync(Guid id, Payment payment)
         {
-            var existingPayment = await context.Payments.FirstOrDefaultAsync(x => x.PaymentId == id);
+            var existingPayment = await context.Payments.Include(p => p.Booking).ThenInclude(b => b.Tour).FirstOrDefaultAsync(x => x.PaymentId == id);
 
             if (existingPayment == null) throw new PaymentNotFoundException(id);
 
