@@ -15,7 +15,9 @@ namespace ExploreGambia.API.Models.Domain
 
         [Precision(18, 2)]
         public decimal TotalAmount { get; set; } // Total cost (Price * Number of People)
-        public BookingStatus Status { get; set; } = BookingStatus.Pending; 
+        public BookingStatus Status { get; set; } = BookingStatus.Pending;
+
+        public DateTime StatusUpdatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
         public Tour Tour { get; set; } 
