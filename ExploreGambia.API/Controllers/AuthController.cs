@@ -9,7 +9,7 @@ using Serilog;
 namespace ExploreGambia.API.Controllers
 {
     [ApiVersion("1.0")]  // Specify API version
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v{version:apiVersion}/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -25,7 +25,7 @@ namespace ExploreGambia.API.Controllers
 
         // POST: /api/Auth/Register
         [HttpPost]
-        [Route("Register")]
+        [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
         {
             if (!ModelState.IsValid) 
@@ -76,7 +76,7 @@ namespace ExploreGambia.API.Controllers
 
         // POST: /api/Auth/Login
         [HttpPost]
-        [Route("Login")]
+        [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
         {
             var user = await userManager.FindByEmailAsync(loginRequestDto.Username);
