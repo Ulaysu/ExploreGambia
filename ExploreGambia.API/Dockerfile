@@ -17,4 +17,4 @@ COPY --from=build /app/out ./
 # Expose port (match the port in your launchSettings.json or appsettings)
 EXPOSE 8080
 
-ENTRYPOINT ["dotnet", "ExploreGambia.Api.dll"]
+ENTRYPOINT ["dotnet", "ExploreGambia.API.dll"]
