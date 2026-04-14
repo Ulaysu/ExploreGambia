@@ -42,7 +42,7 @@ namespace ExploreGambia.API.Repositories
             decimal? maxPrice = null, DateTime? startDate = null, DateTime? endDate = null,
             int pageNumber = 1, int pageSize = 10)
         {
-            IQueryable<Tour> tours = context.Tours.Include("TourGuide");
+            IQueryable<Tour> tours = context.Tours.Include(t => t.TourGuide);
 
             // Apply filtering
             if (!string.IsNullOrWhiteSpace(location))
@@ -102,7 +102,7 @@ namespace ExploreGambia.API.Repositories
 
         public async Task<Tour?> GetTourById(Guid id)
         {
-            var tour = await context.Tours.FirstOrDefaultAsync(x => x.TourId == id);
+            var tour = await context.Tours.Include(t => t.TourGuide).FirstOrDefaultAsync(x => x.TourId == id);
             if (tour == null) throw new TourNotFoundException(id);
 
             return tour;
@@ -111,7 +111,7 @@ namespace ExploreGambia.API.Repositories
         // UPDATE 
         public async Task<Tour?> UpdateTourAsync(Guid id, Tour tour)
         {
-            var existingTour = await context.Tours.FirstOrDefaultAsync(x => x.TourId == id);
+            var existingTour = await context.Tours.Include(t => t.TourGuide).FirstOrDefaultAsync(x => x.TourId == id);
 
             if (existingTour == null) throw new TourNotFoundException(id);
 

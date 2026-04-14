@@ -7,7 +7,7 @@ namespace ExploreGambia.API.Models.DTOs
     {
         public Guid PaymentId { get; set; }
 
-        public Guid BookingId { get; set; }
+        public BookingDto Booking { get; set; }
 
         public string PaymentMethod { get; set; }
 

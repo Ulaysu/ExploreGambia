@@ -7,8 +7,7 @@ namespace ExploreGambia.API.Models.DTOs
 
         public Guid TourId { get; set; }
 
-        public Guid TourGuideId { get; set; }
-
+        public TourGuideDto TourGuide { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;

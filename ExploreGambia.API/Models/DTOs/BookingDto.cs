@@ -6,7 +6,7 @@ namespace ExploreGambia.API.Models.DTOs
     public class BookingDto
     {
         public Guid BookingId { get; set; } // Primary Key
-        public Guid TourId { get; set; } // Foreign Key (FK) to Tour
+        public TourDto Tour { get; set; }
 
         public DateTime BookingDate { get; set; } = DateTime.UtcNow; // Timestamp
         public int NumberOfPeople { get; set; } // Number of participants
