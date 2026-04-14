@@ -8,21 +8,38 @@ namespace ExploreGambia.API.Data
         
         private readonly ExploreGambiaDbContext _context;
 
-        public DataSeeder(ExploreGambiaDbContext context)
+        private readonly ExploreGambiaAuthDbContext _authContext;
+
+        public DataSeeder(ExploreGambiaDbContext context, ExploreGambiaAuthDbContext authContext)
         {
             _context = context;
+            _authContext = authContext;
         }
 
         public async Task SeedAsync()
         {
-            await _context.Database.MigrateAsync(); // Ensures database is created and migrated
 
+            await EnsureDatabaseReadyAsync(_context);
+            await EnsureDatabaseReadyAsync(_authContext);
             await SeedTourGuides();
             await SeedTours();
             await SeedBookings();
             await SeedPayments();
 
 
+        }
+
+        private static async Task EnsureDatabaseReadyAsync(DbContext dbContext)
+        {
+           var hasMigrations = dbContext.Database.GetMigrations().Any();
+
+            if (hasMigrations)
+            {
+                await dbContext.Database.MigrateAsync();
+                return;
+            }
+
+            await dbContext.Database.EnsureCreatedAsync();
         }
 
         private async Task SeedTourGuides()
