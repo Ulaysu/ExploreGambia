@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExploreGambia.API.Controllers
 {
     [ApiVersion("1.0")]  // Specify API version
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v{version:apiVersion}/payments")]
     [ApiController]
     public class PaymentsController : ControllerBase
     {

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ExploreGambia.API.Controllers
 {
     [ApiVersion("1.0")]  // Specify API version
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v{version:apiVersion}/tours")]
     [ApiController]
     public class ToursController : ControllerBase
     {
