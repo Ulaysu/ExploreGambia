@@ -14,5 +14,7 @@ namespace ExploreGambia.API.Models.DTOs
         [Precision(18, 2)]
         public decimal TotalAmount { get; set; } // Total cost (Price * Number of People)
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
+
+        public DateTime StatusUpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }
