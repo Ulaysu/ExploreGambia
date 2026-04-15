@@ -18,6 +18,7 @@ namespace ExploreGambia.API.Data
 
             var userRoleId = "6bcdc7ba-a89a-4a96-ba49-5838575745d1";
             var adminRoleId = "9a56e4c1-8b5e-41fb-ae0c-bf7e27662945";
+            var guideRoleId = "d2c9e8f3-5b1a-4c9e-9f1a-2b3e4f5a6c7d";   
 
             var roles = new List<IdentityRole>
             {
@@ -34,6 +35,13 @@ namespace ExploreGambia.API.Data
                     ConcurrencyStamp = adminRoleId,
                     Name = "Admin",
                     NormalizedName = "Admin".ToUpper()
+                },
+                new IdentityRole
+                {
+                    Id = guideRoleId,
+                    ConcurrencyStamp = guideRoleId,
+                    Name = "Guide",
+                    NormalizedName = "Guide".ToUpper()
                 }
             };
 
