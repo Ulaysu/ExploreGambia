@@ -1,0 +1,9 @@
+namespace ExploreGambia.API.Models.DTOs
+{
+    public class AuthMeResponseDto
+    {
+        public string Email { get; set; } = string.Empty;
+        public List<string> Roles { get; set; } = new List<string>();
+        public bool IsAuthenticated { get; set; } = true;
+    }
+}

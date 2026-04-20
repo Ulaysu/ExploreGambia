@@ -14,7 +14,7 @@ namespace ExploreGambia.API.Models.DTOs
         public string Password { get; set; }
 
         [Required]
-        [ValidRoles(new string[] { "Admin", "User" }, ErrorMessage = "Invalid role(s) selected.")]
+        [ValidRoles(new string[] { "Admin", "User", "Guide" }, ErrorMessage = "Invalid role(s) selected.")]
         public string[] Roles { get; set; }
 
     }

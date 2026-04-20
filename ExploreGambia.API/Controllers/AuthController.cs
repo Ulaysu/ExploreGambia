@@ -1,27 +1,31 @@
 ﻿using Asp.Versioning;
-using ExploreGambia.API.Models.DTOs;
+using AutoMapper;
+   using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Repositories;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 namespace ExploreGambia.API.Controllers
 {
-    [ApiVersion("1.0")]  // Specify API version
+    [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> userManager;
         private readonly ITokenRepository tokenRepository;
+        private readonly UserManager<IdentityUser> userManager;
+        private readonly IMapper mapper;
 
-        public AuthController(UserManager<IdentityUser> userManager, ITokenRepository tokenRepository)
+        public AuthController(ITokenRepository tokenRepository, UserManager<IdentityUser> userManager, IMapper mapper)
         {
-            this.userManager = userManager;
             this.tokenRepository = tokenRepository;
+            this.userManager = userManager;
+            this.mapper = mapper;
         }
-
 
         // POST: /api/Auth/Register
         [HttpPost]
@@ -70,7 +74,7 @@ namespace ExploreGambia.API.Controllers
                           identityResult.Errors);
                
             }
-            return Unauthorized("Something went wrong during registration.");
+            return BadRequest("Registration request is incomplete.");
 
         }
 
@@ -109,6 +113,42 @@ namespace ExploreGambia.API.Controllers
             return Unauthorized("Username or password incorrect");
         }
 
+        /// <summary>
+        /// Get authenticated user profile with roles
+        /// </summary>
+        /// <returns>User email, roles, and authentication status</returns>
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUserAsync()
+        {
+            // Extract user ID from claims
+            var userEmailClaim = User.FindFirst(ClaimTypes.Email)?.Value;
 
+            if (string.IsNullOrEmpty(userEmailClaim))
+            {
+                return Unauthorized(new { message = "User ID not found in token claims" });
+            }
+
+            // Fetch user from Identity
+            var user = await userManager.FindByEmailAsync(userEmailClaim);
+
+            if (user == null)
+            {
+                return Unauthorized(new { message = "User not found" });
+            }
+
+            // Get user roles
+            var roles = await userManager.GetRolesAsync(user);
+
+            // Build response
+            var response = new AuthMeResponseDto
+            {
+                Email = user.Email ?? string.Empty,
+                Roles = roles.ToList(),
+                IsAuthenticated = true
+            };
+
+            return Ok(response);
+        }
     }
 }
