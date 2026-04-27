@@ -15,6 +15,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.JsonWebTokens;
 using ExploreGambia.API.CustomActionFilters;
+using ExploreGambia.API.Models.Domain;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -115,12 +116,14 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 
-builder.Services.AddIdentityCore<IdentityUser>()
+builder.Services.AddIdentityCore<ApplicationUser>()
     .AddRoles<IdentityRole>()
-    .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("ExploreGambia")
+    .AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>("ExploreGambia")
     .AddEntityFrameworkStores<ExploreGambiaAuthDbContext>()
     .AddDefaultTokenProviders();
 
+// Add AuthService to DI
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -139,7 +142,7 @@ builder.Services.AddDbContext<ExploreGambiaDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
  
 builder.Services.AddDbContext<ExploreGambiaAuthDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
 
 // Bind environment variables
 builder.Configuration.AddEnvironmentVariables();
@@ -197,33 +200,38 @@ builder.Services.AddScoped<DataSeeder>();
 
 
 
-var app = builder.Build();
-
-
-
-// Apply migrations and seed data
-using (var scope = app.Services.CreateScope())
+try
 {
-    var services = scope.ServiceProvider;
-    var seeder = services.GetRequiredService<DataSeeder>();
-    await seeder.SeedAsync(); // Call the async method to seed data
-}
+    var app = builder.Build();
+    
+    // Apply migrations and seed data
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var seeder = services.GetRequiredService<DataSeeder>();
+        await seeder.SeedAsync();  // ✅ Breakpoint here to see exact error
+    }
+    
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+    app.UseMiddleware<GlobalExceptionHandler>();
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthentication();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
+}
+catch (Exception ex)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    Console.WriteLine($"Fatal error: {ex.Message}\n{ex.StackTrace}");
 }
-
-app.UseMiddleware<GlobalExceptionHandler>();
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();

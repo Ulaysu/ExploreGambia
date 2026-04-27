@@ -1,0 +1,116 @@
+using ExploreGambia.API.Models.Domain;
+using ExploreGambia.API.Models.DTOs;
+using Microsoft.AspNetCore.Identity;
+using Serilog;
+
+namespace ExploreGambia.API.Repositories
+{
+    public class AuthService : IAuthService
+    {
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly ITokenRepository tokenRepository;
+
+        public AuthService(UserManager<ApplicationUser> userManager, ITokenRepository tokenRepository)
+        {
+            this.userManager = userManager;
+            this.tokenRepository = tokenRepository;
+        }
+
+        public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto registerRequestDto)
+        {
+            // ✅ Validate Email and Password only
+            if (string.IsNullOrWhiteSpace(registerRequestDto.Email) ||
+                string.IsNullOrWhiteSpace(registerRequestDto.Password))
+            {
+                return new RegisterResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "Email and password are required.",
+                    Errors = new List<string> { "Missing required fields" }
+                };
+            }
+
+            // ✅ Email as UserName internally
+            var applicationUser = new ApplicationUser
+            {
+                UserName = registerRequestDto.Email,
+                Email = registerRequestDto.Email,
+                FirstName = registerRequestDto.FirstName ?? string.Empty,
+                LastName = registerRequestDto.LastName ?? string.Empty
+            };
+
+            var identityResult = await userManager.CreateAsync(applicationUser, registerRequestDto.Password);
+
+            if (identityResult.Succeeded)
+            {
+                // Add roles if provided
+                if (registerRequestDto.Roles != null && registerRequestDto.Roles.Any())
+                {
+                    identityResult = await userManager.AddToRolesAsync(applicationUser, registerRequestDto.Roles);
+
+                    if (identityResult.Succeeded)
+                    {
+                        return new RegisterResponseDto
+                        {
+                            IsSuccess = true,
+                            Message = "User was registered successfully! Please login."
+                        };
+                    }
+                    else
+                    {
+                        // ✅ Log using Email
+                        Log.Error("Failed to add roles '{Roles}' to user '{Email}'. Errors: {@Errors}",
+                                  string.Join(",", registerRequestDto.Roles),
+                                  registerRequestDto.Email,
+                                  identityResult.Errors);
+
+                        return new RegisterResponseDto
+                        {
+                            IsSuccess = false,
+                            Message = "Failed to assign roles during registration.",
+                            Errors = identityResult.Errors.Select(e => e.Description).ToList()
+                        };
+                    }
+                }
+
+                return new RegisterResponseDto
+                {
+                    IsSuccess = true,
+                    Message = "User was registered successfully! Please login."
+                };
+            }
+
+            // ✅ Log using Email
+            Log.Error("User registration failed for '{Email}'. Errors: {@Errors}",
+                      registerRequestDto.Email,
+                      identityResult.Errors);
+
+            return new RegisterResponseDto
+            {
+                IsSuccess = false,
+                Message = "Registration failed.",
+                Errors = identityResult.Errors.Select(e => e.Description).ToList()
+            };
+        }
+
+        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequestDto)
+        {
+            var user = await userManager.FindByEmailAsync(loginRequestDto.Email);
+
+            if (user != null)
+            {
+                var checkPasswordResult = await userManager.CheckPasswordAsync(user, loginRequestDto.Password);
+
+                if (checkPasswordResult)
+                {
+                    var roles = await userManager.GetRolesAsync(user);
+                    var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList());
+
+                    return new LoginResponseDto { JwtToken = jwtToken };
+                }
+            }
+
+            return new LoginResponseDto { JwtToken = string.Empty, Error = "Email or password incorrect" };
+        }
+    }
+}

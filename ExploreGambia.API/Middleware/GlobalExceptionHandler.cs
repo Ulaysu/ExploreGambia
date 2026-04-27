@@ -35,7 +35,7 @@ namespace ExploreGambia.API.Middleware
                 // Return A Custom Exrror Response
                 // Determine the HTTP status code based on the exception type
                 HttpStatusCode statusCode = HttpStatusCode.InternalServerError;
-                string errorMessage = "Something went wrong! We are looking into resolving this.";
+                string errorMessage = $"Something went wrong! We are looking into resolving this. {ex.Message}";
 
 
 

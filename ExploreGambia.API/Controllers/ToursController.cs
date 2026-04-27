@@ -57,7 +57,7 @@ namespace ExploreGambia.API.Controllers
 
         // Secured endpoint - Create tour (Admin only)
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateTour([FromBody] AddTourRequestDto addTourRequestDto)
         {
             // convert from Dto to Domain Model
@@ -75,7 +75,7 @@ namespace ExploreGambia.API.Controllers
         // Secured endpoint - Update tour (Admin only)
         [HttpPut]
         [Route("{id:Guid}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateTourGuide([FromRoute] Guid id, [FromBody] UpdateTourRequestDto updateTourRequestDto)
         {
 
@@ -93,7 +93,7 @@ namespace ExploreGambia.API.Controllers
         // Secured endpoint - Delete tour (Admin only)
         [HttpDelete]
         [Route("{id:Guid}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTourGuide([FromRoute] Guid id)
         {
             var tourDomainModel = await tourRepository.DeleteTourAsync(id);

@@ -1,13 +1,11 @@
 ﻿using Asp.Versioning;
-using AutoMapper;
-   using ExploreGambia.API.Models.DTOs;
+using ExploreGambia.API.Models.Domain;
+using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
-using Serilog;
 
 namespace ExploreGambia.API.Controllers
 {
@@ -16,131 +14,85 @@ namespace ExploreGambia.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly ITokenRepository tokenRepository;
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly IMapper mapper;
+        private readonly IAuthService authService;
+        private readonly UserManager<ApplicationUser> userManager;
 
-        public AuthController(ITokenRepository tokenRepository, UserManager<IdentityUser> userManager, IMapper mapper)
+        public AuthController(IAuthService authService, UserManager<ApplicationUser> userManager)
         {
-            this.tokenRepository = tokenRepository;
+            this.authService = authService;
             this.userManager = userManager;
-            this.mapper = mapper;
-        }
-
-        // POST: /api/Auth/Register
-        [HttpPost]
-        [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
-        {
-            if (!ModelState.IsValid) 
-            {
-                return BadRequest(ModelState);
-            }
-            var identityUser = new IdentityUser
-            {
-                UserName = registerRequestDto.Username,
-                Email = registerRequestDto.Username
-            };
-
-            var identityResult = await userManager.CreateAsync(identityUser, registerRequestDto.Password);
-
-            if (identityResult.Succeeded)
-            {
-                // Add roles to this User
-                if (registerRequestDto.Roles != null && registerRequestDto.Roles.Any())
-                {
-                    identityResult = await userManager.AddToRolesAsync(identityUser, registerRequestDto.Roles);
-
-                    if (identityResult.Succeeded)
-                    {
-                        return Ok("User was registered! Please login.");
-                    }
-                    else
-                    {
-                        // Logging the error if adding roles failed
-                        Log.Error("Failed to add roles '{Roles}' to user '{Username}'. Errors: {@Errors}",
-                                  string.Join(",", registerRequestDto.Roles),
-                                  registerRequestDto.Username,
-                                  identityResult.Errors);
-                        return StatusCode(StatusCodes.Status500InternalServerError, "Failed to assign roles during registration.");
-                    }
-                }
-            }
-            else
-            {
-                // Logging the errors that occurred during user creation
-                Log.Error("User registration failed for '{Username}'. Errors: {@Errors}",
-                          registerRequestDto.Username,
-                          identityResult.Errors);
-               
-            }
-            return BadRequest("Registration request is incomplete.");
-
-        }
-
-        // POST: /api/Auth/Login
-        [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
-        {
-            var user = await userManager.FindByEmailAsync(loginRequestDto.Username);
-
-            if (user != null)
-            {
-                var checkPasswordResult = await userManager.CheckPasswordAsync(user, loginRequestDto.Password);
-
-                if (checkPasswordResult)
-                {
-                    // Get Roles for this user
-                    var roles = await userManager.GetRolesAsync(user);
-
-                    if (roles != null)
-                    {
-                        // Create Token
-
-                        var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList());
-
-                        var response = new LoginResponseDto
-                        {
-                            JwtToken = jwtToken
-                        };
-
-                        return Ok(response);
-                    }
-                }
-            }
-
-            return Unauthorized("Username or password incorrect");
         }
 
         /// <summary>
-        /// Get authenticated user profile with roles
+        /// Register a new user with email, password, and optional roles
         /// </summary>
-        /// <returns>User email, roles, and authentication status</returns>
-        [HttpGet("me")]
-        [Authorize]
-        public async Task<IActionResult> GetCurrentUserAsync()
+        [HttpPost("register")]
+        [ProducesResponseType(typeof(RegisterResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> RegisterAsync([FromBody] RegisterRequestDto registerRequestDto)
         {
-            // Extract user ID from claims
-            var userEmailClaim = User.FindFirst(ClaimTypes.Email)?.Value;
-
-            if (string.IsNullOrEmpty(userEmailClaim))
-            {
-                return Unauthorized(new { message = "User ID not found in token claims" });
+            if (!ModelState.IsValid)      {
+                return BadRequest(ModelState);
             }
 
-            // Fetch user from Identity
-            var user = await userManager.FindByEmailAsync(userEmailClaim);
+            var response = await authService.RegisterAsync(registerRequestDto);
+
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Login with email and password
+        /// </summary>
+        [HttpPost("login")]
+        [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginRequestDto loginRequestDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await authService.LoginAsync(loginRequestDto);
+
+            if (string.IsNullOrEmpty(response.JwtToken))
+            {
+                return Unauthorized(new { message = response.Error ?? "Login failed" });
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Get authenticated user profile with roles and personal info
+        /// </summary>
+        [HttpGet("me")]
+        [Authorize]
+        [ProducesResponseType(typeof(AuthMeResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetCurrentUserAsync()
+        {
+            var emailClaim = User.FindFirst(ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(emailClaim))
+            {
+                return Unauthorized(new { message = "Email not found in token claims" });
+            }
+
+            var user = await userManager.FindByEmailAsync(emailClaim);
 
             if (user == null)
             {
                 return Unauthorized(new { message = "User not found" });
             }
 
-            // Get user roles
             var roles = await userManager.GetRolesAsync(user);
 
-            // Build response
             var response = new AuthMeResponseDto
             {
                 Email = user.Email ?? string.Empty,
