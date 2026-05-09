@@ -36,12 +36,23 @@ builder.Logging.AddSerilog(logger);
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ValidateModelAttribute>(); // Add the global filter here
+})
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
-
-
-builder.Services.AddControllers();
 
 // Add API Versioning
 var apiVersioningBuilder = builder.Services.AddApiVersioning(options =>
@@ -102,12 +113,6 @@ builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<AutoMapperProfiles>();
 });
-
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });
 
 // Add Repositories
 builder.Services.AddScoped<ITourRepository, TourRepository>();
@@ -222,6 +227,8 @@ try
     app.UseMiddleware<GlobalExceptionHandler>();
 
     app.UseHttpsRedirection();
+
+    app.UseCors("FrontendPolicy");
 
     app.UseAuthentication();
 
