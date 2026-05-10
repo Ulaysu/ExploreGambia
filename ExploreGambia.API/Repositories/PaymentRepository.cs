@@ -8,6 +8,7 @@ namespace ExploreGambia.API.Repositories
 {
     public class PaymentRepository : IPaymentRepository
     {
+        private const int MaxPageSize = 100;
         private readonly ExploreGambiaDbContext context;
         private readonly ILogger<PaymentRepository> logger;
 
@@ -58,7 +59,14 @@ namespace ExploreGambia.API.Repositories
             bool? isSuccessful = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1,
             int pageSize = 10)
         {
-            var payments = context.Payments.Include(p=> p.Booking).ThenInclude(b => b.Tour).AsQueryable();
+            pageNumber = Math.Max(pageNumber, 1);
+            pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
+
+            var payments = context.Payments
+                .AsNoTracking()
+                .Include(p=> p.Booking)
+                .ThenInclude(b => b.Tour)
+                .AsQueryable();
 
             // Apply Filtering
             if (!string.IsNullOrWhiteSpace(paymentMethod))
@@ -82,6 +90,7 @@ namespace ExploreGambia.API.Repositories
                 payments = payments.Where(p => p.IsSuccessful == isSuccessful.Value);
             }
 
+            var isSorted = false;
 
             // Apply Sorting 
             if (!string.IsNullOrWhiteSpace(sortBy))
@@ -90,15 +99,19 @@ namespace ExploreGambia.API.Repositories
                 {
                     case "paymentdate":
                         payments = isAscending ? payments.OrderBy(p => p.PaymentDate) : payments.OrderByDescending(p => p.PaymentDate);
+                        isSorted = true;
                         break;
                     case "amount":
                         payments = isAscending ? payments.OrderBy(p => p.Amount) : payments.OrderByDescending(p => p.Amount);
+                        isSorted = true;
                         break;
                     case "paymentmethod":
                         payments = isAscending ? payments.OrderBy(p => p.PaymentMethod) : payments.OrderByDescending(p => p.PaymentMethod);
+                        isSorted = true;
                         break;
                     case "issuccessful":
                         payments = isAscending ? payments.OrderBy(p => p.IsSuccessful) : payments.OrderByDescending(p => p.IsSuccessful);
+                        isSorted = true;
                         break;
                     default:
                         logger.LogWarning($"Received unknown sortBy parameter: '{sortBy}'. No sorting applied to payments.");
@@ -106,12 +119,21 @@ namespace ExploreGambia.API.Repositories
                 }
             }
 
+            if (!isSorted)
+            {
+                payments = payments.OrderBy(p => p.PaymentId);
+            }
+
             return await payments.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
         }
 
         public async Task<Payment?> GetPaymentById(Guid id)
         {
-            var payment = await context.Payments.Include(p => p.Booking).ThenInclude(b => b.Tour).FirstOrDefaultAsync(x => x.PaymentId == id);
+            var payment = await context.Payments
+                .AsNoTracking()
+                .Include(p => p.Booking)
+                .ThenInclude(b => b.Tour)
+                .FirstOrDefaultAsync(x => x.PaymentId == id);
             if (payment == null) throw new PaymentNotFoundException(id);
 
             return payment;

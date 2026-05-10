@@ -7,6 +7,7 @@ namespace ExploreGambia.API.Repositories
 {
     public class TourRepository : ITourRepository
     {
+        private const int MaxPageSize = 100;
         private readonly ExploreGambiaDbContext context;
 
         public TourRepository(ExploreGambiaDbContext context)
@@ -42,7 +43,12 @@ namespace ExploreGambia.API.Repositories
             decimal? maxPrice = null, DateTime? startDate = null, DateTime? endDate = null,
             int pageNumber = 1, int pageSize = 10)
         {
-            IQueryable<Tour> tours = context.Tours.Include(t => t.TourGuide);
+            pageNumber = Math.Max(pageNumber, 1);
+            pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
+
+            IQueryable<Tour> tours = context.Tours
+                .AsNoTracking()
+                .Include(t => t.TourGuide);
 
             // Apply filtering
             if (!string.IsNullOrWhiteSpace(location))
@@ -70,6 +76,8 @@ namespace ExploreGambia.API.Repositories
                 tours = tours.Where(t => t.EndDate <= endDate.Value);
             }
 
+            var isSorted = false;
+
             // Apply sorting if sortBy parameter is provided
             if (!string.IsNullOrWhiteSpace(sortBy))
             {
@@ -77,23 +85,33 @@ namespace ExploreGambia.API.Repositories
                 {
                     case "title":
                         tours = isAscending ? tours.OrderBy(t => t.Title) : tours.OrderByDescending(t => t.Title);
+                        isSorted = true;
                         break;
                     case "price":
                         tours = isAscending ? tours.OrderBy(t => t.Price) : tours.OrderByDescending(t => t.Price);
+                        isSorted = true;
                         break;
                     case "startdate":
                         tours = isAscending ? tours.OrderBy(t => t.StartDate) : tours.OrderByDescending(t => t.StartDate);
+                        isSorted = true;
                         break;
                     case "enddate":
                         tours = isAscending ? tours.OrderBy(t => t.EndDate) : tours.OrderByDescending(t => t.EndDate);
+                        isSorted = true;
                         break;
                     case "location":
                         tours = isAscending ? tours.OrderBy(t => t.Location) : tours.OrderByDescending(t => t.Location);
+                        isSorted = true;
                         break;
                     
                     default:
                         break;
                 }
+            }
+
+            if (!isSorted)
+            {
+                tours = tours.OrderBy(t => t.TourId);
             }
 
             // Apply pagination
@@ -102,7 +120,10 @@ namespace ExploreGambia.API.Repositories
 
         public async Task<Tour?> GetTourById(Guid id)
         {
-            var tour = await context.Tours.Include(t => t.TourGuide).FirstOrDefaultAsync(x => x.TourId == id);
+            var tour = await context.Tours
+                .AsNoTracking()
+                .Include(t => t.TourGuide)
+                .FirstOrDefaultAsync(x => x.TourId == id);
             if (tour == null) throw new TourNotFoundException(id);
 
             return tour;

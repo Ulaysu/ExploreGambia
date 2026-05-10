@@ -7,6 +7,7 @@ namespace ExploreGambia.API.Repositories
 {
     public class TourGuideRepository : ITourGuideRepository
     {
+        private const int MaxPageSize = 100;
         private readonly ExploreGambiaDbContext context;
         private readonly ILogger<TourGuideRepository> logger;
 
@@ -39,9 +40,12 @@ namespace ExploreGambia.API.Repositories
         // Get a list of all TourGuides
         public async Task<List<TourGuide>> GetAllAsync(string? sortBy = null, bool isAscending = true, string? searchTerm = null, int pageNumber = 1, int pageSize = 10)
         {
-            IQueryable<TourGuide> tourGuides = context.TourGuides.Include(x => x.Tours);
+            pageNumber = Math.Max(pageNumber, 1);
+            pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
-
+            IQueryable<TourGuide> tourGuides = context.TourGuides
+                .AsNoTracking()
+                .Include(x => x.Tours);
 
             // Filtering
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -50,6 +54,8 @@ namespace ExploreGambia.API.Repositories
                 tourGuides = tourGuides.Where(tg => EF.Functions.Like(tg.FullName, pattern));
             }
 
+            var isSorted = false;
+
             // Apply sorting if sortBy parameter is provided
             if (!string.IsNullOrEmpty(sortBy))
             {
@@ -57,14 +63,21 @@ namespace ExploreGambia.API.Repositories
                 {
                     case "fullname":
                         tourGuides = isAscending ? tourGuides.OrderBy(tg => tg.FullName) : tourGuides.OrderByDescending(tg => tg.FullName); 
+                        isSorted = true;
                         break;
                     case "availability":
                         tourGuides = isAscending ? tourGuides.OrderBy(tg => tg.IsAvailable) : tourGuides.OrderByDescending(tg => tg.IsAvailable);
+                        isSorted = true;
                         break;
                     default:
                         logger.LogWarning($"Received unknown sortBy parameter: '{sortBy}'. No sorting applied.");
                         break;
                 }
+            }
+
+            if (!isSorted)
+            {
+                tourGuides = tourGuides.OrderBy(tg => tg.TourGuideId);
             }
 
             // Apply pagination
@@ -74,7 +87,9 @@ namespace ExploreGambia.API.Repositories
         // Get a TourGuide by Id
         public async Task<TourGuide?> GetTourGuideByIdAsync(Guid id)
         {
-            var tourGuide = await context.TourGuides.FirstOrDefaultAsync(x => x.TourGuideId == id);
+            var tourGuide = await context.TourGuides
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.TourGuideId == id);
             if (tourGuide == null) throw new TourGuideNotFoundException(id);
 
             return tourGuide;

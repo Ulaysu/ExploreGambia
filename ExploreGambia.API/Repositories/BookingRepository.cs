@@ -7,6 +7,7 @@ namespace ExploreGambia.API.Repositories
 {
     public class BookingRepository : IBookingRepository
     {
+        private const int MaxPageSize = 100;
         private readonly ExploreGambiaDbContext context;
         private readonly ILogger<BookingRepository> logger;
 
@@ -41,7 +42,12 @@ namespace ExploreGambia.API.Repositories
             DateTime? bookingDateFrom = null, DateTime? bookingDateTo = null, string? sortBy = null, 
             bool isAscending = true, int pageNumber = 1, int pageSize = 10)
         {
-           IQueryable<Booking> bookings = context.Bookings.Include(b => b.Tour);
+            pageNumber = Math.Max(pageNumber, 1);
+            pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
+
+           IQueryable<Booking> bookings = context.Bookings
+                .AsNoTracking()
+                .Include(b => b.Tour);
 
             // Apply filtering
             if (status.HasValue)
@@ -60,6 +66,8 @@ namespace ExploreGambia.API.Repositories
                 bookings = bookings.Where(b => b.BookingDate <= bookingDateTo.Value.AddDays(1).AddTicks(-1)); // Inclusive
             }
 
+            var isSorted = false;
+
             // Apply sorting if sortBy parameter is provided
             if (!string.IsNullOrWhiteSpace(sortBy))
             {
@@ -67,20 +75,29 @@ namespace ExploreGambia.API.Repositories
                 {
                     case "bookingdate":
                         bookings = isAscending ? bookings.OrderBy(b => b.BookingDate) : bookings.OrderByDescending(b => b.BookingDate);
+                        isSorted = true;
                         break;
                     case "totalamount":
                         bookings = isAscending ? bookings.OrderBy(b => b.TotalAmount) : bookings.OrderByDescending(b => b.TotalAmount);
+                        isSorted = true;
                         break;
                     case "numberofpeople":
                         bookings = isAscending ? bookings.OrderBy(b => b.NumberOfPeople) : bookings.OrderByDescending(b => b.NumberOfPeople);
+                        isSorted = true;
                         break;
                     case "status":
                         bookings = isAscending ? bookings.OrderBy(b => b.Status) : bookings.OrderByDescending(b => b.Status);
+                        isSorted = true;
                         break;
                     default:
                         logger.LogWarning($"Received unknown sortBy parameter: '{sortBy}'. No sorting applied to bookings.");
                         break;
                 }
+            }
+
+            if (!isSorted)
+            {
+                bookings = bookings.OrderBy(b => b.BookingId);
             }
             // Apply pagination
             return await bookings.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
@@ -89,7 +106,10 @@ namespace ExploreGambia.API.Repositories
 
         public async Task<Booking?> GetBookingById(Guid id)
         {
-            var booking = await context.Bookings.Include(b => b.Tour).FirstOrDefaultAsync(x => x.BookingId == id);
+            var booking = await context.Bookings
+                .AsNoTracking()
+                .Include(b => b.Tour)
+                .FirstOrDefaultAsync(x => x.BookingId == id);
             if (booking == null) throw new BookingNotFoundException(id);
 
             return booking;
@@ -103,7 +123,7 @@ namespace ExploreGambia.API.Repositories
         // UPDATE
         public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
         {
-            var existingBooking = await GetBookingById(id);
+            var existingBooking = await context.Bookings.FirstOrDefaultAsync(x => x.BookingId == id);
             if (existingBooking == null) throw new BookingNotFoundException(id);
 
             // Update basic properties
