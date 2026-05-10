@@ -1,8 +1,5 @@
-﻿using System.Net;
-using System.Text.Json;
+using System.Net;
 using ExploreGambia.API.Exceptions;
-using Microsoft.AspNetCore.Diagnostics;
-using Serilog;
 
 namespace ExploreGambia.API.Middleware
 {
@@ -18,7 +15,6 @@ namespace ExploreGambia.API.Middleware
             this.next = next;
         }
 
-
         public async Task InvokeAsync(HttpContext httpContext)
         {
             try
@@ -29,35 +25,35 @@ namespace ExploreGambia.API.Middleware
             {
                 var errorId = Guid.NewGuid();
 
-                // Log This Exception
-                logger.LogError(ex, $"{errorId} : {ex.Message}");
+                logger.LogError(ex, "Unhandled exception occurred. ErrorId: {ErrorId}", errorId);
 
-                // Return A Custom Exrror Response
-                // Determine the HTTP status code based on the exception type
-                HttpStatusCode statusCode = HttpStatusCode.InternalServerError;
-                string errorMessage = $"Something went wrong! We are looking into resolving this. {ex.Message}";
+                var statusCode = HttpStatusCode.InternalServerError;
+                var errorCode = "internal_server_error";
+                var errorMessage = "Something went wrong. We are looking into resolving this.";
 
-
-
-                if (ex is BookingNotFoundException || ex is TourNotFoundException || ex is TourGuideNotFoundException)
+                if (ex is BookingNotFoundException
+                    || ex is TourNotFoundException
+                    || ex is TourGuideNotFoundException
+                    || ex is PaymentNotFoundException)
                 {
                     statusCode = HttpStatusCode.NotFound;
+                    errorCode = "resource_not_found";
                     errorMessage = ex.Message;
                 }
 
-                // Return a custom error response
                 httpContext.Response.StatusCode = (int)statusCode;
                 httpContext.Response.ContentType = "application/json";
 
                 var error = new
                 {
-                    Id = errorId,
-                    ErrorMessage = errorMessage
+                    ErrorId = errorId,
+                    Code = errorCode,
+                    Message = errorMessage,
+                    Details = Array.Empty<string>()
                 };
 
                 await httpContext.Response.WriteAsJsonAsync(error);
             }
         }
-
     }
 }
