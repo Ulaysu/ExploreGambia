@@ -111,11 +111,11 @@ namespace ExploreGambia.API.Data
 
                 var payments = new List<Payment>
                 {
-                    new Payment { PaymentId = Guid.NewGuid(), BookingId = bookings[0].BookingId, PaymentMethod = "Credit Card", Amount = 100.00m, PaymentDate = DateTime.UtcNow, IsSuccessful = true },
-                    new Payment { PaymentId = Guid.NewGuid(), BookingId = bookings[1].BookingId, PaymentMethod = "PayPal", Amount = 300.00m, PaymentDate = DateTime.UtcNow, IsSuccessful = false },
-                    new Payment { PaymentId = Guid.NewGuid(), BookingId = bookings[2].BookingId, PaymentMethod = "Cash", Amount = 300.00m, PaymentDate = DateTime.UtcNow, IsSuccessful = true },
-                    new Payment { PaymentId = Guid.NewGuid(), BookingId = bookings[3].BookingId, PaymentMethod = "Bank Transfer", Amount = 120.00m, PaymentDate = DateTime.UtcNow, IsSuccessful = true },
-                    new Payment { PaymentId = Guid.NewGuid(), BookingId = bookings[4].BookingId, PaymentMethod = "Credit Card", Amount = 275.00m, PaymentDate = DateTime.UtcNow, IsSuccessful = true }
+                    new Payment { PaymentId = Guid.NewGuid(), BookingId = bookings[0].BookingId, PaymentMethod = "Credit Card", Amount = 100.00m, PaymentDate = DateTime.UtcNow, Status = PaymentStatus.Succeeded },
+                    new Payment { PaymentId = Guid.NewGuid(), BookingId = bookings[1].BookingId, PaymentMethod = "PayPal", Amount = 300.00m, PaymentDate = DateTime.UtcNow, Status = PaymentStatus.Pending },
+                    new Payment { PaymentId = Guid.NewGuid(), BookingId = bookings[2].BookingId, PaymentMethod = "Cash", Amount = 300.00m, PaymentDate = DateTime.UtcNow, Status = PaymentStatus.Succeeded },
+                    new Payment { PaymentId = Guid.NewGuid(), BookingId = bookings[3].BookingId, PaymentMethod = "Bank Transfer", Amount = 120.00m, PaymentDate = DateTime.UtcNow, Status = PaymentStatus.Succeeded },
+                    new Payment { PaymentId = Guid.NewGuid(), BookingId = bookings[4].BookingId, PaymentMethod = "Credit Card", Amount = 275.00m, PaymentDate = DateTime.UtcNow, Status = PaymentStatus.Succeeded }
                 };
 
                 _context.Payments.AddRange(payments);

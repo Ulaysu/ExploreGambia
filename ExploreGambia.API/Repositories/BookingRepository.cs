@@ -147,5 +147,17 @@ namespace ExploreGambia.API.Repositories
             await context.SaveChangesAsync();
             return existingBooking;
         }
+
+        public async Task<Booking?> UpdateBookingStatusAsync(Guid id, BookingStatus status)
+        {
+            var existingBooking = await context.Bookings.FirstOrDefaultAsync(x => x.BookingId == id);
+            if (existingBooking == null) throw new BookingNotFoundException(id);
+
+            existingBooking.Status = status;
+            existingBooking.StatusUpdatedAt = DateTime.UtcNow;
+
+            await context.SaveChangesAsync();
+            return existingBooking;
+        }
     }
 }

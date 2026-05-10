@@ -40,6 +40,12 @@ namespace ExploreGambia.API.Middleware
                     errorCode = "resource_not_found";
                     errorMessage = ex.Message;
                 }
+                else if (ex is BusinessRuleException)
+                {
+                    statusCode = HttpStatusCode.Conflict;
+                    errorCode = "business_rule_violation";
+                    errorMessage = ex.Message;
+                }
 
                 httpContext.Response.StatusCode = (int)statusCode;
                 httpContext.Response.ContentType = "application/json";

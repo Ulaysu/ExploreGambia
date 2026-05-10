@@ -8,10 +8,11 @@ namespace ExploreGambia.API.Repositories
         Task<List<Payment>> GetAllPaymentsAsync(string? paymentMethod = null,
             DateTime? paymentDateFrom = null,
             DateTime? paymentDateTo = null,
-            bool? isSuccessful = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1,
+            PaymentStatus? status = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1,
             int pageSize = 10);
         Task<Payment?> GetPaymentById(Guid id);
         Task<Payment?> UpdatePaymentAsync(Guid id, Payment payment);
+        Task<Payment?> UpdatePaymentStatusAsync(Guid id, PaymentStatus status, string? providerReference = null);
         Task<Payment?> DeletePaymentAsync(Guid id);
     }
 }

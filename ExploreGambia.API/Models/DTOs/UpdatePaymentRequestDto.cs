@@ -1,6 +1,6 @@
-﻿using ExploreGambia.API.Validations;
-using System.ComponentModel.DataAnnotations;
+using ExploreGambia.API.Validations;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace ExploreGambia.API.Models.DTOs
 {
@@ -10,17 +10,14 @@ namespace ExploreGambia.API.Models.DTOs
         [GuidNotEmpty(ErrorMessage = "BookingId cannot be an empty GUID.")]
         public Guid BookingId { get; set; }
 
-        [MaxLength(50, ErrorMessage = "PaymentMethod cannot exceed 50 characters.")] // Optional, but good to limit
-        public string PaymentMethod { get; set; }
+        [MaxLength(50, ErrorMessage = "PaymentMethod cannot exceed 50 characters.")]
+        public string PaymentMethod { get; set; } = string.Empty;
 
         [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0.")]
-        [Precision(18, 2)] 
+        [Precision(18, 2)]
         public decimal Amount { get; set; }
 
-        [Required(ErrorMessage = "PaymentDate is required.")]
-        public DateTime PaymentDate { get; set; }
-
-        public bool IsSuccessful { get; set; }
-
+        [MaxLength(100, ErrorMessage = "ProviderReference cannot exceed 100 characters.")]
+        public string? ProviderReference { get; set; }
     }
 }

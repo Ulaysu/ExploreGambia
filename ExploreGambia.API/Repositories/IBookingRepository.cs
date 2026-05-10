@@ -17,6 +17,8 @@ namespace ExploreGambia.API.Repositories
 
         Task<Booking?> UpdateBookingAsync(Guid id, Booking booking);
 
+        Task<Booking?> UpdateBookingStatusAsync(Guid id, BookingStatus status);
+
         Task<Booking?> DeleteBookingAsync(Guid id);
     }
 }

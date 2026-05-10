@@ -33,6 +33,9 @@ secrets.json
 *.ldf
 *.sqlite
 Migrations/
+!ExploreGambia.API/Migrations/
+ExploreGambia.API/Migrations/*
+!ExploreGambia.API/Migrations/20260510120000_AddPaymentStatusLifecycle.cs
 
 # Ignore temporary files and logs
 *.tmp

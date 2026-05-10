@@ -3,6 +3,8 @@ using AutoMapper;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Repositories;
+using ExploreGambia.API.Services;
+using ExploreGambia.API.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,13 +17,15 @@ namespace ExploreGambia.API.Controllers
     public class PaymentsController : ControllerBase
     {
         private readonly IPaymentRepository paymentRepository;
+        private readonly IPaymentService paymentService;
         private readonly IMapper mapper;
         private readonly ILogger<PaymentsController> logger;
 
-        public PaymentsController(IPaymentRepository paymentRepository, IMapper mapper, 
+        public PaymentsController(IPaymentRepository paymentRepository, IPaymentService paymentService, IMapper mapper,
             ILogger<PaymentsController> logger)
         {
             this.paymentRepository = paymentRepository;
+            this.paymentService = paymentService;
             this.mapper = mapper;
             this.logger = logger;
         }
@@ -31,10 +35,10 @@ namespace ExploreGambia.API.Controllers
         public async Task<IActionResult> GetAllPayments([FromQuery] string? paymentMethod,
     [FromQuery] DateTime? paymentDateFrom,
     [FromQuery] DateTime? paymentDateTo,
-    [FromQuery] bool? isSuccessful, [FromQuery] string? sortBy, [FromQuery] bool? isAscending,
+    [FromQuery] PaymentStatus? status, [FromQuery] string? sortBy, [FromQuery] bool? isAscending,
     [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var payments = await paymentRepository.GetAllPaymentsAsync(paymentMethod, paymentDateFrom, paymentDateTo, isSuccessful, sortBy, isAscending ?? true, pageNumber, pageSize);
+            var payments = await paymentRepository.GetAllPaymentsAsync(paymentMethod, paymentDateFrom, paymentDateTo, status, sortBy, isAscending ?? true, pageNumber, pageSize);
 
             return Ok(mapper.Map<List<PaymentDto>>(payments));
         }
@@ -56,9 +60,7 @@ namespace ExploreGambia.API.Controllers
         //[Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> CreatePayment([FromBody] AddPaymentRequestDto addPaymentRequestDto)
         {
-            var payment = mapper.Map<Payment>(addPaymentRequestDto);
-
-            payment = await paymentRepository.CreatePaymentAsync(payment);
+            var payment = await paymentService.CreatePaymentAsync(addPaymentRequestDto);
 
             var paymentDto = mapper.Map<PaymentDto>(payment);
 
@@ -70,11 +72,18 @@ namespace ExploreGambia.API.Controllers
         //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdatePayment(Guid id, UpdatePaymentRequestDto updatePaymentRequestDto)
         {
-            var payment = mapper.Map<Payment>(updatePaymentRequestDto);
-
-            payment = await paymentRepository.UpdatePaymentAsync(id, payment);
+            var payment = await paymentService.UpdatePaymentAsync(id, updatePaymentRequestDto);
             
            
+            return Ok(mapper.Map<PaymentDto>(payment));
+        }
+
+        [HttpPost("{id:guid}/confirm")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ConfirmPayment([FromRoute] Guid id, [FromBody] ConfirmPaymentRequestDto confirmPaymentRequestDto)
+        {
+            var payment = await paymentService.ConfirmPaymentAsync(id, confirmPaymentRequestDto);
+
             return Ok(mapper.Map<PaymentDto>(payment));
         }
 
@@ -84,7 +93,8 @@ namespace ExploreGambia.API.Controllers
         //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBooking([FromRoute] Guid id)
         {
-            var payment = await paymentRepository.DeletePaymentAsync(id);
+            var payment = await paymentRepository.DeletePaymentAsync(id)
+                ?? throw new PaymentNotFoundException(id);
 
 
             // Log the successful deletion, including non-sensitive information

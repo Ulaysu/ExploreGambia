@@ -3,6 +3,7 @@ using AutoMapper;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Repositories;
+using ExploreGambia.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +18,13 @@ namespace ExploreGambia.API.Controllers
     public class BookingController : ControllerBase
     {
         private readonly IBookingRepository bookingRepository;
-        private readonly ITourRepository tourRepository;
+        private readonly IBookingService bookingService;
         private readonly IMapper mapper;
 
-        public BookingController(IBookingRepository bookingRepository, ITourRepository tourRepository, IMapper mapper)
+        public BookingController(IBookingRepository bookingRepository, IBookingService bookingService, IMapper mapper)
         {
             this.bookingRepository = bookingRepository;
-            this.tourRepository = tourRepository;
+            this.bookingService = bookingService;
             this.mapper = mapper;
         }
 
@@ -58,34 +59,7 @@ namespace ExploreGambia.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBooking([FromBody] AddBookingRequestDto addBookingRequestDto)
         {
-            // Validating the request
-            if (addBookingRequestDto == null || addBookingRequestDto.NumberOfPeople <= 0)
-            {
-                return BadRequest("Invalid booking request.");
-            }
-
-            // Checking if the tour exists
-            var tour = await tourRepository.GetTourById(addBookingRequestDto.TourId);
-            if (tour == null)
-            {
-                return NotFound("Tour not found.");
-            }
-
-            // Checking tour availability
-            if (addBookingRequestDto.NumberOfPeople > tour.MaxParticipants)
-            {
-                return BadRequest("The number of people exceeds the tour's maximum allowed participants.");
-            }
-
-            // Convert DTO to Domain Model using AutoMapper
-            var booking = mapper.Map<Booking>(addBookingRequestDto);
-            booking.BookingId = Guid.NewGuid(); // Assign a new BookingId
-            booking.BookingDate = DateTime.UtcNow;
-            booking.TotalAmount = tour.Price * addBookingRequestDto.NumberOfPeople; // Calculate cost
-            booking.Status = BookingStatus.Pending;
-
-            // Save to database
-            booking = await bookingRepository.CreateBookingAsync(booking);
+            var booking = await bookingService.CreateBookingAsync(addBookingRequestDto);
 
             // Convert to Response DTO using AutoMapper
             var bookingDto = mapper.Map<BookingDto>(booking);
@@ -99,9 +73,7 @@ namespace ExploreGambia.API.Controllers
         [Authorize(Roles = "User")]
          public async Task<IActionResult> UpdateBooking([FromRoute] Guid id, [FromBody] UpdateBookingRequestDto updateBookingRequestDto)
          {
-             var booking = mapper.Map<Booking>(updateBookingRequestDto);
-
-             booking = await bookingRepository.UpdateBookingAsync(id, booking);
+             var booking = await bookingService.UpdateBookingAsync(id, updateBookingRequestDto);
              if (booking == null)
              {
                 return NotFound("Could not update booking. Check if the Booking ID is correct and if the specified Tour ID exists.");

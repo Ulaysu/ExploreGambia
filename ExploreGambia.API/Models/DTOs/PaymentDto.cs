@@ -1,4 +1,4 @@
-﻿using ExploreGambia.API.Models.Domain;
+using ExploreGambia.API.Models.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExploreGambia.API.Models.DTOs
@@ -9,13 +9,15 @@ namespace ExploreGambia.API.Models.DTOs
 
         public BookingDto Booking { get; set; }
 
-        public string PaymentMethod { get; set; }
+        public string PaymentMethod { get; set; } = string.Empty;
 
         [Precision(18, 2)]
         public decimal Amount { get; set; }
 
         public DateTime PaymentDate { get; set; }
 
-        public bool IsSuccessful { get; set; }
+        public PaymentStatus Status { get; set; }
+
+        public string? ProviderReference { get; set; }
     }
 }

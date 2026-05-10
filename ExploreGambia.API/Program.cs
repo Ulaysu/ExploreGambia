@@ -4,6 +4,7 @@ using ExploreGambia.API.Data;
 using ExploreGambia.API.Mapping;
 using ExploreGambia.API.Middleware;
 using ExploreGambia.API.Repositories;
+using ExploreGambia.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -120,6 +121,8 @@ builder.Services.AddScoped<ITourGuideRepository, TourGuideRepository>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 builder.Services.AddIdentityCore<ApplicationUser>()
     .AddRoles<IdentityRole>()

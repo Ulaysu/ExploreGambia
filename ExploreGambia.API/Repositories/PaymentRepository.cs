@@ -24,17 +24,9 @@ namespace ExploreGambia.API.Repositories
             var existingBooking = await context.Bookings.FirstOrDefaultAsync(x => x.BookingId == payment.BookingId);
 
             if (existingBooking == null) throw new BookingNotFoundException(payment.BookingId);
-           
 
             await context.Payments.AddAsync(payment);
             await context.SaveChangesAsync();
-
-            // If payment is successful, update booking status
-            if (payment.IsSuccessful)
-            {
-                existingBooking.Status = BookingStatus.Confirmed;
-                await context.SaveChangesAsync();
-            }
 
             return payment;
         }
@@ -56,7 +48,7 @@ namespace ExploreGambia.API.Repositories
         public async Task<List<Payment>> GetAllPaymentsAsync(string? paymentMethod = null,
             DateTime? paymentDateFrom = null,
             DateTime? paymentDateTo = null,
-            bool? isSuccessful = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1,
+            PaymentStatus? status = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1,
             int pageSize = 10)
         {
             pageNumber = Math.Max(pageNumber, 1);
@@ -85,9 +77,9 @@ namespace ExploreGambia.API.Repositories
                 payments = payments.Where(p => p.PaymentDate <= paymentDateTo.Value.AddDays(1).AddTicks(-1)); // Inclusive
             }
 
-            if (isSuccessful.HasValue)
+            if (status.HasValue)
             {
-                payments = payments.Where(p => p.IsSuccessful == isSuccessful.Value);
+                payments = payments.Where(p => p.Status == status.Value);
             }
 
             var isSorted = false;
@@ -109,8 +101,8 @@ namespace ExploreGambia.API.Repositories
                         payments = isAscending ? payments.OrderBy(p => p.PaymentMethod) : payments.OrderByDescending(p => p.PaymentMethod);
                         isSorted = true;
                         break;
-                    case "issuccessful":
-                        payments = isAscending ? payments.OrderBy(p => p.IsSuccessful) : payments.OrderByDescending(p => p.IsSuccessful);
+                    case "status":
+                        payments = isAscending ? payments.OrderBy(p => p.Status) : payments.OrderByDescending(p => p.Status);
                         isSorted = true;
                         break;
                     default:
@@ -149,8 +141,22 @@ namespace ExploreGambia.API.Repositories
             existingPayment.BookingId = payment.BookingId;
             existingPayment.PaymentMethod = payment.PaymentMethod;
             existingPayment.Amount = payment.Amount;
-            existingPayment.PaymentDate = payment.PaymentDate;
-            existingPayment.IsSuccessful = payment.IsSuccessful;
+            existingPayment.ProviderReference = payment.ProviderReference;
+
+            await context.SaveChangesAsync();
+
+            return existingPayment;
+        }
+
+        public async Task<Payment?> UpdatePaymentStatusAsync(Guid id, PaymentStatus status, string? providerReference = null)
+        {
+            var existingPayment = await context.Payments.FirstOrDefaultAsync(x => x.PaymentId == id);
+
+            if (existingPayment == null) throw new PaymentNotFoundException(id);
+
+            existingPayment.Status = status;
+            existingPayment.ProviderReference = providerReference ?? existingPayment.ProviderReference;
+            existingPayment.PaymentDate = DateTime.UtcNow;
 
             await context.SaveChangesAsync();
 
