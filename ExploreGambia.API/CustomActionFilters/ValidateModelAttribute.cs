@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Logging;
-using Serilog; 
-using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Serilog.Core;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace ExploreGambia.API.CustomActionFilters
 {
@@ -16,35 +12,40 @@ namespace ExploreGambia.API.CustomActionFilters
         {
             _logger = logger;
         }
+
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (context.ModelState.IsValid == false)
+            if (!context.ModelState.IsValid)
             {
-                // Log the model state errors
-                if (!context.ModelState.IsValid) 
-                { 
-                    var errors = context.ModelState
-                        .Where(e => e.Value.Errors.Count > 0)
-                        .ToDictionary(k => k.Key, 
-                        v => v.Value.Errors.Select(e => e.ErrorMessage).ToArray());
+                var errorId = Guid.NewGuid();
+                var errors = context.ModelState
+                    .Where(entry => entry.Value?.Errors.Count > 0)
+                    .ToDictionary(
+                        entry => entry.Key,
+                        entry => entry.Value!.Errors
+                            .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage)
+                                ? "The input was not valid."
+                                : error.ErrorMessage)
+                            .ToArray());
 
-                    if (context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
-                    {
-                        _logger.LogWarning("Model validation failed for action '{ActionName}' in controller '{ControllerName}'. Errors: {@ValidationErrors}",
-                                            controllerActionDescriptor.ActionName,
-                                            context.Controller.GetType().Name,
-                                            errors);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Model validation failed for an unknown action in controller '{ControllerName}'. Errors: {@ValidationErrors}",
-                                            context.Controller.GetType().Name,
-                                            errors);
-                        
-                    }
+                var actionName = context.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor
+                    ? controllerActionDescriptor.ActionName
+                    : "Unknown";
 
-                }
-                context.Result = new BadRequestResult();
+                _logger.LogWarning(
+                    "Model validation failed for action '{ActionName}' in controller '{ControllerName}'. ErrorId: {ErrorId}. Errors: {@ValidationErrors}",
+                    actionName,
+                    context.Controller.GetType().Name,
+                    errorId,
+                    errors);
+
+                context.Result = new BadRequestObjectResult(new
+                {
+                    ErrorId = errorId,
+                    Code = "validation_failed",
+                    Message = "One or more validation errors occurred.",
+                    Details = errors
+                });
             }
         }
     }
