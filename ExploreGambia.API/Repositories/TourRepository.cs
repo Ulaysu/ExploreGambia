@@ -7,7 +7,7 @@ namespace ExploreGambia.API.Repositories
 {
     public class TourRepository : ITourRepository
     {
-        private const int MaxPageSize = 100;
+        private const int MaxPageSize = 10;
         private readonly ExploreGambiaDbContext context;
 
         public TourRepository(ExploreGambiaDbContext context)

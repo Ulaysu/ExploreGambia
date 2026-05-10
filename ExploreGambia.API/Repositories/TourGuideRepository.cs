@@ -7,7 +7,7 @@ namespace ExploreGambia.API.Repositories
 {
     public class TourGuideRepository : ITourGuideRepository
     {
-        private const int MaxPageSize = 100;
+        private const int MaxPageSize = 10;
         private readonly ExploreGambiaDbContext context;
         private readonly ILogger<TourGuideRepository> logger;
 

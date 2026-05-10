@@ -7,7 +7,7 @@ namespace ExploreGambia.API.Repositories
 {
     public class BookingRepository : IBookingRepository
     {
-        private const int MaxPageSize = 100;
+        private const int MaxPageSize = 10;
         private readonly ExploreGambiaDbContext context;
         private readonly ILogger<BookingRepository> logger;
 
