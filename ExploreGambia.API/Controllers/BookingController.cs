@@ -7,6 +7,7 @@ using ExploreGambia.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ExploreGambia.API.Controllers
 {
@@ -59,7 +60,12 @@ namespace ExploreGambia.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBooking([FromBody] AddBookingRequestDto addBookingRequestDto)
         {
-            var booking = await bookingService.CreateBookingAsync(addBookingRequestDto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User identity could not be determined.");
+
+            var booking = await bookingService.CreateBookingAsync(addBookingRequestDto, userId);
 
             // Convert to Response DTO using AutoMapper
             var bookingDto = mapper.Map<BookingDto>(booking);

@@ -19,7 +19,7 @@ namespace ExploreGambia.API.Services
             this.mapper = mapper;
         }
 
-        public async Task<Booking> CreateBookingAsync(AddBookingRequestDto request)
+        public async Task<Booking> CreateBookingAsync(AddBookingRequestDto request, string userId)
         {
             var tour = await tourRepository.GetTourById(request.TourId)
                 ?? throw new TourNotFoundException(request.TourId);
@@ -36,6 +36,7 @@ namespace ExploreGambia.API.Services
 
             var booking = mapper.Map<Booking>(request);
             booking.BookingId = Guid.NewGuid();
+            booking.UserId = userId;
             booking.BookingDate = DateTime.UtcNow;
             booking.TotalAmount = tour.Price * request.NumberOfPeople;
             booking.Status = BookingStatus.Pending;
