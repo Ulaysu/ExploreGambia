@@ -8,8 +8,9 @@ namespace ExploreGambia.API.Models.Domain
         [Key]
         public Guid BookingId { get; set; } // Primary Key
         public Guid TourId { get; set; } // Foreign Key (FK) to Tour
-        
-        
+        public string UserId { get; set; } = string.Empty; // FK to AspNetUsers
+
+
         public DateTime BookingDate { get; set; } = DateTime.UtcNow; // Timestamp
         public int NumberOfPeople { get; set; } // Number of participants
 
@@ -20,7 +21,9 @@ namespace ExploreGambia.API.Models.Domain
         public DateTime StatusUpdatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
-        public Tour Tour { get; set; } 
+        public Tour Tour { get; set; }
+
+        public ApplicationUser? User { get; set; }          // nav property (optional)
 
 
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
