@@ -116,9 +116,14 @@ namespace ExploreGambia.API.Repositories
 
         }
 
-       
+        public async Task<List<Booking>> GetBookingsByUserIdAsync(string userId)
+        {
+            return await context.Bookings.AsNoTracking().Include(b => b.Tour).Where(b => b.UserId == userId).ToListAsync();
+        }
 
-        
+
+
+
 
         // UPDATE
         public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)

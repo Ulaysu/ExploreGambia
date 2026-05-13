@@ -23,8 +23,6 @@ namespace ExploreGambia.API.Models.Domain
         // Navigation properties
         public Tour Tour { get; set; }
 
-        public ApplicationUser? User { get; set; }          // nav property (optional)
-
 
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }

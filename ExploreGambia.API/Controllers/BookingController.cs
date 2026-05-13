@@ -30,6 +30,20 @@ namespace ExploreGambia.API.Controllers
         }
 
         [Authorize(Roles = "User, Admin")]
+        [HttpGet("my-bookings")]
+        public async Task<IActionResult> GetMyBookings()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User identity could not be determined.");
+
+            var bookings = await bookingService.GetMyBookingsAsync(userId);
+
+            return Ok(mapper.Map<List<BookingDto>>(bookings));
+        }
+
+        [Authorize(Roles = "User, Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllBookings([FromQuery] BookingStatus? status,
     [FromQuery] DateTime? bookingDateFrom, [FromQuery] DateTime? bookingDateTo, [FromQuery] string? sortBy,

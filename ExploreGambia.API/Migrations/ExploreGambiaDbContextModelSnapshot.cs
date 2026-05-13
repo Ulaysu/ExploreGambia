@@ -47,6 +47,11 @@ namespace ExploreGambia.API.Migrations
                     b.Property<Guid>("TourId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("BookingId");
 
                     b.HasIndex("TourId");

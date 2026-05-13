@@ -7,5 +7,7 @@ namespace ExploreGambia.API.Services
     {
         Task<Booking> CreateBookingAsync(AddBookingRequestDto request, string userId);
         Task<Booking?> UpdateBookingAsync(Guid id, UpdateBookingRequestDto request);
+
+        Task<List<Booking>> GetMyBookingsAsync(string userId);
     }
 }

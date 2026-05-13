@@ -20,6 +20,10 @@ namespace ExploreGambia.API.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Booking>()
+                .Property(b => b.UserId)
+                .HasMaxLength(450); // match AspNetUsers Id column length, no FK
+
             // Tour <-> TourGuide (One-to-Many)
             modelBuilder.Entity<Tour>()
                 .HasOne(t => t.TourGuide)

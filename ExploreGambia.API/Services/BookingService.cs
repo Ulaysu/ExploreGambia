@@ -19,6 +19,11 @@ namespace ExploreGambia.API.Services
             this.mapper = mapper;
         }
 
+        public async Task<List<Booking>> GetMyBookingsAsync(string userId)
+        {
+            return await bookingRepository.GetBookingsByUserIdAsync(userId);
+        }
+
         public async Task<Booking> CreateBookingAsync(AddBookingRequestDto request, string userId)
         {
             var tour = await tourRepository.GetTourById(request.TourId)
