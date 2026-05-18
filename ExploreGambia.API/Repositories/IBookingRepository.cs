@@ -11,6 +11,8 @@ namespace ExploreGambia.API.Repositories
 
         Task<Booking?> GetBookingById(Guid id);
 
+        Task<Booking?> GetActiveBookingByUserAndTourAsync(string userId, Guid tourId);
+
 
         Task<Booking> CreateBookingAsync(Booking booking);
 

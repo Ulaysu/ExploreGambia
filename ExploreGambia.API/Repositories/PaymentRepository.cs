@@ -119,6 +119,11 @@ namespace ExploreGambia.API.Repositories
             return await payments.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
         }
 
+        public Task<List<Payment>> GetBookingsByUserIdAsync(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<Payment?> GetPaymentById(Guid id)
         {
             var payment = await context.Payments

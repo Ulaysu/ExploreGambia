@@ -39,6 +39,12 @@ namespace ExploreGambia.API.Services
                 throw new BusinessRuleException("The number of people exceeds the tour's maximum allowed participants.");
             }
 
+            // ✅ ADD THIS — prevent duplicate bookings
+            var existingBooking = await bookingRepository.GetActiveBookingByUserAndTourAsync(userId, request.TourId);
+            if (existingBooking != null)
+                throw new BusinessRuleException("You already have an active booking for this tour.");
+
+
             var booking = mapper.Map<Booking>(request);
             booking.BookingId = Guid.NewGuid();
             booking.UserId = userId;

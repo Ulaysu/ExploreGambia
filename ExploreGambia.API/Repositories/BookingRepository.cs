@@ -38,6 +38,17 @@ namespace ExploreGambia.API.Repositories
 
         }
 
+        public async Task<Booking?> GetActiveBookingByUserAndTourAsync(string userId, Guid tourId)
+        {
+            return await context.Bookings.Where(
+                b => b.UserId == userId
+                && b.TourId == tourId 
+                && b.Status != BookingStatus.Completed
+                && b.Status != BookingStatus.Canceled
+
+                ).FirstOrDefaultAsync();
+        }
+
         public async Task<List<Booking>> GetAllBookingsAsync(BookingStatus? status = null, 
             DateTime? bookingDateFrom = null, DateTime? bookingDateTo = null, string? sortBy = null, 
             bool isAscending = true, int pageNumber = 1, int pageSize = 10)
@@ -118,7 +129,7 @@ namespace ExploreGambia.API.Repositories
 
         public async Task<List<Booking>> GetBookingsByUserIdAsync(string userId)
         {
-            return await context.Bookings.AsNoTracking().Include(b => b.Tour).Where(b => b.UserId == userId).ToListAsync();
+            return await context.Bookings.AsNoTracking().Include(b => b.Tour).OrderByDescending(b => b.BookingDate).Where(b => b.UserId == userId).ToListAsync();
         }
 
 
