@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
-using ExploreGambia.API.Repositories;
+using ExploreGambia.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

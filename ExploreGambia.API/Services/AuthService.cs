@@ -1,9 +1,12 @@
+using Azure.Core;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
+using ExploreGambia.API.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
+using System.Security.Claims;
 
-namespace ExploreGambia.API.Repositories
+namespace ExploreGambia.API.Services
 {
     public class AuthService : IAuthService
     {
@@ -111,6 +114,37 @@ namespace ExploreGambia.API.Repositories
             }
 
             return new LoginResponseDto { JwtToken = string.Empty, Error = "Email or password incorrect" };
+        }
+
+        public async Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
+        {
+            var principal = tokenRepository.GetPrincipalFromExpiredToken(request.AccessToken);
+            var email = principal.FindFirstValue(ClaimTypes.Email);
+
+            var user = await userManager.FindByEmailAsync(email!)
+                ?? throw new UnauthorizedAccessException("Invalid token.");
+
+            if (user.RefreshToken != request.RefreshToken)
+                throw new UnauthorizedAccessException("Invalid refresh token.");
+
+            if (user.RefreshTokenExpiryTime < DateTime.UtcNow)
+                throw new UnauthorizedAccessException("Refresh token has expired. Please log in again.");
+
+            var roles = await userManager.GetRolesAsync(user);
+            var newAccessToken = tokenRepository.CreateJWTToken(user, roles.ToList());
+            var newRefreshToken = tokenRepository.GenerateRefreshToken();
+
+            // ✅ Rotate the refresh token
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
+            await userManager.UpdateAsync(user);
+
+            return new RefreshTokenResponseDto
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken
+            };
+
         }
     }
 }
