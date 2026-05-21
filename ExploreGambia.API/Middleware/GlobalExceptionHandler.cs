@@ -46,6 +46,12 @@ namespace ExploreGambia.API.Middleware
                     errorCode = "business_rule_violation";
                     errorMessage = ex.Message;
                 }
+                else if (ex is UnauthorizedAccessException)
+                {
+                    statusCode = HttpStatusCode.Forbidden;
+                    errorCode = "forbidden";
+                    errorMessage = ex.Message;
+                }
 
                 httpContext.Response.StatusCode = (int)statusCode;
                 httpContext.Response.ContentType = "application/json";

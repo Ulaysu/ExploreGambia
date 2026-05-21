@@ -8,6 +8,9 @@ using ExploreGambia.API.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Text.Json;
+using ExploreGambia.API.Services.Payments;
 
 namespace ExploreGambia.API.Controllers
 {
@@ -85,6 +88,78 @@ namespace ExploreGambia.API.Controllers
             var payment = await paymentService.ConfirmPaymentAsync(id, confirmPaymentRequestDto);
 
             return Ok(mapper.Map<PaymentDto>(payment));
+        }
+
+        [Authorize(Roles = "User,Admin")]
+        [HttpPost("bookings/{bookingId:guid}/modempay/inline")]
+        public async Task<IActionResult> PrepareModemPayInlinePayment(
+            [FromRoute] Guid bookingId,
+            [FromBody] ModemPayInlinePaymentRequestDto request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized("User identity could not be determined.");
+            }
+
+            var customerContext = new ModemPayCustomerContextDto
+            {
+                UserId = userId,
+                IsAdmin = User.IsInRole("Admin"),
+                Email = User.FindFirstValue(ClaimTypes.Email),
+                Name = User.Identity?.Name
+            };
+
+            var checkout = await paymentService.PrepareModemPayInlinePaymentAsync(bookingId, request, customerContext);
+            return Ok(checkout);
+        }
+
+        [Authorize(Roles = "User,Admin")]
+        [HttpPost("modempay/verify")]
+        public async Task<IActionResult> VerifyModemPayPayment([FromBody] VerifyModemPayPaymentRequestDto request, CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized("User identity could not be determined.");
+            }
+
+            var customerContext = new ModemPayCustomerContextDto
+            {
+                UserId = userId,
+                IsAdmin = User.IsInRole("Admin"),
+                Email = User.FindFirstValue(ClaimTypes.Email),
+                Name = User.Identity?.Name
+            };
+
+            var payment = await paymentService.VerifyModemPayPaymentAsync(request, customerContext, cancellationToken);
+            return Ok(mapper.Map<PaymentDto>(payment));
+        }
+
+        [AllowAnonymous]
+        [HttpPost("modempay/webhook")]
+        public async Task<IActionResult> HandleModemPayWebhook([FromServices] IModemPayClient modemPayClient)
+        {
+            using var reader = new StreamReader(Request.Body);
+            var rawPayload = await reader.ReadToEndAsync();
+            var signature = Request.Headers["x-modem-signature"].FirstOrDefault();
+
+            if (!modemPayClient.IsValidWebhookSignature(rawPayload, signature))
+            {
+                return BadRequest(new { Message = "Invalid Modem Pay signature." });
+            }
+
+            var webhookEvent = JsonSerializer.Deserialize<ModemPayWebhookEvent>(
+                rawPayload,
+                new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+            if (webhookEvent == null || string.IsNullOrWhiteSpace(webhookEvent.Event))
+            {
+                return BadRequest(new { Message = "Invalid Modem Pay webhook payload." });
+            }
+
+            await paymentService.ProcessModemPayWebhookAsync(webhookEvent);
+            return Ok(new { Received = true });
         }
 
         // Delete Payment

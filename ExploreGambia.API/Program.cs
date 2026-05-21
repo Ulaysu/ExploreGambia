@@ -17,6 +17,7 @@ using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.JsonWebTokens;
 using ExploreGambia.API.CustomActionFilters;
 using ExploreGambia.API.Models.Domain;
+using ExploreGambia.API.Services.Payments;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -123,6 +124,34 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+builder.Services.Configure<ModemPayOptions>(options =>
+{
+    options.PublicKey = Environment.GetEnvironmentVariable("MODEMPAY_PUBLIC_KEY")
+        ?? builder.Configuration["ModemPay:PublicKey"]
+        ?? string.Empty;
+    options.SecretKey = Environment.GetEnvironmentVariable("MODEMPAY_SECRET_KEY")
+        ?? builder.Configuration["ModemPay:SecretKey"]
+        ?? string.Empty;
+    options.WebhookSecret = Environment.GetEnvironmentVariable("MODEMPAY_WEBHOOK_SECRET")
+        ?? builder.Configuration["ModemPay:WebhookSecret"]
+        ?? string.Empty;
+    options.Currency = Environment.GetEnvironmentVariable("MODEMPAY_CURRENCY")
+        ?? builder.Configuration["ModemPay:Currency"]
+        ?? "GMD";
+    options.BaseUrl = Environment.GetEnvironmentVariable("MODEMPAY_BASE_URL")
+        ?? builder.Configuration["ModemPay:BaseUrl"]
+        ?? "https://api.modempay.com";
+    options.TransactionPathTemplate = Environment.GetEnvironmentVariable("MODEMPAY_TRANSACTION_PATH_TEMPLATE")
+        ?? builder.Configuration["ModemPay:TransactionPathTemplate"]
+        ?? "/transactions/{transactionId}";
+});
+
+builder.Services.AddHttpClient<IModemPayClient, ModemPayClient>((serviceProvider, client) =>
+{
+    var options = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<ModemPayOptions>>().Value;
+    client.BaseAddress = new Uri(options.BaseUrl);
+});
 
 builder.Services.AddIdentityCore<ApplicationUser>()
     .AddRoles<IdentityRole>()

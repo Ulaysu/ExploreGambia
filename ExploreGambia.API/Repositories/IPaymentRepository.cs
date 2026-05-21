@@ -12,6 +12,8 @@ namespace ExploreGambia.API.Repositories
             int pageSize = 10);
         Task<Payment?> GetPaymentById(Guid id);
         Task<List<Payment>> GetBookingsByUserIdAsync(string userId);
+        Task<Payment?> GetLatestPaymentByBookingAndMethodAsync(Guid bookingId, string paymentMethod);
+        Task<Payment?> GetPaymentByProviderReferenceAsync(string providerReference);
         Task<Payment?> UpdatePaymentAsync(Guid id, Payment payment);
         Task<Payment?> UpdatePaymentStatusAsync(Guid id, PaymentStatus status, string? providerReference = null);
         Task<Payment?> DeletePaymentAsync(Guid id);

@@ -136,6 +136,24 @@ namespace ExploreGambia.API.Repositories
             return payment;
         }
 
+        public async Task<Payment?> GetLatestPaymentByBookingAndMethodAsync(Guid bookingId, string paymentMethod)
+        {
+            return await context.Payments
+                .Include(p => p.Booking)
+                .ThenInclude(b => b.Tour)
+                .Where(p => p.BookingId == bookingId && p.PaymentMethod == paymentMethod)
+                .OrderByDescending(p => p.PaymentDate)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Payment?> GetPaymentByProviderReferenceAsync(string providerReference)
+        {
+            return await context.Payments
+                .Include(p => p.Booking)
+                .ThenInclude(b => b.Tour)
+                .FirstOrDefaultAsync(p => p.ProviderReference == providerReference);
+        }
+
         // UPDATE 
         public async Task<Payment?> UpdatePaymentAsync(Guid id, Payment payment)
         {
