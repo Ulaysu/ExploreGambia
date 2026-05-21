@@ -102,5 +102,14 @@ namespace ExploreGambia.API.Controllers
 
             return Ok(response);
         }
+
+
+        [HttpPost("refresh-token")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
+        {
+            var result = await authService.RefreshTokenAsync(request);
+            return Ok(result);
+        }
     }
 }

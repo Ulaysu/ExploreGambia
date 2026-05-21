@@ -109,7 +109,17 @@ namespace ExploreGambia.API.Services
                     var roles = await userManager.GetRolesAsync(user);
                     var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList());
 
-                    return new LoginResponseDto { JwtToken = jwtToken };
+                    // THIS is where GenerateRefreshToken gets called
+                    var refreshToken = tokenRepository.GenerateRefreshToken();
+
+                    // Stored in the database against the user
+                    user.RefreshToken = refreshToken;
+                    user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
+                    await userManager.UpdateAsync(user);
+
+                    return new LoginResponseDto { 
+                        JwtToken = jwtToken,
+                        RefreshToken = refreshToken};
                 }
             }
 
