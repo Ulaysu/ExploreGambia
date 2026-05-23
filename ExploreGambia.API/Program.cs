@@ -1,24 +1,25 @@
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using ExploreGambia.API.CustomActionFilters;
 using ExploreGambia.API.Data;
 using ExploreGambia.API.Mapping;
 using ExploreGambia.API.Middleware;
+using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Repositories;
 using ExploreGambia.API.Services;
+using ExploreGambia.API.Services.Payments;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Npgsql;
 using Serilog;
 using System;
 using System.Text;
 using System.Text.Json.Serialization;
-using Microsoft.IdentityModel.JsonWebTokens;
-using ExploreGambia.API.CustomActionFilters;
-using ExploreGambia.API.Models.Domain;
-using ExploreGambia.API.Services.Payments;
-using Npgsql;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -178,6 +179,8 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
 });
+
+builder.Services.AddDataProtection().PersistKeysToDbContext<ExploreGambiaAuthDbContext>();
 
 
 var dbConnection = ResolvePostgresConnectionString(builder.Configuration);

@@ -1,17 +1,20 @@
 ﻿using ExploreGambia.API.Models.Domain;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExploreGambia.API.Data
 {
-    public class ExploreGambiaAuthDbContext : IdentityDbContext<ApplicationUser>
+    public class ExploreGambiaAuthDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionKeyContext
     {
+
         public ExploreGambiaAuthDbContext(DbContextOptions<ExploreGambiaAuthDbContext> options)
             : base(options)
         {
         }
 
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

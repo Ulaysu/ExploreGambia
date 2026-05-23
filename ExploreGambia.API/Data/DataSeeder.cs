@@ -21,25 +21,29 @@ namespace ExploreGambia.API.Data
 
             await EnsureDatabaseReadyAsync(_context);
             await EnsureDatabaseReadyAsync(_authContext);
-            await SeedTourGuides();
-            await SeedTours();
-            await SeedBookings();
-            await SeedPayments();
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                await SeedTourGuides();
+                await SeedTours();
+                await SeedBookings();
+                await SeedPayments();
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
 
 
         }
 
         private static async Task EnsureDatabaseReadyAsync(DbContext dbContext)
         {
-           var hasMigrations = dbContext.Database.GetMigrations().Any();
-
-            if (hasMigrations)
-            {
-                await dbContext.Database.MigrateAsync();
-                return;
-            }
-
-            await dbContext.Database.EnsureCreatedAsync();
+            await dbContext.Database.MigrateAsync();
         }
 
         private async Task SeedTourGuides()
