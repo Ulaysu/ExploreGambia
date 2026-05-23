@@ -18,6 +18,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using ExploreGambia.API.CustomActionFilters;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Services.Payments;
+using Npgsql;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -179,10 +180,11 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 
-var dbConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+var dbConnection = ResolvePostgresConnectionString(builder.Configuration);
 if (string.IsNullOrWhiteSpace(dbConnection))
 {
-    throw new InvalidOperationException("ConnectionStrings:DefaultConnection is missing.");
+    throw new InvalidOperationException(
+        "PostgreSQL connection is missing. Configure ConnectionStrings__DefaultConnection, DATABASE_URL, or PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD.");
 }
 
 if (!builder.Environment.IsDevelopment() &&
@@ -192,6 +194,8 @@ if (!builder.Environment.IsDevelopment() &&
     throw new InvalidOperationException(
         "Production database connection is pointing to localhost. Configure ConnectionStrings__DefaultConnection in Railway.");
 }
+
+ValidatePostgresConnectionString(dbConnection);
 
 // Add DbContext
 builder.Services.AddDbContext<ExploreGambiaDbContext>(options => 
@@ -291,4 +295,78 @@ try
 catch (Exception ex)
 {
     Console.WriteLine($"Fatal error: {ex.Message}\n{ex.StackTrace}");
+}
+
+static string? ResolvePostgresConnectionString(IConfiguration configuration)
+{
+    var configuredConnection = configuration.GetConnectionString("DefaultConnection");
+    if (!string.IsNullOrWhiteSpace(configuredConnection))
+    {
+        return configuredConnection;
+    }
+
+    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+    if (!string.IsNullOrWhiteSpace(databaseUrl) &&
+        Uri.TryCreate(databaseUrl, UriKind.Absolute, out var databaseUri))
+    {
+        var userInfo = databaseUri.UserInfo.Split(':', 2);
+        var builder = new NpgsqlConnectionStringBuilder
+        {
+            Host = databaseUri.Host,
+            Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
+            Database = databaseUri.AbsolutePath.TrimStart('/'),
+            Username = Uri.UnescapeDataString(userInfo.ElementAtOrDefault(0) ?? string.Empty),
+            Password = Uri.UnescapeDataString(userInfo.ElementAtOrDefault(1) ?? string.Empty),
+            SslMode = SslMode.Require
+        };
+
+        return builder.ConnectionString;
+    }
+
+    var host = Environment.GetEnvironmentVariable("PGHOST");
+    var database = Environment.GetEnvironmentVariable("PGDATABASE");
+    var username = Environment.GetEnvironmentVariable("PGUSER");
+    var password = Environment.GetEnvironmentVariable("PGPASSWORD");
+
+    if (string.IsNullOrWhiteSpace(host) ||
+        string.IsNullOrWhiteSpace(database) ||
+        string.IsNullOrWhiteSpace(username) ||
+        string.IsNullOrWhiteSpace(password))
+    {
+        return null;
+    }
+
+    var portValue = Environment.GetEnvironmentVariable("PGPORT");
+    var port = int.TryParse(portValue, out var parsedPort) ? parsedPort : 5432;
+
+    return new NpgsqlConnectionStringBuilder
+    {
+        Host = host,
+        Port = port,
+        Database = database,
+        Username = username,
+        Password = password,
+        SslMode = SslMode.Require
+    }.ConnectionString;
+}
+
+static void ValidatePostgresConnectionString(string connectionString)
+{
+    NpgsqlConnectionStringBuilder builder;
+    try
+    {
+        builder = new NpgsqlConnectionStringBuilder(connectionString);
+    }
+    catch (Exception ex)
+    {
+        throw new InvalidOperationException(
+            "PostgreSQL connection string is invalid. Use Host=...;Port=...;Database=...;Username=...;Password=... format or set DATABASE_URL.",
+            ex);
+    }
+
+    if (string.IsNullOrWhiteSpace(builder.Host))
+    {
+        throw new InvalidOperationException(
+            "PostgreSQL connection string is missing Host. Check the Railway ConnectionStrings__DefaultConnection variable.");
+    }
 }
