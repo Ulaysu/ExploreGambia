@@ -173,13 +173,15 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 
-
+var dbConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 // Add DbContext
 builder.Services.AddDbContext<ExploreGambiaDbContext>(options => 
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+options.UseNpgsql(
+    dbConnection, npsql => npsql.MigrationsHistoryTable("__EFMigrationsHistory_App")));
  
 builder.Services.AddDbContext<ExploreGambiaAuthDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection")));
+    options.UseNpgsql(
+    dbConnection, npsql => npsql.MigrationsHistoryTable("__EFMigrationsHistory_Auth ")));
 
 // Bind environment variables
 builder.Configuration.AddEnvironmentVariables();

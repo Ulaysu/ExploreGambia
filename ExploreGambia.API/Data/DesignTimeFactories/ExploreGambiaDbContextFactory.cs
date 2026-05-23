@@ -13,7 +13,8 @@ namespace ExploreGambia.API.Data.DesignTimeFactories
                 .Build();
 
             var optionsBuilder = new DbContextOptionsBuilder<ExploreGambiaDbContext>();
-            optionsBuilder.UseSqlServer(config.GetConnectionString("DefaultConnection"));
+            optionsBuilder.UseNpgsql(config.GetConnectionString("DefaultConnection"),
+                 npsql => npsql.MigrationsHistoryTable("__EFMigrationsHistory_App"));
 
             return new ExploreGambiaDbContext(optionsBuilder.Options);
         }
