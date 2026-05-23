@@ -22,6 +22,12 @@ using ExploreGambia.API.Services.Payments;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+
 // Add services to the container.
 
 // Configure Serilog
@@ -174,6 +180,19 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 
 var dbConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(dbConnection))
+{
+    throw new InvalidOperationException("ConnectionStrings:DefaultConnection is missing.");
+}
+
+if (!builder.Environment.IsDevelopment() &&
+    (dbConnection.Contains("localhost", StringComparison.OrdinalIgnoreCase) ||
+     dbConnection.Contains("127.0.0.1", StringComparison.OrdinalIgnoreCase)))
+{
+    throw new InvalidOperationException(
+        "Production database connection is pointing to localhost. Configure ConnectionStrings__DefaultConnection in Railway.");
+}
+
 // Add DbContext
 builder.Services.AddDbContext<ExploreGambiaDbContext>(options => 
 options.UseNpgsql(
@@ -181,10 +200,7 @@ options.UseNpgsql(
  
 builder.Services.AddDbContext<ExploreGambiaAuthDbContext>(options =>
     options.UseNpgsql(
-    dbConnection, npsql => npsql.MigrationsHistoryTable("__EFMigrationsHistory_Auth ")));
-
-// Bind environment variables
-builder.Configuration.AddEnvironmentVariables();
+    dbConnection, npsql => npsql.MigrationsHistoryTable("__EFMigrationsHistory_Auth")));
 
 // Read the secret key from environment variable
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
