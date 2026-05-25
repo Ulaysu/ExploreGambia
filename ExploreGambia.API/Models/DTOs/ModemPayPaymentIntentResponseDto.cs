@@ -2,7 +2,7 @@
 
 namespace ExploreGambia.API.Models.DTOs
 {
-    public class PaymentIntentResponseDto
+    public class ModemPayPaymentIntentResponseDto
     {
         [JsonPropertyName("payment_intent_id")]
         public string PaymentIntentId { get; set; } = string.Empty;

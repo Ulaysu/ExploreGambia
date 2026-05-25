@@ -2,7 +2,7 @@
 
 namespace ExploreGambia.API.Models.DTOs
 {
-    public class PaymentInentRequestDto
+    public class ModemPayPaymentInentRequestDto
     {
         [JsonPropertyName("amount")]
         public decimal Amount { get; set; }
