@@ -7,6 +7,6 @@ namespace ExploreGambia.API.Services.Payments
         public string WebhookSecret { get; set; } = string.Empty;
         public string Currency { get; set; } = "GMD";
         public string BaseUrl { get; set; } = "https://api.modempay.com";
-        public string TransactionPathTemplate { get; set; } = "/transactions/{transactionId}";
+        public string TransactionPathTemplate { get; set; } = "/v1/transactions/{transactionId}";
     }
 }

@@ -17,6 +17,13 @@ namespace ExploreGambia.API.Services
             VerifyModemPayPaymentRequestDto request,
             ModemPayCustomerContextDto customerContext,
             CancellationToken cancellationToken = default);
+
+        Task<ModemPayPaymentIntentResponseDto>
+    CreateModemPayPaymentIntentAsync(
+        Guid bookingId,
+        CreateModemPayIntentRequestDto request,
+        ModemPayCustomerContextDto customerContext,
+        CancellationToken cancellationToken = default);
         Task ProcessModemPayWebhookAsync(ModemPayWebhookEvent webhookEvent);
         Task<Payment?> UpdatePaymentAsync(Guid id, UpdatePaymentRequestDto request);
     }

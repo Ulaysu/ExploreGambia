@@ -288,6 +288,84 @@ namespace ExploreGambia.API.Services
             }
         }
 
+        public async Task<ModemPayPaymentIntentResponseDto> CreateModemPayPaymentIntentAsync(
+        Guid bookingId, CreateModemPayIntentRequestDto request, ModemPayCustomerContextDto customerContext,
+        CancellationToken cancellationToken = default)
+        {
+            EnsureModemPayConfigured(true);
+
+            var booking =
+                await bookingRepository.GetBookingById(bookingId)
+                ?? throw new BookingNotFoundException(bookingId);
+
+            if (!customerContext.IsAdmin &&
+                booking.UserId != customerContext.UserId)
+            {
+                throw new UnauthorizedAccessException(
+                    "You cannot pay for another user's booking.");
+            }
+
+            EnsureBookingCanAcceptPayment(booking);
+
+            var payment =
+                await paymentRepository
+                .GetLatestPaymentByBookingAndMethodAsync(
+                    booking.BookingId,
+                    ModemPayCardPaymentMethod);
+
+            if (payment == null ||
+                payment.Status == PaymentStatus.Failed ||
+                payment.Status == PaymentStatus.Canceled)
+            {
+                payment = await paymentRepository.CreatePaymentAsync(
+                    new Payment
+                    {
+                        PaymentId = Guid.NewGuid(),
+                        BookingId = booking.BookingId,
+                        Amount = booking.TotalAmount,
+                        PaymentDate = DateTime.UtcNow,
+                        PaymentMethod = ModemPayCardPaymentMethod,
+                        Status = PaymentStatus.Pending
+                    });
+            }
+
+            if (payment.Status == PaymentStatus.Succeeded)
+            {
+                throw new BusinessRuleException(
+                    "Booking already paid.");
+            }
+
+            var modemPayRequest =
+                new ModemPayPaymentInentRequestDto
+                {
+                    Amount = booking.TotalAmount,
+                    Currency = modemPayOptions.Currency,
+
+                    ReturnUrl = request.ReturnUrl,
+                    CancelUrl = request.CancelUrl,
+
+                    Metadata = new Dictionary<string, string>
+                    {
+                        ["paymentId"] = payment.PaymentId.ToString(),
+                        ["bookingId"] = booking.BookingId.ToString(),
+                        ["userId"] = customerContext.UserId
+                    }
+                };
+
+            var response =
+                await modemPayClient.CreatePaymentIntentAsync(
+                    modemPayRequest,
+                    cancellationToken);
+
+            if (response == null)
+            {
+                throw new BusinessRuleException(
+                    "Failed to create ModemPay payment intent.");
+            }
+
+            return response;
+        }
+
         private static string? GetProviderReference(ModemPayTransaction transaction)
         {
             return FirstNonEmpty(transaction.Id, transaction.TransactionReference, transaction.PaymentIntentId);
