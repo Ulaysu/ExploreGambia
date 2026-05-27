@@ -162,6 +162,38 @@ namespace ExploreGambia.API.Controllers
             return Ok(new { Received = true });
         }
 
+        [Authorize(Roles = "User,Admin")]
+        [HttpPost("bookings/{bookingId:guid}/modempay/intent")]
+        public async Task<IActionResult> CreateModemPayIntent([FromRoute] Guid bookingId,[FromBody] CreateModemPayIntentRequestDto request,
+        CancellationToken cancellationToken)
+        {
+            var userId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
+
+            var customerContext =
+                new ModemPayCustomerContextDto
+                {
+                    UserId = userId,
+                    IsAdmin = User.IsInRole("Admin"),
+                    Email = User.FindFirstValue(ClaimTypes.Email),
+                    Name = User.Identity?.Name
+                };
+
+            var response =
+                await paymentService.CreateModemPayPaymentIntentAsync(
+                    bookingId,
+                    request,
+                    customerContext,
+                    cancellationToken);
+
+            return Ok(response);
+        }
+
         // Delete Payment
         [HttpDelete]
         [Route("{id:Guid}")]

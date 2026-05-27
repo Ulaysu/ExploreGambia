@@ -288,8 +288,11 @@ namespace ExploreGambia.API.Services
             }
         }
 
-        public async Task<ModemPayPaymentIntentResponseDto> CreateModemPayPaymentIntentAsync(
-        Guid bookingId, CreateModemPayIntentRequestDto request, ModemPayCustomerContextDto customerContext,
+        public async Task<ModemPayPaymentIntentResponseDto>
+    CreateModemPayPaymentIntentAsync(
+        Guid bookingId,
+        CreateModemPayIntentRequestDto request,
+        ModemPayCustomerContextDto customerContext,
         CancellationToken cancellationToken = default)
         {
             EnsureModemPayConfigured(true);

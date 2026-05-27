@@ -11,16 +11,16 @@ namespace ExploreGambia.API.Models.DTOs
         public string IntentSecret { get; set; } = string.Empty;
 
         [JsonPropertyName("payment_link")]
-        public string PaymmentLink {  get; set; } = string.Empty;
+        public string PaymentLink {  get; set; } = string.Empty;
 
         [JsonPropertyName("amount")]
-        public string Amount { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
 
         [JsonPropertyName("currency")]
         public string Currency { get; set; } = string.Empty;
 
         [JsonPropertyName("status")]
-        public string Status { get; set; } = string.Empty;
+        public string Status { get; set; }
 
     }
 }

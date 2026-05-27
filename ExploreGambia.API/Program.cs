@@ -18,6 +18,7 @@ using Microsoft.OpenApi.Models;
 using Npgsql;
 using Serilog;
 using System;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -35,7 +36,7 @@ if (!string.IsNullOrWhiteSpace(port))
 // Configure Serilog
 var logger = new LoggerConfiguration()
     .WriteTo.Console()
-    .WriteTo.File("Logs/ExploreGambia_Log.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.File("Logs/ExploreGambia_Log.txt", rollingInterval: RollingInterval.Minute)
     .MinimumLevel.Information()
     .CreateLogger();
 
@@ -158,8 +159,21 @@ builder.Services.Configure<ModemPayOptions>(options =>
 
 builder.Services.AddHttpClient<IModemPayClient, ModemPayClient>((serviceProvider, client) =>
 {
-    var options = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<ModemPayOptions>>().Value;
-    client.BaseAddress = new Uri(options.BaseUrl);
+    var options =
+        serviceProvider
+            .GetRequiredService<Microsoft.Extensions.Options.IOptions<ModemPayOptions>>()
+            .Value;
+
+    client.BaseAddress =
+        new Uri(options.BaseUrl);
+
+    client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue(
+            "Bearer",
+            options.SecretKey);
+
+    client.DefaultRequestHeaders.Accept.Add(
+        new MediaTypeWithQualityHeaderValue("application/json"));
 });
 
 builder.Services.AddIdentityCore<ApplicationUser>()

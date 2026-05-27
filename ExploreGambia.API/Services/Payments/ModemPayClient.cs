@@ -1,9 +1,10 @@
+using ExploreGambia.API.Exceptions;
+using ExploreGambia.API.Models.DTOs;
+using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using ExploreGambia.API.Models.DTOs;
-using Microsoft.Extensions.Options;
 
 namespace ExploreGambia.API.Services.Payments
 {
@@ -62,37 +63,69 @@ namespace ExploreGambia.API.Services.Payments
                 && CryptographicOperations.FixedTimeEquals(leftBytes, rightBytes);
         }
 
-        public async Task<ModemPayPaymentIntentResponseDto?> CreatePaymentIntentAsync(ModemPayPaymentInentRequestDto request, CancellationToken cancellationToken = default)
-        {
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/v1/payments");
+        
 
-            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", options.SecretKey);
-
-            httpRequest.Content = new StringContent(
-             JsonSerializer.Serialize(new
-               {
-                   data = request
-               }),
-               Encoding.UTF8,
-               "application/json");
-
-            using var response = await httpClient.SendAsync(httpRequest, cancellationToken);
-
-            var responseContent =
-        await response.Content.ReadAsStringAsync(cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
+public async Task<ModemPayPaymentIntentResponseDto>
+    CreatePaymentIntentAsync(
+        ModemPayPaymentInentRequestDto request,
+        CancellationToken cancellationToken = default)
+    {
+        var payload =
+            new ModemPayCreatePaymentWrapperDto
             {
-                throw new Exception(
-                    $"ModemPay Error: {response.StatusCode} - {responseContent}");
-            }
+                Data = request
+            };
 
-            return JsonSerializer.Deserialize<ModemPayPaymentIntentResponseDto>(
-                responseContent,
-                JsonOptions);
+        var json =
+            JsonSerializer.Serialize(payload);
 
+        var content =
+            new StringContent(
+                json,
+                Encoding.UTF8,
+                "application/json");
 
+        var response =
+            await httpClient.PostAsync(
+                "/v1/payments",
+                content,
+                cancellationToken);
 
+        var responseContent =
+            await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new BusinessRuleException(
+                $"ModemPay error: {responseContent}");
         }
+
+        var options =
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+        var apiResponse =
+            JsonSerializer.Deserialize<ModemPayApiResponseDto>(
+                responseContent,
+                options);
+
+        if (apiResponse == null)
+        {
+            throw new BusinessRuleException(
+                "Unable to deserialize ModemPay response.");
+        }
+
+        if (!apiResponse.Status)
+        {
+            throw new BusinessRuleException(
+                apiResponse.Message);
+        }
+
+        return apiResponse.Data;
     }
+    
+
+}
 }

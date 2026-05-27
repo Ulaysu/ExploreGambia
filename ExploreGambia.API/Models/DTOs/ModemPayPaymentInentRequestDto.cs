@@ -17,15 +17,9 @@ namespace ExploreGambia.API.Models.DTOs
         public string CancelUrl { get; set; } = string.Empty;
 
         [JsonPropertyName("metadata")]
-        public Dictionary<string, string> Metadata { get; set; } = new();
+        public Dictionary<string, string> Metadata { get; set; } = [];
 
-        [JsonPropertyName("network")]
-        public string? Network { get; set; }
-
-        [JsonPropertyName("account_number")]
-        public string? AccountNumber { get; set; }
-
-        [JsonPropertyName("skip_url_validation")]
-        public bool SkipUrlValidation { get; set; } = false;
+        [JsonPropertyName("from_sdk")]
+        public bool FromSdk { get; set; } = false;
     }
 }
