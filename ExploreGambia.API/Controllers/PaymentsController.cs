@@ -23,14 +23,16 @@ namespace ExploreGambia.API.Controllers
         private readonly IPaymentService paymentService;
         private readonly IMapper mapper;
         private readonly ILogger<PaymentsController> logger;
+        private readonly IStripePaymentService stripePaymentService;
 
-        public PaymentsController(IPaymentRepository paymentRepository, IPaymentService paymentService, IMapper mapper,
+        public PaymentsController(IPaymentRepository paymentRepository, IPaymentService paymentService, IStripePaymentService stripePaymentService, IMapper mapper,
             ILogger<PaymentsController> logger)
         {
             this.paymentRepository = paymentRepository;
             this.paymentService = paymentService;
             this.mapper = mapper;
             this.logger = logger;
+            this.stripePaymentService = stripePaymentService;
         }
 
         [HttpGet]
@@ -214,5 +216,32 @@ namespace ExploreGambia.API.Controllers
 
 
         }
+
+
+        [Authorize(Roles = "User,Admin")]
+        [HttpPost("bookings/{bookingId:guid}/stripe/checkout")]
+        public async Task<IActionResult>
+    CreateStripeCheckout(
+        [FromRoute] Guid bookingId,
+        [FromBody] CreateStripeCheckoutRequestDto request)
+        {
+            var userId =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
+
+            var response =
+                await stripePaymentService
+                    .CreateCheckoutSessionAsync(
+                        bookingId,
+                        userId,
+                        request);
+
+            return Ok(response);
+        }
     }
+
 }

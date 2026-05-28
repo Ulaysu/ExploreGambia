@@ -21,6 +21,8 @@ using System;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Serialization;
+using Stripe;
+using ExploreGambia.API.Models.Configurations;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -134,6 +136,7 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IStripePaymentService, StripePaymentService>();
 
 builder.Services.Configure<ModemPayOptions>(options =>
 {
@@ -175,6 +178,37 @@ builder.Services.AddHttpClient<IModemPayClient, ModemPayClient>((serviceProvider
     client.DefaultRequestHeaders.Accept.Add(
         new MediaTypeWithQualityHeaderValue("application/json"));
 });
+
+// Stripe configuration
+
+builder.Services.Configure<StripeOptions>(options =>
+{
+    options.SecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY")
+        ?? builder.Configuration["Stripe:SecretKey"]
+        ?? string.Empty;
+    options.PublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY")
+        ?? builder.Configuration["Stripe:PublishableKey"]
+        ?? string.Empty;
+    options.SuccessUrl = Environment.GetEnvironmentVariable("STRIPE_SUCCESS_URL")
+        ?? builder.Configuration["Stripe:SuccessUrl"]
+        ?? string.Empty;
+    options.CancelUrl = Environment.GetEnvironmentVariable("STRIPE_CANCEL_URL")
+        ?? builder.Configuration["Stripe:CancelUrl"]
+        ?? string.Empty;
+    options.WebhookSecret = Environment.GetEnvironmentVariable("STRIPE_WEBHOOK_SECRET")
+        ?? builder.Configuration["Stripe:WebhookSecret"]
+        ?? string.Empty;
+});
+
+var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
+if (string.IsNullOrEmpty(stripeSecretKey))
+{
+    throw new InvalidOperationException("Stripe Secret key is missing!");
+}
+
+StripeConfiguration.ApiKey = stripeSecretKey;
+
+
 
 builder.Services.AddIdentityCore<ApplicationUser>()
     .AddRoles<IdentityRole>()
