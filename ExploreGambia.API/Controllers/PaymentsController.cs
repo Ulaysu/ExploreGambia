@@ -164,6 +164,18 @@ namespace ExploreGambia.API.Controllers
             return Ok(new { Received = true });
         }
 
+        [AllowAnonymous]
+        [HttpPost("stripe/webhook")]
+        public async Task<IActionResult> HandleStripeWebhook()
+        {
+            using var reader = new StreamReader(Request.Body);
+            var rawPayload = await reader.ReadToEndAsync();
+            var signature = Request.Headers["Stripe-Signature"].FirstOrDefault();
+
+            await stripePaymentService.HandleStripeWebhookAsync(rawPayload, signature);
+            return Ok(new { Received = true });
+        }
+
         [Authorize(Roles = "User,Admin")]
         [HttpPost("bookings/{bookingId:guid}/modempay/intent")]
         public async Task<IActionResult> CreateModemPayIntent([FromRoute] Guid bookingId,[FromBody] CreateModemPayIntentRequestDto request,

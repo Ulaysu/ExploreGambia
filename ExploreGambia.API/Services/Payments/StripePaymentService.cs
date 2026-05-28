@@ -12,13 +12,17 @@ namespace ExploreGambia.API.Services.Payments
         private readonly IBookingRepository _bookingRepository;
         private readonly IPaymentRepository _paymentRepository;
         private readonly StripeOptions _stripeOptions;
+        private readonly ILogger<StripePaymentService> _logger;
 
         public StripePaymentService(IBookingRepository bookingRepository, 
-            IPaymentRepository paymentRepository, IOptions<StripeOptions> stripeOptions)
+            IPaymentRepository paymentRepository,
+            IOptions<StripeOptions> stripeOptions,
+            ILogger<StripePaymentService> logger)
         {
             this._bookingRepository = bookingRepository;
             this._paymentRepository = paymentRepository;
             this._stripeOptions = stripeOptions.Value;
+            this._logger = logger;
         }
 
         public async Task<StripeCheckoutResponseDto>
@@ -119,6 +123,15 @@ namespace ExploreGambia.API.Services.Payments
                 CheckoutUrl = session.Url,
                 SessionId = session.Id
             };
+        }
+
+        public Task HandleStripeWebhookAsync(string json, string? stripeSignature)
+        {
+            _logger.LogInformation(
+                "Received Stripe webhook payload. Signature header present: {HasSignature}",
+                !string.IsNullOrWhiteSpace(stripeSignature));
+
+            return Task.CompletedTask;
         }
     }
 }

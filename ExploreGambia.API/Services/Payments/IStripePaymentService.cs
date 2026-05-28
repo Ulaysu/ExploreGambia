@@ -9,5 +9,7 @@ namespace ExploreGambia.API.Services.Payments
                 Guid bookingId,
                 string userId,
                 CreateStripeCheckoutRequestDto request);
+
+        Task HandleStripeWebhookAsync(string json, string? stripeSignature);
     }
 }
