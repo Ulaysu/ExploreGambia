@@ -346,6 +346,10 @@ namespace ExploreGambia.API.Services
 
                     ReturnUrl = request.ReturnUrl,
                     CancelUrl = request.CancelUrl,
+                    PaymentMethods = new List<string>
+                    {
+                        "card"
+                    },
 
                     Metadata = new Dictionary<string, string>
                     {

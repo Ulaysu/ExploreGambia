@@ -16,6 +16,9 @@ namespace ExploreGambia.API.Models.DTOs
         [JsonPropertyName("cancel_url")]
         public string CancelUrl { get; set; } = string.Empty;
 
+        [JsonPropertyName("payment_methods")]
+        public List<string> PaymentMethods { get; set; } = new();
+
         [JsonPropertyName("metadata")]
         public Dictionary<string, string> Metadata { get; set; } = [];
 
