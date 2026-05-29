@@ -11,6 +11,8 @@ namespace ExploreGambia.API.Services.Payments
 {
     public class StripePaymentService : IStripePaymentService
     {
+        private const string CheckoutSessionCompletedEvent = "checkout.session.completed";
+        private const string PaidPaymentStatus = "paid";
         private readonly IBookingRepository _bookingRepository;
         private readonly IPaymentRepository _paymentRepository;
         private readonly IPaymentService _paymentService;
@@ -145,6 +147,57 @@ namespace ExploreGambia.API.Services.Payments
 
             _logger.LogInformation(
                 "Verified Stripe webhook event {EventType}.",
+                stripeEvent.Type);
+
+            return stripeEvent.Type switch
+            {
+                CheckoutSessionCompletedEvent =>
+                    HandleCheckoutSessionCompletedAsync(stripeEvent),
+
+                _ =>
+                    IgnoreStripeEventAsync(stripeEvent)
+            };
+        }
+
+        private Task HandleCheckoutSessionCompletedAsync(Stripe.Event stripeEvent)
+        {
+            if (stripeEvent.Data.Object is not Session session)
+            {
+                _logger.LogWarning(
+                    "Stripe checkout.session.completed event did not contain a checkout session object.");
+
+                return Task.CompletedTask;
+            }
+
+            if (string.IsNullOrWhiteSpace(session.Id))
+            {
+                _logger.LogWarning(
+                    "Stripe checkout.session.completed event did not contain a session id.");
+
+                return Task.CompletedTask;
+            }
+
+            if (!string.Equals(session.PaymentStatus, PaidPaymentStatus, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogInformation(
+                    "Ignoring Stripe checkout session {SessionId} because payment status is {PaymentStatus}.",
+                    session.Id,
+                    session.PaymentStatus);
+
+                return Task.CompletedTask;
+            }
+
+            _logger.LogInformation(
+                "Received paid Stripe checkout session {SessionId}.",
+                session.Id);
+
+            return Task.CompletedTask;
+        }
+
+        private Task IgnoreStripeEventAsync(Stripe.Event stripeEvent)
+        {
+            _logger.LogInformation(
+                "Ignoring unsupported Stripe webhook event {EventType}.",
                 stripeEvent.Type);
 
             return Task.CompletedTask;

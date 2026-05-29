@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text.Json;
 using ExploreGambia.API.Services.Payments;
+using Stripe;
 
 namespace ExploreGambia.API.Controllers
 {
@@ -172,7 +173,15 @@ namespace ExploreGambia.API.Controllers
             var rawPayload = await reader.ReadToEndAsync();
             var signature = Request.Headers["Stripe-Signature"].FirstOrDefault();
 
-            await stripePaymentService.HandleStripeWebhookAsync(rawPayload, signature);
+            try
+            {
+                await stripePaymentService.HandleStripeWebhookAsync(rawPayload, signature);
+            }
+            catch (StripeException)
+            {
+                return BadRequest(new { Message = "Invalid Stripe signature." });
+            }
+
             return Ok(new { Received = true });
         }
 
