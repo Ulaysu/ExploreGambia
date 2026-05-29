@@ -159,14 +159,14 @@ namespace ExploreGambia.API.Services.Payments
             };
         }
 
-        private Task HandleCheckoutSessionCompletedAsync(Stripe.Event stripeEvent)
+        private async Task HandleCheckoutSessionCompletedAsync(Stripe.Event stripeEvent)
         {
             if (stripeEvent.Data.Object is not Session session)
             {
                 _logger.LogWarning(
                     "Stripe checkout.session.completed event did not contain a checkout session object.");
 
-                return Task.CompletedTask;
+                return;
             }
 
             if (string.IsNullOrWhiteSpace(session.Id))
@@ -174,7 +174,7 @@ namespace ExploreGambia.API.Services.Payments
                 _logger.LogWarning(
                     "Stripe checkout.session.completed event did not contain a session id.");
 
-                return Task.CompletedTask;
+                return;
             }
 
             if (!string.Equals(session.PaymentStatus, PaidPaymentStatus, StringComparison.OrdinalIgnoreCase))
@@ -184,14 +184,25 @@ namespace ExploreGambia.API.Services.Payments
                     session.Id,
                     session.PaymentStatus);
 
-                return Task.CompletedTask;
+                return;
+            }
+
+            var payment =
+                await _paymentRepository.GetPaymentByProviderReferenceAsync(session.Id);
+
+            if (payment == null)
+            {
+                _logger.LogWarning(
+                    "No local payment found for Stripe checkout session {SessionId}.",
+                    session.Id);
+
+                return;
             }
 
             _logger.LogInformation(
-                "Received paid Stripe checkout session {SessionId}.",
-                session.Id);
-
-            return Task.CompletedTask;
+                "Resolved Stripe checkout session {SessionId} to payment {PaymentId}.",
+                session.Id,
+                payment.PaymentId);
         }
 
         private Task IgnoreStripeEventAsync(Stripe.Event stripeEvent)
