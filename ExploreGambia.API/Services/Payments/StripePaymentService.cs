@@ -203,6 +203,13 @@ namespace ExploreGambia.API.Services.Payments
                 "Resolved Stripe checkout session {SessionId} to payment {PaymentId}.",
                 session.Id,
                 payment.PaymentId);
+
+            await _paymentService.ConfirmProviderPaymentAsync(payment.PaymentId, session.Id);
+
+            _logger.LogInformation(
+                "Confirmed Stripe payment {PaymentId} for checkout session {SessionId}.",
+                payment.PaymentId,
+                session.Id);
         }
 
         private Task IgnoreStripeEventAsync(Stripe.Event stripeEvent)
