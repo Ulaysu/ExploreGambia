@@ -8,6 +8,7 @@ ExploreGambia is a comprehensive API for managing tours, bookings, payments, and
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Stripe Webhook Testing](#stripe-webhook-testing)
 - [API Endpoints](#api-endpoints)
 - [Data Models](#data-models)
 - [Dependencies](#dependencies)
@@ -95,6 +96,37 @@ The API will be available at `https://localhost:7297`.
 ### Swagger
 
 Swagger is enabled for API documentation. You can access it at: [`https://localhost:44331/swagger`](https://localhost:44331/swagger)
+
+## Stripe Webhook Testing
+
+Stripe webhooks are the source of truth for successful Stripe payments. Do not use the frontend success URL to mark payments as paid or bookings as confirmed.
+
+For local testing, install and sign in to the Stripe CLI, then forward Stripe webhook events to the local API:
+
+```powershell
+stripe listen --forward-to https://localhost:44331/api/v1/payments/stripe/webhook
+```
+
+The Stripe CLI prints a webhook signing secret:
+
+```text
+Ready! Your webhook signing secret is:
+whsec_xxxxxxxxx
+```
+
+Set that value as the local webhook secret:
+
+```powershell
+setx STRIPE_WEBHOOK_SECRET "whsec_xxxxxxxxx"
+```
+
+Restart Visual Studio or IIS Express after setting the environment variable. Then create a Stripe Checkout payment and use the Stripe test card:
+
+```text
+4242 4242 4242 4242
+```
+
+After payment, Stripe sends `checkout.session.completed` to the webhook endpoint. The backend verifies the Stripe signature, resolves the local payment by the Stripe Checkout Session ID, marks the payment as succeeded, and confirms the booking.
 
 ## API Endpoints
 
