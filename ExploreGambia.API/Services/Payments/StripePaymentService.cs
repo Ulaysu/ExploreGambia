@@ -2,7 +2,9 @@
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Repositories;
+using ExploreGambia.API.Services;
 using Microsoft.Extensions.Options;
+using Stripe;
 using Stripe.Checkout;
 
 namespace ExploreGambia.API.Services.Payments
@@ -11,16 +13,19 @@ namespace ExploreGambia.API.Services.Payments
     {
         private readonly IBookingRepository _bookingRepository;
         private readonly IPaymentRepository _paymentRepository;
+        private readonly IPaymentService _paymentService;
         private readonly StripeOptions _stripeOptions;
         private readonly ILogger<StripePaymentService> _logger;
 
         public StripePaymentService(IBookingRepository bookingRepository, 
             IPaymentRepository paymentRepository,
+            IPaymentService paymentService,
             IOptions<StripeOptions> stripeOptions,
             ILogger<StripePaymentService> logger)
         {
             this._bookingRepository = bookingRepository;
             this._paymentRepository = paymentRepository;
+            this._paymentService = paymentService;
             this._stripeOptions = stripeOptions.Value;
             this._logger = logger;
         }
@@ -127,9 +132,20 @@ namespace ExploreGambia.API.Services.Payments
 
         public Task HandleStripeWebhookAsync(string json, string? stripeSignature)
         {
+            if (string.IsNullOrWhiteSpace(_stripeOptions.WebhookSecret))
+            {
+                throw new InvalidOperationException("Stripe webhook secret is not configured.");
+            }
+
+            var stripeEvent =
+                EventUtility.ConstructEvent(
+                    json,
+                    stripeSignature ?? string.Empty,
+                    _stripeOptions.WebhookSecret);
+
             _logger.LogInformation(
-                "Received Stripe webhook payload. Signature header present: {HasSignature}",
-                !string.IsNullOrWhiteSpace(stripeSignature));
+                "Verified Stripe webhook event {EventType}.",
+                stripeEvent.Type);
 
             return Task.CompletedTask;
         }

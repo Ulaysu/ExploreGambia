@@ -245,12 +245,7 @@ namespace ExploreGambia.API.Controllers
                 return Unauthorized();
             }
 
-            var response =
-                await stripePaymentService
-                    .CreateCheckoutSessionAsync(
-                        bookingId,
-                        userId,
-                        request);
+            var response = await stripePaymentService.CreateCheckoutSessionAsync(bookingId, userId,request);
 
             return Ok(response);
         }
