@@ -95,6 +95,9 @@ namespace ExploreGambia.API.Controllers
 
             var response = new AuthMeResponseDto
             {
+                UserId = user.Id,
+                FirstName = user.FirstName ?? string.Empty,
+                LastName = user.LastName ?? string.Empty,
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToList(),
                 IsAuthenticated = true
