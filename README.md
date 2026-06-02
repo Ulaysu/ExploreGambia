@@ -1,107 +1,291 @@
 # ExploreGambia API
 
-ExploreGambia is a comprehensive API for managing tours, bookings, payments, and attractions in Gambia. This project is built using ASP.NET Core and Entity Framework Core, targeting .NET 8.0.
+ExploreGambia API is an ASP.NET Core backend for a tour booking platform. It manages tours, tour guides, bookings, authentication, and payments through Stripe and ModemPay.
 
-## Table of Contents
+The API is built with .NET 8, Entity Framework Core, PostgreSQL, ASP.NET Core Identity, JWT authentication, API versioning, Swagger, AutoMapper, and Serilog.
 
-- [Overview](#overview)
+## Table Of Contents
+
 - [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Configuration](#configuration)
+- [Local Setup](#local-setup)
+- [Authentication](#authentication)
+- [API Versioning](#api-versioning)
+- [Core Workflows](#core-workflows)
 - [Stripe Webhook Testing](#stripe-webhook-testing)
 - [API Endpoints](#api-endpoints)
-- [Data Models](#data-models)
-- [Dependencies](#dependencies)
-- [Seeding Data](#seeding-data)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Overview
-
-ExploreGambia API provides a robust backend for managing tours, bookings, payments, and attractions. It includes endpoints for CRUD operations and integrates with a SQL Server database using Entity Framework Core.
+- [Data Model](#data-model)
+- [Validation And Errors](#validation-and-errors)
+- [Logging](#logging)
+- [Deployment Notes](#deployment-notes)
 
 ## Features
 
-- Manage Tours
-- Manage Bookings
-- Manage Payments
-- Manage Attractions
-- Manage Tour Guides
-- Data Seeding for initial setup
-- AutoMapper for DTO mapping
-- Swagger for API documentation
+- User registration, login, refresh tokens, and current-user profile lookup.
+- Role support through ASP.NET Core Identity roles: `User`, `Admin`, and `Guide`.
+- Tour guide management.
+- Tour catalogue management with filtering, sorting, and pagination.
+- Booking creation with duplicate active-booking prevention.
+- Booking status lifecycle: `Pending`, `Confirmed`, `Canceled`, `Completed`.
+- Payment lifecycle: `Pending`, `Processing`, `Succeeded`, `Failed`, `Canceled`.
+- Stripe Checkout session creation.
+- Stripe webhook confirmation for successful checkout payments.
+- ModemPay inline/card payment preparation, verification, intent creation, and webhook handling.
+- Swagger/OpenAPI documentation.
+- PostgreSQL connection support for local and Railway-style deployments.
+- Serilog console and rolling file logs.
 
-## Installation
+## Architecture
 
-### Prerequisites
+The project follows a controller-service-repository structure:
 
-- .NET 8.0 SDK
-- SQL Server
-- A tool to manage SQL Server (SQL Server Management Studio or Azure Data Studio)
+- Controllers expose versioned HTTP endpoints.
+- Services hold business workflows such as booking creation, payment confirmation, provider verification, and auth.
+- Repositories handle data access through Entity Framework Core.
+- Domain models represent persisted entities.
+- DTOs define request and response payloads.
+- AutoMapper maps between DTOs and domain models.
+- `GlobalExceptionHandler` centralizes exception responses.
 
-### Steps
+Two EF Core DbContexts are used:
 
-1. **Clone the Repository**
+- `ExploreGambiaDbContext`: tours, tour guides, bookings, and payments.
+- `ExploreGambiaAuthDbContext`: Identity users, roles, and data protection keys.
 
-   ```bash
-   git clone <repository-url>
-   cd ExploreGambia
-   ```
+Both contexts use the same PostgreSQL connection string but separate migration history tables:
 
-2. **Set Up Database Connection String**
+- `__EFMigrationsHistory_App`
+- `__EFMigrationsHistory_Auth`
 
-   - Open `appsettings.json`
-   - Update the connection string under `"ConnectionStrings"`
-     ```json
-     "ConnectionStrings": {
-       "DefaultConnection": "Server=your_server;Database=ExploreGambiaDB;User Id=your_user;Password=your_password;TrustServerCertificate=True;"
-     }
-     ```
+## Tech Stack
 
-3. **Restore Dependencies**
+- .NET 8
+- ASP.NET Core Web API
+- Entity Framework Core
+- PostgreSQL with `Npgsql.EntityFrameworkCore.PostgreSQL`
+- ASP.NET Core Identity
+- JWT Bearer authentication
+- Asp.Versioning
+- AutoMapper
+- Stripe.net
+- ModemPay HTTP client integration
+- Serilog
+- Swagger / Swashbuckle
 
-   ```bash
-   dotnet restore
-   ```
+## Project Structure
 
-4. **Apply Migrations & Seed the Database**
-
-   ```bash
-   dotnet ef database update
-   ```
-
-5. **Run the Application**
-
-   ```bash
-   dotnet run
-   ```
-
-6. **Access the API**
-
-   - Base URL: `https://localhost:7297`
-   - Swagger Documentation: [`https://localhost:44331/swagger`](https://localhost:44331/swagger)
-
-## Usage
-
-### Running the Application
-
-To run the application, use the following command:
-
-```bash
-dotnet run
+```text
+ExploreGambia.API/
+  Controllers/          HTTP API controllers
+  CustomActionFilters/  Model validation filter
+  Data/                 EF Core DbContexts and seeders
+  Exceptions/           Domain-specific exceptions
+  Mapping/              AutoMapper profiles
+  Middleware/           Global exception handler
+  Migrations/           EF Core migrations
+  Models/
+    Configurations/     Options classes
+    Domain/             Entity models and enums
+    DTOs/               Request and response DTOs
+  Repositories/         Data access contracts and implementations
+  Services/             Business logic and auth services
+  Services/Payments/    Stripe and ModemPay integrations
 ```
 
-The API will be available at `https://localhost:7297`.
+## Configuration
 
-### Swagger
+The API reads sensitive configuration primarily from environment variables. Some values may also be supplied through `appsettings.json` where supported by `Program.cs`.
 
-Swagger is enabled for API documentation. You can access it at: [`https://localhost:44331/swagger`](https://localhost:44331/swagger)
+### Required Environment Variables
+
+| Variable | Purpose |
+| --- | --- |
+| `JWT_SECRET` | Signing key for JWT access tokens. |
+| `STRIPE_SECRET_KEY` | Stripe secret API key. Required at startup. |
+| `ConnectionStrings__DefaultConnection` | PostgreSQL connection string. |
+
+Instead of `ConnectionStrings__DefaultConnection`, the app can resolve PostgreSQL settings from:
+
+- `DATABASE_URL`
+- or `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`
+
+### Stripe Variables
+
+| Variable | Purpose |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Stripe server-side API key. |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe publishable key for frontend usage. |
+| `STRIPE_SUCCESS_URL` | Default Stripe Checkout success redirect URL. |
+| `STRIPE_CANCEL_URL` | Default Stripe Checkout cancel redirect URL. |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret used to verify webhook requests. |
+
+### ModemPay Variables
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `MODEMPAY_PUBLIC_KEY` | empty | Public key used for inline payment setup. |
+| `MODEMPAY_SECRET_KEY` | empty | Secret key used for provider API calls. |
+| `MODEMPAY_WEBHOOK_SECRET` | empty | Webhook signature secret. |
+| `MODEMPAY_CURRENCY` | `GMD` | Payment currency. |
+| `MODEMPAY_BASE_URL` | `https://api.modempay.com` | Provider API base URL. |
+| `MODEMPAY_TRANSACTION_PATH_TEMPLATE` | `/transactions/{transactionId}` | Transaction lookup path template. |
+
+### Other Runtime Settings
+
+| Variable | Purpose |
+| --- | --- |
+| `PORT` | If set, the app listens on `http://0.0.0.0:{PORT}`. Useful for hosted environments. |
+
+## Local Setup
+
+1. Clone the repository.
+
+```powershell
+git clone <repository-url>
+cd ExploreGambia
+```
+
+2. Configure required local environment variables.
+
+```powershell
+setx JWT_SECRET "your-long-local-jwt-secret"
+setx STRIPE_SECRET_KEY "sk_test_..."
+setx STRIPE_PUBLISHABLE_KEY "pk_test_..."
+setx STRIPE_SUCCESS_URL "http://localhost:5173/payment/success"
+setx STRIPE_CANCEL_URL "http://localhost:5173/payment/cancel"
+setx ConnectionStrings__DefaultConnection "Host=localhost;Port=5432;Database=ExploreGambia;Username=postgres;Password=your_password"
+```
+
+Restart Visual Studio, IIS Express, or the terminal after using `setx`.
+
+3. Restore packages.
+
+```powershell
+dotnet restore
+```
+
+4. Apply EF Core migrations.
+
+```powershell
+dotnet ef database update --project ExploreGambia.API
+```
+
+5. Run the API.
+
+```powershell
+dotnet run --project ExploreGambia.API
+```
+
+6. Open Swagger.
+
+```text
+https://localhost:44331/swagger
+```
+
+The exact HTTPS port can vary by launch profile. Check `ExploreGambia.API/Properties/launchSettings.json` if your local port differs.
+
+## Authentication
+
+Authentication uses ASP.NET Core Identity plus JWT Bearer tokens.
+
+Main auth endpoints:
+
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh-token`
+- `GET /api/v1/auth/me`
+
+Include the JWT access token on protected requests:
+
+```http
+Authorization: Bearer <access-token>
+```
+
+Seeded roles:
+
+- `User`
+- `Admin`
+- `Guide`
+
+Password policy is intentionally relaxed for development and MVP usage:
+
+- minimum length: `6`
+- digit not required
+- lowercase not required
+- uppercase not required
+- non-alphanumeric not required
+
+## API Versioning
+
+The API uses URL versioning as the primary route shape:
+
+```text
+/api/v1/...
+```
+
+Versioning can also be read from:
+
+- `x-api-version` header
+- `api-version` query string
+
+Default version: `1.0`.
+
+## Core Workflows
+
+### Booking Flow
+
+```text
+User authenticates
+  -> User creates booking for a tour
+  -> API validates tour availability and participant count
+  -> API prevents duplicate active booking for the same user and tour
+  -> Booking starts as Pending
+```
+
+Booking totals are calculated server-side:
+
+```text
+booking.TotalAmount = tour.Price * numberOfPeople
+```
+
+### Stripe Payment Flow
+
+```text
+User creates booking
+  -> Frontend requests Stripe Checkout session
+  -> API creates local Payment with Pending status
+  -> API creates Stripe Checkout Session
+  -> API stores session.Id in payment.ProviderReference
+  -> User pays on Stripe Checkout
+  -> Stripe sends webhook to API
+  -> API verifies Stripe signature
+  -> API handles checkout.session.completed
+  -> API finds Payment by ProviderReference
+  -> API marks Payment as Succeeded
+  -> API marks Booking as Confirmed
+```
+
+Important: the frontend success redirect is not trusted for payment confirmation. The Stripe webhook is the source of truth.
+
+### ModemPay Flow
+
+The API supports ModemPay through:
+
+- inline payment preparation
+- payment verification
+- payment intent creation
+- signed webhook processing
+
+ModemPay successful transactions use the same provider-confirmation workflow that updates payment and booking state.
 
 ## Stripe Webhook Testing
 
-Stripe webhooks are the source of truth for successful Stripe payments. Do not use the frontend success URL to mark payments as paid or bookings as confirmed.
+Stripe webhooks are required for reliable payment confirmation. Users can close the browser, lose internet, or manually visit success URLs, so redirect pages must not mark bookings as confirmed.
 
-For local testing, install and sign in to the Stripe CLI, then forward Stripe webhook events to the local API:
+Install and sign in to the Stripe CLI, then forward events to the local API:
 
 ```powershell
 stripe listen --forward-to https://localhost:44331/api/v1/payments/stripe/webhook
@@ -114,176 +298,261 @@ Ready! Your webhook signing secret is:
 whsec_xxxxxxxxx
 ```
 
-Set that value as the local webhook secret:
+Set it locally:
 
 ```powershell
 setx STRIPE_WEBHOOK_SECRET "whsec_xxxxxxxxx"
 ```
 
-Restart Visual Studio or IIS Express after setting the environment variable. Then create a Stripe Checkout payment and use the Stripe test card:
+Restart Visual Studio, IIS Express, or the terminal after setting the environment variable.
+
+Then create a Stripe Checkout payment and use the test card:
 
 ```text
 4242 4242 4242 4242
 ```
 
-After payment, Stripe sends `checkout.session.completed` to the webhook endpoint. The backend verifies the Stripe signature, resolves the local payment by the Stripe Checkout Session ID, marks the payment as succeeded, and confirms the booking.
+Expected result:
+
+- Stripe CLI receives `checkout.session.completed`.
+- API returns `200 OK` from `/api/v1/payments/stripe/webhook`.
+- Payment moves from `Pending` to `Succeeded`.
+- Booking moves from `Pending` to `Confirmed`.
 
 ## API Endpoints
 
+All endpoint paths below use version `v1`.
+
+### Auth
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/api/v1/auth/register` | Public | Register a user. |
+| `POST` | `/api/v1/auth/login` | Public | Login and receive tokens. |
+| `POST` | `/api/v1/auth/refresh-token` | Public | Refresh auth tokens. |
+| `GET` | `/api/v1/auth/me` | Bearer token | Get current authenticated user profile. |
+
 ### Tours
 
-- `GET /api/tours` - Get all tours
-- `GET /api/tours/{id}` - Get a tour by ID
-- `POST /api/tours` - Create a new tour
-- `PUT /api/tours/{id}` - Update a tour
-- `DELETE /api/tours/{id}` - Delete a tour
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/v1/tours` | List tours with filters, sorting, and pagination. |
+| `GET` | `/api/v1/tours/{id}` | Get one tour. |
+| `POST` | `/api/v1/tours` | Create a tour. |
+| `PUT` | `/api/v1/tours/{id}` | Update a tour. |
+| `DELETE` | `/api/v1/tours/{id}` | Delete a tour. |
 
-### Bookings
+Supported tour query parameters include:
 
-- `GET /api/bookings` - Get all bookings
-- `GET /api/bookings/{id}` - Get a booking by ID
-- `POST /api/bookings` - Create a new booking
-- `PUT /api/bookings/{id}` - Update a booking
-- `DELETE /api/bookings/{id}` - Delete a booking
-
-### Payments
-
-- `GET /api/payments` - Get all payments
-- `GET /api/payments/{id}` - Get a payment by ID
-- `POST /api/payments` - Create a new payment
-- `PUT /api/payments/{id}` - Update a payment
-- `DELETE /api/payments/{id}` - Delete a payment
+- `sortBy`
+- `isAscending`
+- `location`
+- `minPrice`
+- `maxPrice`
+- `startDate`
+- `endDate`
+- `pageNumber`
+- `pageSize`
 
 ### Tour Guides
 
-- `GET /api/tourguides` - Get all tour guides
-- `GET /api/tourguides/{id}` - Get a tour guide by ID
-- `POST /api/tourguides` - Create a new tour guide
-- `PUT /api/tourguides/{id}` - Update a tour guide
-- `DELETE /api/tourguides/{id}` - Delete a tour guide
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/v1/tour-guides` | List tour guides with search, sorting, and pagination. |
+| `GET` | `/api/v1/tour-guides/{id}` | Get one tour guide. |
+| `POST` | `/api/v1/tour-guides` | Create a tour guide. |
+| `PUT` | `/api/v1/tour-guides/{id}` | Update a tour guide. |
+| `DELETE` | `/api/v1/tour-guides/{id}` | Delete a tour guide. |
 
-## Data Models
+Supported guide query parameters include:
+
+- `sortBy`
+- `isAscending`
+- `searchTerm`
+- `pageNumber`
+- `pageSize`
+
+### Bookings
+
+Most booking endpoints require a bearer token.
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/api/v1/bookings/my-bookings` | `User`, `Admin` | Get current user's bookings. |
+| `GET` | `/api/v1/bookings` | `User`, `Admin` | List bookings with filters and pagination. |
+| `GET` | `/api/v1/bookings/{id}` | `User`, `Admin` | Get one booking. |
+| `POST` | `/api/v1/bookings` | `Admin`, `User` | Create a booking. |
+| `PUT` | `/api/v1/bookings/{id}` | `User` | Update a booking. |
+| `DELETE` | `/api/v1/bookings/{id}` | `Admin` | Delete a booking. |
+
+Supported booking query parameters include:
+
+- `status`
+- `bookingDateFrom`
+- `bookingDateTo`
+- `sortBy`
+- `isAscending`
+- `pageNumber`
+- `pageSize`
+
+### Payments
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/api/v1/payments` | Currently public in controller | List payments with filters and pagination. |
+| `GET` | `/api/v1/payments/{id}` | Currently public in controller | Get one payment. |
+| `POST` | `/api/v1/payments` | Currently public in controller | Create a manual payment record. |
+| `PUT` | `/api/v1/payments/{id}` | Currently public in controller | Update a payment. |
+| `POST` | `/api/v1/payments/{id}/confirm` | Currently public in controller | Confirm a payment manually. |
+| `DELETE` | `/api/v1/payments/{id}` | Currently public in controller | Delete a payment. |
+| `POST` | `/api/v1/payments/bookings/{bookingId}/stripe/checkout` | `User`, `Admin` | Create Stripe Checkout session. |
+| `POST` | `/api/v1/payments/stripe/webhook` | Public webhook | Receive and verify Stripe webhook events. |
+| `POST` | `/api/v1/payments/bookings/{bookingId}/modempay/inline` | `User`, `Admin` | Prepare ModemPay inline payment. |
+| `POST` | `/api/v1/payments/modempay/verify` | `User`, `Admin` | Verify ModemPay transaction. |
+| `POST` | `/api/v1/payments/bookings/{bookingId}/modempay/intent` | `User`, `Admin` | Create ModemPay payment intent. |
+| `POST` | `/api/v1/payments/modempay/webhook` | Public webhook | Receive and verify ModemPay webhook events. |
+
+Supported payment query parameters include:
+
+- `paymentMethod`
+- `paymentDateFrom`
+- `paymentDateTo`
+- `status`
+- `sortBy`
+- `isAscending`
+- `pageNumber`
+- `pageSize`
+
+## Data Model
 
 ### Tour
 
-Represents a tour package with details such as title, description, price, and duration
+Represents a bookable tour.
 
-```csharp
-public class Tour {
-public Guid TourId { get; set; }
-public string Title { get; set; }
-public string Description { get; set; }  
-public string Location { get; set; } 
+Key fields:
 
-[Precision(18, 2)]
-public decimal Price { get; set; }  
-public int MaxParticipants { get; set; } 
-public DateTime StartDate { get; set; } 
-public DateTime EndDate { get; set; } 
-public string ImageUrl { get; set; } = string.Empty;
-public bool IsAvailable { get; set; } = true; 
+- `TourId`
+- `Title`
+- `Description`
+- `Location`
+- `Price`
+- `MaxParticipants`
+- `StartDate`
+- `EndDate`
+- `ImageUrl`
+- `IsAvailable`
+- `TourGuideId`
 
-// Foreign Key Relationship
-public Guid TourGuideId { get; set; } 
-}
-```
+Relationships:
+
+- many tours belong to one tour guide
+- one tour can have many bookings
+
+### TourGuide
+
+Represents a guide who can lead tours.
+
+Key fields:
+
+- `TourGuideId`
+- `FullName`
+- `PhoneNumber`
+- `Email`
+- `Bio`
+- `IsAvailable`
+
+Relationship:
+
+- one tour guide can have many tours
 
 ### Booking
 
-Represents a customer's tour booking with reference to the booked tour .
+Represents a user's tour reservation.
 
-```csharp
-public class Booking {
-     public Guid BookingId { get; set; } 
-     public Guid TourId { get; set; } 
-     public DateTime BookingDate { get; set; } = DateTime.UtcNow;
-     public int NumberOfPeople { get; set; }
-  
-     [Precision(18, 2)]
-     public decimal TotalAmount { get; set; }
-     public BookingStatus Status { get; set; } = BookingStatus.Pending; 
+Key fields:
 
-       
-}
-```
+- `BookingId`
+- `TourId`
+- `UserId`
+- `BookingDate`
+- `NumberOfPeople`
+- `TotalAmount`
+- `Status`
+- `StatusUpdatedAt`
+
+Statuses:
+
+- `Pending`
+- `Confirmed`
+- `Canceled`
+- `Completed`
+
+Relationships:
+
+- one booking belongs to one tour
+- one booking can have many payment attempts
 
 ### Payment
 
-Tracks payments made for bookings, including the amount and status.
+Represents a payment attempt or confirmed payment for a booking.
 
-```csharp
-public class Payment {
-        public Guid PaymentId { get; set; }         
-        public Guid BookingId { get; set; }         
-        public string PaymentMethod { get; set; }
+Key fields:
 
-        [Precision(18, 2)]
-        public decimal Amount { get; set; }       
-        public DateTime PaymentDate { get; set; } 
-        public bool IsSuccessful { get; set; }     
-        public Booking Booking { get; set; }       
+- `PaymentId`
+- `BookingId`
+- `PaymentMethod`
+- `Amount`
+- `PaymentDate`
+- `Status`
+- `ProviderReference`
 
-}
-```
+Statuses:
 
-### Attraction
+- `Pending`
+- `Processing`
+- `Succeeded`
+- `Failed`
+- `Canceled`
 
-Represents a tourist attraction with location and description.
+`ProviderReference` stores provider identifiers such as Stripe Checkout Session IDs or ModemPay transaction references.
 
-```csharp
-public class Attraction {
-   public Guid AttractionId { get; set; } 
-   public string Name { get; set; } = string.Empty;
-   public string Description { get; set; } = string.Empty;
-   public string Location { get; set; } = string.Empty;
-   public string ImageUrl { get; set; } = string.Empty; 
+### ApplicationUser
 
-   // Navigation Property for Many-to-Many Relationship
-   public List<TourAttraction> TourAttractions { get; set; } = new List<TourAttraction>();
-     
-}
-```
+Identity user model used by ASP.NET Core Identity. Bookings store `UserId` as the Identity user id.
 
-### Tour Guide
+## Validation And Errors
 
-Represents a tour guide with personal details and expertise.
+The API uses:
 
-```csharp
-public class TourGuide {
-    public Guid TourGuideId { get; set; } // Primary Key
-  
-    public string FullName { get; set; } = string.Empty;
-    
-    public string PhoneNumber { get; set; } = string.Empty;
-    
-    public string Email { get; set; } = string.Empty;
-    
-    public string Bio { get; set; } = string.Empty; // Short description of guide
-    
-    public bool IsAvailable { get; set; } = true; // Can they accept tours?
-    
-    // Navigation property
-    public List<Tour> Tours { get; set; } = new List<Tour>();
+- data annotation validation on DTOs
+- a global `ValidateModelAttribute`
+- domain exceptions such as `BookingNotFoundException`, `TourNotFoundException`, `PaymentNotFoundException`, and `BusinessRuleException`
+- `GlobalExceptionHandler` for consistent error responses
 
-}
-```
+Business rules include:
 
-## Dependencies
+- bookings cannot be created for unavailable tours
+- booking participants cannot exceed a tour's maximum participants
+- users cannot create duplicate active bookings for the same tour
+- payment amount must match the booking total
+- canceled or completed bookings cannot accept payments
 
-- .NET 8.0
-- Entity Framework Core
-- AutoMapper
-- Swagger
+## Logging
 
-## Seeding Data
+Serilog logs to:
 
-To seed initial data into the database, the `DataSeeder` class is used. This class is called during the application startup to ensure the database is populated with initial data.
+- console
+- `Logs/ExploreGambia_Log.txt`
 
-## Contributing
+File logs roll by minute according to the current configuration.
 
-Contributions are welcome! Please fork the repository and submit a pull request.
+## Deployment Notes
 
-## License
-
-This project is licensed under the MIT License.
-
+- Configure `JWT_SECRET`, `STRIPE_SECRET_KEY`, and PostgreSQL connection settings before startup.
+- In production, the app rejects database connection strings that point to `localhost` or `127.0.0.1`.
+- Railway-style `DATABASE_URL` is supported and converted to an Npgsql connection string.
+- Swagger is enabled in both Development and Production in the current configuration.
+- CORS currently allows:
+  - `http://localhost:5173`
+  - `https://eg-frontend-pi.vercel.app`
+- Stripe webhook endpoints must use a real `STRIPE_WEBHOOK_SECRET`; do not trust frontend redirects for payment confirmation.
