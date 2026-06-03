@@ -15,6 +15,8 @@ namespace ExploreGambia.API.Mapping
 
             CreateMap<TourGuide, TourGuideDto>().ReverseMap();
 
+            CreateMap<TourGuide, TourGuideProfileDto>().ReverseMap();
+
             CreateMap<TourGuide, AddTourGuideRequestDto>().ReverseMap();
 
             CreateMap<TourGuide, UpdateTourGuideRequestDto>().ReverseMap();

@@ -4,6 +4,10 @@
     {
         public Guid TourGuideId { get; set; } // Primary Key
 
+        public string? UserId { get; set; }
+
+        public ApplicationUser? User { get; set; }
+
         public string FullName { get; set; } = string.Empty;
 
         public string PhoneNumber { get; set; } = string.Empty;
