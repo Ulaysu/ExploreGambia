@@ -3,6 +3,7 @@ using System;
 using ExploreGambia.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExploreGambia.API.Migrations
 {
     [DbContext(typeof(ExploreGambiaDbContext))]
-    partial class ExploreGambiaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260603092855_LinkTourGuideToUser")]
+    partial class LinkTourGuideToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

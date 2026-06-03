@@ -12,11 +12,15 @@ namespace ExploreGambia.API.Services
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly ITokenRepository tokenRepository;
+        private readonly ITourGuideRepository tourGuideRepository;
 
-        public AuthService(UserManager<ApplicationUser> userManager, ITokenRepository tokenRepository)
+        public AuthService(UserManager<ApplicationUser> userManager, ITokenRepository tokenRepository,
+            ITourGuideRepository tourGuideRepository)
         {
             this.userManager = userManager;
             this.tokenRepository = tokenRepository;
+            this.tourGuideRepository = tourGuideRepository;
+
         }
 
         public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto registerRequestDto)
@@ -53,6 +57,29 @@ namespace ExploreGambia.API.Services
 
                     if (identityResult.Succeeded)
                     {
+                        var roles = registerRequestDto.Roles.Select(r => r.ToLower()).ToList();
+
+                        if (roles.Contains("guide"))
+                        {
+                            var existingGuide = await tourGuideRepository
+                                .GetTourGuideByUserIdAsync(applicationUser.Id);
+
+                            if (existingGuide == null)
+                            {
+                                var tourGuide = new TourGuide
+                                {
+                                    TourGuideId = Guid.NewGuid(),
+                                    UserId = applicationUser.Id,
+                                    FullName = $"{applicationUser.FirstName} {applicationUser.LastName}",
+                                    Email = applicationUser.Email!,
+                                    PhoneNumber = string.Empty,
+                                    Bio = string.Empty,
+                                    IsAvailable = true
+                                };
+
+                                await tourGuideRepository.CreateTourGuideAsync(tourGuide);
+                            }
+                        }
                         return new RegisterResponseDto
                         {
                             IsSuccess = true,

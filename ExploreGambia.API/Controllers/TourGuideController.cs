@@ -6,6 +6,7 @@ using ExploreGambia.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ExploreGambia.API.Controllers
 {
@@ -56,6 +57,25 @@ namespace ExploreGambia.API.Controllers
             var tourGuideDto = mapper.Map<TourGuideDto>(tourGuideDomainModel);
 
             return CreatedAtAction(nameof(GetTourGuideById), new { id = tourGuideDto.TourGuideId }, tourGuideDto);
+        }
+
+        [HttpGet("me")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found in token");
+
+            var guide = await tourGuideRepository.GetTourGuideByUserIdAsync(userId);
+
+            if (guide == null)
+                return NotFound("Tour guide profile not found for this user");
+
+            var dto = mapper.Map<TourGuideProfileDto>(guide);
+
+            return Ok(dto);
         }
 
         // Secured endpoint - Update tour guide (Admin only)
