@@ -5,11 +5,11 @@ namespace ExploreGambia.API.Models.DTOs
     public class UpdateAuthMeRequestDto
     {
         [Required]
-        [RegularExpression(@".*\S.*", ErrorMessage = "First name cannot be blank.")]
+        [StringLength(50, MinimumLength = 2)]
         public string FirstName { get; set; } = string.Empty;
 
         [Required]
-        [RegularExpression(@".*\S.*", ErrorMessage = "Last name cannot be blank.")]
+        [StringLength(50, MinimumLength = 2)]
         public string LastName { get; set; } = string.Empty;
     }
 }

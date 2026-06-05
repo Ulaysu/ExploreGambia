@@ -100,6 +100,13 @@ namespace ExploreGambia.API.Repositories
             return await context.TourGuides.AsNoTracking().FirstOrDefaultAsync(g => g.UserId == userId);
         }
 
+        public async Task<TourGuide> UpdateTourGuideProfileAsync(TourGuide guide)
+        {
+            context.TourGuides.Update(guide);
+            await context.SaveChangesAsync();
+            return guide;
+        }
+
         // Update a TourGuide
         public async Task<TourGuide?> UpdateTourGuideAsync(Guid id, TourGuide tourGuide)
         {

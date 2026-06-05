@@ -57,7 +57,7 @@ namespace ExploreGambia.API.Controllers
 
         // Secured endpoint - Create tour (Admin only)
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Guide")]
         public async Task<IActionResult> CreateTour([FromBody] AddTourRequestDto addTourRequestDto)
         {
             // convert from Dto to Domain Model

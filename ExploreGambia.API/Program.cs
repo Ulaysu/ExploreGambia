@@ -137,6 +137,7 @@ builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IStripePaymentService, StripePaymentService>();
+builder.Services.AddScoped<IMediaService, CloudinaryMediaService>();
 
 builder.Services.Configure<ModemPayOptions>(options =>
 {

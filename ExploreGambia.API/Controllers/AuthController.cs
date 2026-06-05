@@ -135,8 +135,8 @@ namespace ExploreGambia.API.Controllers
                 return Unauthorized(new { message = "User not found" });
             }
 
-            user.FirstName = request.FirstName;
-            user.LastName = request.LastName;
+            user.FirstName = request.FirstName.Trim();
+            user.LastName = request.LastName.Trim();
 
             var result = await userManager.UpdateAsync(user);
 

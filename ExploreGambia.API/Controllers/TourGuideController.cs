@@ -107,5 +107,32 @@ namespace ExploreGambia.API.Controllers
 
             return Ok(tourGuideDto);
         }
+
+
+        [HttpPut("me")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateTourGuideProfileDto dto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User ID not found in token");
+
+            var guide = await tourGuideRepository.GetTourGuideByUserIdAsync(userId);
+
+            if (guide == null)
+                return NotFound("Tour guide profile not found");
+
+            // update fields
+            guide.PhoneNumber = dto.PhoneNumber;
+            guide.Bio = dto.Bio;
+            guide.IsAvailable = dto.IsAvailable;
+
+            await tourGuideRepository.UpdateTourGuideProfileAsync(guide);
+
+            var result = mapper.Map<TourGuideProfileDto>(guide);
+
+            return Ok(result);
+        }
     }
 }
