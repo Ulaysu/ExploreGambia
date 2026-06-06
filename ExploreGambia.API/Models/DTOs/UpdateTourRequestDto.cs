@@ -6,8 +6,7 @@ namespace ExploreGambia.API.Models.DTOs
 {
     public class UpdateTourRequestDto
     {
-        [GuidNotEmpty(ErrorMessage = "TourGuideId cannot be an empty GUID.")]
-        public Guid TourGuideId { get; set; }
+        
 
         [MaxLength(255, ErrorMessage = "Title cannot exceed 255 characters.")]
         public string Title { get; set; } = string.Empty;

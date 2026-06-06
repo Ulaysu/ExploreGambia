@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ExploreGambia.API.Controllers
 {
@@ -18,11 +19,13 @@ namespace ExploreGambia.API.Controllers
     {
         
         private readonly ITourRepository tourRepository;
+        private readonly ITourGuideRepository tourGuideRepository;
         private readonly IMapper mapper;
 
-        public ToursController(ITourRepository tourRepository, IMapper mapper)
+        public ToursController(ITourRepository tourRepository, ITourGuideRepository tourGuideRepository, IMapper mapper)
         {
             this.tourRepository = tourRepository;
+            this.tourGuideRepository = tourGuideRepository;
             this.mapper = mapper;
         }
 
@@ -60,8 +63,19 @@ namespace ExploreGambia.API.Controllers
         [Authorize(Roles = "Admin,Guide")]
         public async Task<IActionResult> CreateTour([FromBody] AddTourRequestDto addTourRequestDto)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var tourguide = await tourGuideRepository.GetTourGuideByUserIdAsync(userId);
+
+            if(tourguide is null)
+            {
+                return BadRequest("This particular tourguide is not found");
+            }
             // convert from Dto to Domain Model
             var tourDomainModel = mapper.Map<Tour>(addTourRequestDto);
+
+            tourDomainModel.TourGuideId = tourguide.TourGuideId;
+
 
             tourDomainModel = await tourRepository.CreateTourAsync(tourDomainModel);
 
@@ -75,11 +89,33 @@ namespace ExploreGambia.API.Controllers
         // Secured endpoint - Update tour (Admin only)
         [HttpPut]
         [Route("{id:Guid}")]
-        //[Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin,Guide")]
         public async Task<IActionResult> UpdateTourGuide([FromRoute] Guid id, [FromBody] UpdateTourRequestDto updateTourRequestDto)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var tourguide = await tourGuideRepository.GetTourGuideByUserIdAsync(userId);
+
+            if (tourguide is null)
+            {
+                return BadRequest("This particular tourguide is not found");
+            }
+
+            var existingTour = await tourRepository.GetTourById(id);
+
+            if (existingTour == null)
+            {
+                return NotFound();
+            }
+
+            // Verify ownership
+            if (existingTour.TourGuide.UserId != userId)
+            {
+                return Forbid("This tour is not yours");
+            }
 
             var tourDomainModel = mapper.Map<Tour>(updateTourRequestDto);
+            tourDomainModel.TourGuideId = tourguide.TourGuideId;
 
             tourDomainModel = await tourRepository.UpdateTourAsync(id, tourDomainModel);
 
@@ -104,6 +140,22 @@ namespace ExploreGambia.API.Controllers
 
             return Ok(tourDto);
 
+        }
+
+        [HttpGet("my")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> GetMyTours()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var tours = await tourRepository.GetToursByUserIdAsync(userId);
+
+            return Ok(mapper.Map<List<TourDto>>(tours));
         }
 
     }
