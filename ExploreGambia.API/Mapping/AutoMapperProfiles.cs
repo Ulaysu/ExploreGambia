@@ -18,7 +18,13 @@ namespace ExploreGambia.API.Mapping
 
             CreateMap<Tour, AddTourRequestDto>();
 
-            CreateMap<Tour, UpdateTourRequestDto>().ReverseMap();
+            CreateMap<UpdateTourRequestDto, Tour>()
+               .ForMember(dest => dest.StartDate,
+                opt => opt.MapFrom(src => DateTime.SpecifyKind(src.StartDate, DateTimeKind.Utc)))
+               .ForMember(dest => dest.EndDate,
+                   opt => opt.MapFrom(src => DateTime.SpecifyKind(src.EndDate, DateTimeKind.Utc)));
+
+            CreateMap<Tour, UpdateTourRequestDto>();
 
             CreateMap<TourGuide, TourGuideDto>().ReverseMap();
 

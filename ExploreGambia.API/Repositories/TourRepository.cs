@@ -136,6 +136,16 @@ namespace ExploreGambia.API.Repositories
                 .Where(t => t.TourGuide.UserId == userId).ToListAsync();
         }
 
+        public async Task<Tour?> GetTourByIdAndUserIdAsync(Guid tourId, string userId)
+        {
+            return await context.Tours
+                .AsNoTracking()
+                .Include(t => t.TourGuide)
+                .FirstOrDefaultAsync(t =>
+                    t.TourId == tourId &&
+                    t.TourGuide.UserId == userId);
+        }
+
         // UPDATE 
         public async Task<Tour?> UpdateTourAsync(Guid id, Tour tour)
         {

@@ -13,6 +13,8 @@ namespace ExploreGambia.API.Repositories
 
         Task<Tour?> GetTourById(Guid id);
 
+        Task<Tour?> GetTourByIdAndUserIdAsync(Guid tourId, string userId);
+
         Task<List<Tour>> GetToursByUserIdAsync(string userId);
 
         Task<Tour> CreateTourAsync(Tour tour);

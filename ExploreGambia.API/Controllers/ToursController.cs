@@ -142,6 +142,27 @@ namespace ExploreGambia.API.Controllers
 
         }
 
+        [HttpGet("my/{id:guid}")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> GetMyTourById([FromRoute] Guid id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var tour = await tourRepository.GetTourByIdAndUserIdAsync(id, userId);
+
+            if (tour == null)
+            {
+                return NotFound("Tour not found or does not belong to you.");
+            }
+
+            return Ok(mapper.Map<TourDto>(tour));
+        }
+
         [HttpGet("my")]
         [Authorize(Roles = "Guide")]
         public async Task<IActionResult> GetMyTours()
