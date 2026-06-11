@@ -146,6 +146,24 @@ namespace ExploreGambia.API.Repositories
                     t.TourGuide.UserId == userId);
         }
 
+        public async Task<Tour?> UpdateAvailabilityAsync(Guid id, bool isAvailable)
+        {
+            var tour = await context.Tours
+                .Include(t => t.TourGuide)
+                .FirstOrDefaultAsync(t => t.TourId == id);
+
+            if (tour == null)
+            {
+                return null;
+            }
+
+            tour.IsAvailable = isAvailable;
+
+            await context.SaveChangesAsync();
+
+            return tour;
+        }
+
         // UPDATE 
         public async Task<Tour?> UpdateTourAsync(Guid id, Tour tour)
         {

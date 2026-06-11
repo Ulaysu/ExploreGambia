@@ -48,6 +48,39 @@ namespace ExploreGambia.API.Controllers
             return Ok(mapper.Map<List<TourDto>>(tourDomainModel));
         }
 
+        [HttpPatch("{id:guid}/availability")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> UpdateAvailability([FromRoute] Guid id,
+          [FromBody] UpdateTourAvailabilityDto request)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var existingTour = await tourRepository.GetTourById(id);
+
+            if (existingTour == null)
+            {
+                return NotFound("Tour not found.");
+            }
+
+            // Ensure guide owns the tour
+            if (existingTour.TourGuide.UserId != userId)
+            {
+                return Forbid();
+            }
+
+            var updatedTour = await tourRepository.UpdateAvailabilityAsync(
+                id,
+                request.IsAvailable
+            );
+
+            return Ok(mapper.Map<TourDto>(updatedTour));
+        }
+
         // Public endpoint - Get tour by ID
         [HttpGet]
         [Route("{id:guid}")]
