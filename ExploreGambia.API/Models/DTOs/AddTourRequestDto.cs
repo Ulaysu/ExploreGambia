@@ -6,9 +6,6 @@ namespace ExploreGambia.API.Models.DTOs
 {
     public class AddTourRequestDto
     {
-        [Required(ErrorMessage = "TourGuideId is required.")]
-        [GuidNotEmpty(ErrorMessage = "TourGuideId cannot be an empty GUID.")]
-        public Guid TourGuideId { get; set; }
 
         [Required(ErrorMessage = "Title is required.")]
         [MaxLength(255, ErrorMessage = "Title cannot exceed 255 characters.")]

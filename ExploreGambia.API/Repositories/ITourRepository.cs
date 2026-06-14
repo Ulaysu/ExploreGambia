@@ -1,4 +1,5 @@
 ﻿using ExploreGambia.API.Models.Domain;
+using ExploreGambia.API.Models.DTOs;
 
 namespace ExploreGambia.API.Repositories
 {
@@ -13,13 +14,20 @@ namespace ExploreGambia.API.Repositories
 
         Task<Tour?> GetTourById(Guid id);
 
+        Task<Tour?> GetTourByIdAndUserIdAsync(Guid tourId, string userId);
+
+        Task<List<TourParticipantDto>> GetParticipantsAsync(Guid tourId);
+
+        Task<Tour?> UpdateAvailabilityAsync(Guid id, bool isAvailable);
+
+        Task<List<Tour>> GetToursByUserIdAsync(string userId);
 
         Task<Tour> CreateTourAsync(Tour tour);
 
 
         Task<Tour?> UpdateTourAsync(Guid id,Tour tour);
 
-        Task<Tour?> DeleteTourAsync(Guid id);
+        Task<Tour?> DeleteTourAsync(Guid tourId, Guid guideId);
 
     }
 }

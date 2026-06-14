@@ -3,6 +3,7 @@ using System;
 using ExploreGambia.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExploreGambia.API.Migrations
 {
     [DbContext(typeof(ExploreGambiaDbContext))]
-    partial class ExploreGambiaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260603092855_LinkTourGuideToUser")]
+    partial class LinkTourGuideToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -125,7 +128,7 @@ namespace ExploreGambia.API.Migrations
 
                     b.HasIndex("TourId");
 
-                    b.ToTable("Bookings", (string)null);
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Payment", b =>
@@ -158,7 +161,7 @@ namespace ExploreGambia.API.Migrations
 
                     b.HasIndex("BookingId");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Tour", b =>
@@ -206,7 +209,7 @@ namespace ExploreGambia.API.Migrations
 
                     b.HasIndex("TourGuideId");
 
-                    b.ToTable("Tours", (string)null);
+                    b.ToTable("Tours");
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.TourGuide", b =>
@@ -242,7 +245,7 @@ namespace ExploreGambia.API.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("TourGuides", (string)null);
+                    b.ToTable("TourGuides");
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Booking", b =>

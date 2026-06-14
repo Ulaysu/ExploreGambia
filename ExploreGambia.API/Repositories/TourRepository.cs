@@ -1,6 +1,7 @@
 ﻿using ExploreGambia.API.Data;
 using ExploreGambia.API.Exceptions;
 using ExploreGambia.API.Models.Domain;
+using ExploreGambia.API.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExploreGambia.API.Repositories
@@ -9,10 +10,12 @@ namespace ExploreGambia.API.Repositories
     {
         private const int MaxPageSize = 10;
         private readonly ExploreGambiaDbContext context;
+        private readonly ExploreGambiaAuthDbContext authContext;
 
-        public TourRepository(ExploreGambiaDbContext context)
+        public TourRepository(ExploreGambiaDbContext context, ExploreGambiaAuthDbContext authContext)
         {
             this.context = context;
+            this.authContext = authContext;
         }
 
         // CREATE 
@@ -25,16 +28,37 @@ namespace ExploreGambia.API.Repositories
         }
 
         // DELETE
-        public async Task<Tour?> DeleteTourAsync(Guid id)
+        public async Task<Tour?> DeleteTourAsync(
+                Guid tourId,
+                Guid guideId)
         {
-            var existingTour = await context.Tours.FirstOrDefaultAsync(x => x.TourId == id);
+            var tour = await context.Tours
+                .Include(t => t.Bookings)
+                .FirstOrDefaultAsync(t =>
+                    t.TourId == tourId &&
+                    t.TourGuideId == guideId);
 
-            if (existingTour == null) throw new TourNotFoundException(id);
+            if (tour == null)
+            {
+                return null;
+            }
 
-            context.Tours.Remove(existingTour);
+            var hasActiveBookings = tour.Bookings.Any(b =>
+                b.Status == BookingStatus.Pending ||
+                b.Status == BookingStatus.Confirmed);
+
+            if (hasActiveBookings)
+            {
+                throw new BusinessRuleException(
+                    "This tour has active bookings and cannot be deleted."
+                );
+            }
+
+            context.Tours.Remove(tour);
+
             await context.SaveChangesAsync();
 
-            return existingTour;
+            return tour;
         }
 
         // Get all Tours
@@ -129,6 +153,41 @@ namespace ExploreGambia.API.Repositories
             return tour;
         }
 
+        public async Task<List<Tour>> GetToursByUserIdAsync(string userId)
+        {
+            return await context.Tours.AsNoTracking().
+                Include(t => t.TourGuide)
+                .Where(t => t.TourGuide.UserId == userId).ToListAsync();
+        }
+
+        public async Task<Tour?> GetTourByIdAndUserIdAsync(Guid tourId, string userId)
+        {
+            return await context.Tours
+                .AsNoTracking()
+                .Include(t => t.TourGuide)
+                .FirstOrDefaultAsync(t =>
+                    t.TourId == tourId &&
+                    t.TourGuide.UserId == userId);
+        }
+
+        public async Task<Tour?> UpdateAvailabilityAsync(Guid id, bool isAvailable)
+        {
+            var tour = await context.Tours
+                .Include(t => t.TourGuide)
+                .FirstOrDefaultAsync(t => t.TourId == id);
+
+            if (tour == null)
+            {
+                return null;
+            }
+
+            tour.IsAvailable = isAvailable;
+
+            await context.SaveChangesAsync();
+
+            return tour;
+        }
+
         // UPDATE 
         public async Task<Tour?> UpdateTourAsync(Guid id, Tour tour)
         {
@@ -150,6 +209,44 @@ namespace ExploreGambia.API.Repositories
 
             return existingTour;
 
+        }
+
+        public async Task<List<TourParticipantDto>> GetParticipantsAsync(Guid tourId)
+        {
+            var bookings = await context.Bookings
+    .Where(b => b.TourId == tourId &&
+                b.Status == BookingStatus.Confirmed)
+    .ToListAsync();
+
+            var userIds = bookings
+                .Where(b => !String.IsNullOrEmpty(b.UserId))
+                .Select(b => b.UserId)
+                .Distinct()
+                .ToList();
+
+            var users = await authContext.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+
+            var usersLookup = users.ToDictionary(u => u.Id);
+
+            var participants = bookings.Select(b =>
+            {
+                usersLookup.TryGetValue(b.UserId, out var user);
+
+                return new TourParticipantDto
+                {
+                    BookingId = b.BookingId,
+                    UserId = b.UserId,
+                    FullName = user == null
+                        ? "Unknown User"
+                        : $"{user.FirstName} {user.LastName}",
+                    Email = user?.Email ?? "",
+                    NumberOfPeople = b.NumberOfPeople,
+                    BookingDate = b.BookingDate
+                };
+            }).ToList();
+            return participants;
         }
     }
 }

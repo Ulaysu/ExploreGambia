@@ -9,11 +9,26 @@ namespace ExploreGambia.API.Mapping
         public AutoMapperProfiles()
         {
             CreateMap<Tour, TourDto>().ReverseMap();
-            CreateMap<Tour, AddTourRequestDto>().ReverseMap();
 
-            CreateMap<Tour, UpdateTourRequestDto>().ReverseMap();
+            CreateMap<AddTourRequestDto, Tour>()
+                .ForMember(dest => dest.StartDate,
+                 opt => opt.MapFrom(src => DateTime.SpecifyKind(src.StartDate, DateTimeKind.Utc)))
+                .ForMember(dest => dest.EndDate,
+                    opt => opt.MapFrom(src => DateTime.SpecifyKind(src.EndDate, DateTimeKind.Utc)));
+
+            CreateMap<Tour, AddTourRequestDto>();
+
+            CreateMap<UpdateTourRequestDto, Tour>()
+               .ForMember(dest => dest.StartDate,
+                opt => opt.MapFrom(src => DateTime.SpecifyKind(src.StartDate, DateTimeKind.Utc)))
+               .ForMember(dest => dest.EndDate,
+                   opt => opt.MapFrom(src => DateTime.SpecifyKind(src.EndDate, DateTimeKind.Utc)));
+
+            CreateMap<Tour, UpdateTourRequestDto>();
 
             CreateMap<TourGuide, TourGuideDto>().ReverseMap();
+
+            CreateMap<TourGuide, TourGuideProfileDto>().ReverseMap();
 
             CreateMap<TourGuide, AddTourGuideRequestDto>().ReverseMap();
 

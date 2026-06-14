@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ExploreGambia.API.Controllers
 {
@@ -18,11 +19,13 @@ namespace ExploreGambia.API.Controllers
     {
         
         private readonly ITourRepository tourRepository;
+        private readonly ITourGuideRepository tourGuideRepository;
         private readonly IMapper mapper;
 
-        public ToursController(ITourRepository tourRepository, IMapper mapper)
+        public ToursController(ITourRepository tourRepository, ITourGuideRepository tourGuideRepository, IMapper mapper)
         {
             this.tourRepository = tourRepository;
+            this.tourGuideRepository = tourGuideRepository;
             this.mapper = mapper;
         }
 
@@ -45,6 +48,39 @@ namespace ExploreGambia.API.Controllers
             return Ok(mapper.Map<List<TourDto>>(tourDomainModel));
         }
 
+        [HttpPatch("{id:guid}/availability")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> UpdateAvailability([FromRoute] Guid id,
+          [FromBody] UpdateTourAvailabilityDto request)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var existingTour = await tourRepository.GetTourById(id);
+
+            if (existingTour == null)
+            {
+                return NotFound("Tour not found.");
+            }
+
+            // Ensure guide owns the tour
+            if (existingTour.TourGuide.UserId != userId)
+            {
+                return Forbid();
+            }
+
+            var updatedTour = await tourRepository.UpdateAvailabilityAsync(
+                id,
+                request.IsAvailable
+            );
+
+            return Ok(mapper.Map<TourDto>(updatedTour));
+        }
+
         // Public endpoint - Get tour by ID
         [HttpGet]
         [Route("{id:guid}")]
@@ -57,11 +93,22 @@ namespace ExploreGambia.API.Controllers
 
         // Secured endpoint - Create tour (Admin only)
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Guide")]
         public async Task<IActionResult> CreateTour([FromBody] AddTourRequestDto addTourRequestDto)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var tourguide = await tourGuideRepository.GetTourGuideByUserIdAsync(userId);
+
+            if(tourguide is null)
+            {
+                return BadRequest("This particular tourguide is not found");
+            }
             // convert from Dto to Domain Model
             var tourDomainModel = mapper.Map<Tour>(addTourRequestDto);
+
+            tourDomainModel.TourGuideId = tourguide.TourGuideId;
+
 
             tourDomainModel = await tourRepository.CreateTourAsync(tourDomainModel);
 
@@ -75,11 +122,33 @@ namespace ExploreGambia.API.Controllers
         // Secured endpoint - Update tour (Admin only)
         [HttpPut]
         [Route("{id:Guid}")]
-        //[Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin,Guide")]
         public async Task<IActionResult> UpdateTourGuide([FromRoute] Guid id, [FromBody] UpdateTourRequestDto updateTourRequestDto)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var tourguide = await tourGuideRepository.GetTourGuideByUserIdAsync(userId);
+
+            if (tourguide is null)
+            {
+                return BadRequest("This particular tourguide is not found");
+            }
+
+            var existingTour = await tourRepository.GetTourById(id);
+
+            if (existingTour == null)
+            {
+                return NotFound();
+            }
+
+            // Verify ownership
+            if (existingTour.TourGuide.UserId != userId)
+            {
+                return Forbid("This tour is not yours");
+            }
 
             var tourDomainModel = mapper.Map<Tour>(updateTourRequestDto);
+            tourDomainModel.TourGuideId = tourguide.TourGuideId;
 
             tourDomainModel = await tourRepository.UpdateTourAsync(id, tourDomainModel);
 
@@ -90,20 +159,96 @@ namespace ExploreGambia.API.Controllers
 
         }
 
-        // Secured endpoint - Delete tour (Admin only)
-        [HttpDelete]
-        [Route("{id:Guid}")]
-        //[Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteTourGuide([FromRoute] Guid id)
+        [HttpGet("{tourId:guid}/participants")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> GetParticipants(Guid tourId)
         {
-            var tourDomainModel = await tourRepository.DeleteTourAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // return deleted Tour back
-            // Convert Domain Model to DTO
-            var tourDto = mapper.Map<TourDto>(tourDomainModel);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
 
-            return Ok(tourDto);
+            var tour = await tourRepository.GetTourById(tourId);
 
+            if (tour == null)
+                return NotFound("Tour not found.");
+
+            if (tour.TourGuide?.UserId != userId)
+                return Forbid();
+
+            var participants =
+                await tourRepository.GetParticipantsAsync(tourId);
+
+            return Ok(participants);
+        }
+
+        // Secured endpoint - Delete tour (Guide only)
+    
+        [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> DeleteTour([FromRoute] Guid id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var guide = await tourGuideRepository
+                .GetTourGuideByUserIdAsync(userId);
+
+            if (guide == null)
+            {
+                return BadRequest("Guide not found.");
+            }
+
+            var deletedTour = await tourRepository
+                .DeleteTourAsync(id, guide.TourGuideId);
+
+            if (deletedTour == null)
+            {
+                return NotFound("Tour not found.");
+            }
+
+            return Ok(new { message = $"We have deleted {deletedTour.Title} Successfully" });
+        }
+
+        [HttpGet("my/{id:guid}")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> GetMyTourById([FromRoute] Guid id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var tour = await tourRepository.GetTourByIdAndUserIdAsync(id, userId);
+
+            if (tour == null)
+            {
+                return NotFound("Tour not found or does not belong to you.");
+            }
+
+            return Ok(mapper.Map<TourDto>(tour));
+        }
+
+        [HttpGet("my")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> GetMyTours()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var tours = await tourRepository.GetToursByUserIdAsync(userId);
+
+            return Ok(mapper.Map<List<TourDto>>(tours));
         }
 
     }

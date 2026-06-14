@@ -42,7 +42,9 @@ namespace ExploreGambia.API.Services
             // ✅ ADD THIS — prevent duplicate bookings
             var existingBooking = await bookingRepository.GetActiveBookingByUserAndTourAsync(userId, request.TourId);
             if (existingBooking != null)
+            {
                 throw new BusinessRuleException("You already have an active booking for this tour.");
+            }
 
 
             var booking = mapper.Map<Booking>(request);

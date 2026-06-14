@@ -95,12 +95,57 @@ namespace ExploreGambia.API.Controllers
 
             var response = new AuthMeResponseDto
             {
+                UserId = user.Id,
+                FirstName = user.FirstName ?? string.Empty,
+                LastName = user.LastName ?? string.Empty,
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToList(),
                 IsAuthenticated = true
             };
 
             return Ok(response);
+        }
+
+        /// <summary>
+        /// Update authenticated user's basic profile information
+        /// </summary>
+        [HttpPut("me")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> UpdateCurrentUserAsync([FromBody] UpdateAuthMeRequestDto request)
+        {
+            if (request == null || !ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var emailClaim = User.FindFirst(ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(emailClaim))
+            {
+                return Unauthorized(new { message = "Email not found in token claims" });
+            }
+
+            var user = await userManager.FindByEmailAsync(emailClaim);
+
+            if (user == null)
+            {
+                return Unauthorized(new { message = "User not found" });
+            }
+
+            user.FirstName = request.FirstName.Trim();
+            user.LastName = request.LastName.Trim();
+
+            var result = await userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            return NoContent();
         }
 
 

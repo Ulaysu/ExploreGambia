@@ -9,5 +9,7 @@ namespace ExploreGambia.API.Models.Domain
 
         public string? RefreshToken { get; set; }
         public DateTime?  RefreshTokenExpiryTime { get; set; }
+
+        public TourGuide? TourGuide { get; set; }
     }
 }
