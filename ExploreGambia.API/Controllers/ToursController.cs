@@ -182,20 +182,36 @@ namespace ExploreGambia.API.Controllers
             return Ok(participants);
         }
 
-        // Secured endpoint - Delete tour (Admin only)
-        [HttpDelete]
-        [Route("{id:Guid}")]
-        //[Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteTourGuide([FromRoute] Guid id)
+        // Secured endpoint - Delete tour (Guide only)
+    
+        [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> DeleteTour([FromRoute] Guid id)
         {
-            var tourDomainModel = await tourRepository.DeleteTourAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // return deleted Tour back
-            // Convert Domain Model to DTO
-            var tourDto = mapper.Map<TourDto>(tourDomainModel);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
 
-            return Ok(tourDto);
+            var guide = await tourGuideRepository
+                .GetTourGuideByUserIdAsync(userId);
 
+            if (guide == null)
+            {
+                return BadRequest("Guide not found.");
+            }
+
+            var deletedTour = await tourRepository
+                .DeleteTourAsync(id, guide.TourGuideId);
+
+            if (deletedTour == null)
+            {
+                return NotFound("Tour not found.");
+            }
+
+            return Ok(new { message = $"We have deleted {deletedTour.Title} Successfully" });
         }
 
         [HttpGet("my/{id:guid}")]
