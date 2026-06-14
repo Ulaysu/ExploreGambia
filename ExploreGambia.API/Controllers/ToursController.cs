@@ -159,6 +159,29 @@ namespace ExploreGambia.API.Controllers
 
         }
 
+        [HttpGet("{tourId:guid}/participants")]
+        [Authorize(Roles = "Guide")]
+        public async Task<IActionResult> GetParticipants(Guid tourId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var tour = await tourRepository.GetTourById(tourId);
+
+            if (tour == null)
+                return NotFound("Tour not found.");
+
+            if (tour.TourGuide?.UserId != userId)
+                return Forbid();
+
+            var participants =
+                await tourRepository.GetParticipantsAsync(tourId);
+
+            return Ok(participants);
+        }
+
         // Secured endpoint - Delete tour (Admin only)
         [HttpDelete]
         [Route("{id:Guid}")]

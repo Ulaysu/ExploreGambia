@@ -20,6 +20,8 @@ namespace ExploreGambia.API.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+          
+
             modelBuilder.Entity<ApplicationUser>()
                 .ToTable("AspNetUsers", table => table.ExcludeFromMigrations());
 

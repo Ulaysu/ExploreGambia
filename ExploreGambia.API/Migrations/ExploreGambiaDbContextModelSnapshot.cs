@@ -125,7 +125,7 @@ namespace ExploreGambia.API.Migrations
 
                     b.HasIndex("TourId");
 
-                    b.ToTable("Bookings");
+                    b.ToTable("Bookings", (string)null);
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Payment", b =>
@@ -158,7 +158,7 @@ namespace ExploreGambia.API.Migrations
 
                     b.HasIndex("BookingId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Tour", b =>
@@ -206,7 +206,7 @@ namespace ExploreGambia.API.Migrations
 
                     b.HasIndex("TourGuideId");
 
-                    b.ToTable("Tours");
+                    b.ToTable("Tours", (string)null);
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.TourGuide", b =>
@@ -242,7 +242,7 @@ namespace ExploreGambia.API.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("TourGuides");
+                    b.ToTable("TourGuides", (string)null);
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Booking", b =>
