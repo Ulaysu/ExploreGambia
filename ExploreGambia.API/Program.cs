@@ -138,6 +138,7 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IStripePaymentService, StripePaymentService>();
 builder.Services.AddScoped<IMediaService, CloudinaryMediaService>();
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 
 builder.Services.Configure<ModemPayOptions>(options =>
 {
