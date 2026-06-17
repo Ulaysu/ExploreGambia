@@ -43,7 +43,8 @@ namespace ExploreGambia.API.Services
                 UserName = registerRequestDto.Email,
                 Email = registerRequestDto.Email,
                 FirstName = registerRequestDto.FirstName ?? string.Empty,
-                LastName = registerRequestDto.LastName ?? string.Empty
+                LastName = registerRequestDto.LastName ?? string.Empty,
+                IsActive = true
             };
 
             var identityResult = await userManager.CreateAsync(applicationUser, registerRequestDto.Password);
@@ -123,7 +124,7 @@ namespace ExploreGambia.API.Services
             };
         }
 
-        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequestDto)
+        /*public async Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequestDto)
         {
             var user = await userManager.FindByEmailAsync(loginRequestDto.Email);
 
@@ -151,6 +152,57 @@ namespace ExploreGambia.API.Services
             }
 
             return new LoginResponseDto { JwtToken = string.Empty, Error = "Email or password incorrect" };
+        }*/
+
+        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequestDto)
+        {
+            var user = await userManager.FindByEmailAsync(loginRequestDto.Email);
+
+            if (user == null)
+            {
+                return new LoginResponseDto
+                {
+                    JwtToken = string.Empty,
+                    Error = "Email or password incorrect"
+                };
+            }
+
+            var checkPasswordResult = await userManager.CheckPasswordAsync(user, loginRequestDto.Password);
+
+            if (!checkPasswordResult)
+            {
+                return new LoginResponseDto
+                {
+                    JwtToken = string.Empty,
+                    Error = "Email or password incorrect"
+                };
+            }
+
+            // User Guard
+            if (!user.IsActive)
+            {
+                return new LoginResponseDto
+                {
+                    JwtToken = string.Empty,
+                    Error = "Account is disabled. Contact admin."
+                };
+            }
+
+            var roles = await userManager.GetRolesAsync(user);
+            var jwtToken = tokenRepository.CreateJWTToken(user, roles.ToList());
+
+            var refreshToken = tokenRepository.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(30);
+
+            await userManager.UpdateAsync(user);
+
+            return new LoginResponseDto
+            {
+                JwtToken = jwtToken,
+                RefreshToken = refreshToken
+            };
         }
 
         public async Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)

@@ -32,5 +32,41 @@ namespace ExploreGambia.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("users")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = await _adminRepo.GetAllUsersAsync();
+
+            return Ok(users);
+        }
+
+
+        [HttpGet("users/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetUser( [FromRoute] string id)
+        {
+            var user = await _adminRepo.GetUserByIdAsync(id);
+
+            if (user == null)
+                return NotFound();
+
+            return Ok(user);
+        }
+
+        [HttpPut("users/{id}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateUserStatus([FromRoute] string id,
+            [FromBody] UpdateUserStatusRequestDto request)
+        {
+            var updated =
+                await _adminRepo.UpdateUserStatusAsync( id, request.IsActive);
+
+            if (!updated)
+                return NotFound();
+
+            return Ok();
+        }
     }
 }
