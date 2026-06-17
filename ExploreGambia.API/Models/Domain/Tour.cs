@@ -21,7 +21,7 @@ namespace ExploreGambia.API.Models.Domain
         public Guid TourGuideId { get; set; } // FK reference to TourGuide
 
         public TourGuide TourGuide { get; set; } // Navigation Property
-
+        public bool IsDeleted { get; set; } = false;
         // Bookings relationship
         public List<Booking> Bookings { get; set; } = new List<Booking>();
 
