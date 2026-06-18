@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -13,11 +14,13 @@ namespace ExploreGambia.API.Controllers
     {
         private readonly IAdminRepository _adminRepo;
         private readonly IMapper _mapper;
+        private readonly IBookingRepository _bookingRepository;
 
-        public AdminController(IAdminRepository adminRepo, IMapper mapper)
+        public AdminController(IAdminRepository adminRepo, IMapper mapper, IBookingRepository bookingRepository)
         {
             _adminRepo = adminRepo;
             _mapper = mapper;
+            _bookingRepository = bookingRepository;
         }
 
         [HttpGet("dashboard")]
@@ -73,6 +76,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpGet("tours")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllTours()
         {
             var tours = await _adminRepo.GetAllToursAsync();
@@ -81,6 +85,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpPatch("tours/{id:guid}/delete")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SoftDeleteTour(Guid id)
         {
             var deleted =
@@ -93,6 +98,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpPatch("tours/{id:guid}/restore")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RestoreTour(Guid id)
         {
             var restored =
@@ -103,5 +109,30 @@ namespace ExploreGambia.API.Controllers
 
             return Ok(new {Message = "Tour Restored Successfully"});
         }
+
+        [HttpGet("bookings")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllBookings(
+    [FromQuery] BookingStatus? status,
+    [FromQuery] DateTime? bookingDateFrom,
+    [FromQuery] DateTime? bookingDateTo,
+    [FromQuery] string? sortBy,
+    [FromQuery] bool? isAscending,
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 10)
+        {
+            var bookings = await _bookingRepository.GetAllBookingsAsync(
+                status,
+                bookingDateFrom,
+                bookingDateTo,
+                sortBy,
+                isAscending ?? true,
+                pageNumber,
+                pageSize);
+
+            return Ok(_mapper.Map<List<AdminBookingDto>>(bookings));
+        }
+
+
     }
 }
