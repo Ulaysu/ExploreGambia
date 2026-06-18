@@ -93,5 +93,46 @@ namespace ExploreGambia.API.Repositories
 
             return result.Succeeded;
         }
+
+
+        public async Task<IEnumerable<Tour>> GetAllToursAsync()
+        {
+            return await _context.Tours
+                .Include(t => t.TourGuide)
+                .OrderByDescending(t => t.StartDate)
+                .ToListAsync();
+        }
+
+        public async Task<bool> SoftDeleteTourAsync(Guid tourId)
+        {
+            var tour = await _context.Tours
+                .FirstOrDefaultAsync(t => t.TourId == tourId);
+
+            if (tour == null)
+                return false;
+
+            tour.IsDeleted = true;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> RestoreTourAsync(Guid tourId)
+        {
+            var tour = await _context.Tours
+                .FirstOrDefaultAsync(t => t.TourId == tourId);
+
+            if (tour == null)
+                return false;
+
+            tour.IsDeleted = false;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+
     }
 }

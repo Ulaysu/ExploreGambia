@@ -1,4 +1,5 @@
-﻿using ExploreGambia.API.Models.DTOs;
+﻿using AutoMapper;
+using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,10 +12,12 @@ namespace ExploreGambia.API.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminRepository _adminRepo;
+        private readonly IMapper _mapper;
 
-        public AdminController(IAdminRepository adminRepo)
+        public AdminController(IAdminRepository adminRepo, IMapper mapper)
         {
             _adminRepo = adminRepo;
+            _mapper = mapper;
         }
 
         [HttpGet("dashboard")]
@@ -67,6 +70,38 @@ namespace ExploreGambia.API.Controllers
                 return NotFound();
 
             return Ok();
+        }
+
+        [HttpGet("tours")]
+        public async Task<IActionResult> GetAllTours()
+        {
+            var tours = await _adminRepo.GetAllToursAsync();
+
+            return Ok(_mapper.Map<List<AdminTourDto>>(tours));
+        }
+
+        [HttpPatch("tours/{id:guid}/delete")]
+        public async Task<IActionResult> SoftDeleteTour(Guid id)
+        {
+            var deleted =
+                await _adminRepo.SoftDeleteTourAsync(id);
+
+            if (!deleted)
+                return NotFound();
+
+            return Ok(new { Message = "Tour Deleted Successfully"});
+        }
+
+        [HttpPatch("tours/{id:guid}/restore")]
+        public async Task<IActionResult> RestoreTour(Guid id)
+        {
+            var restored =
+                await _adminRepo.RestoreTourAsync(id);
+
+            if (!restored)
+                return NotFound();
+
+            return Ok(new {Message = "Tour Restored Successfully"});
         }
     }
 }
