@@ -1,4 +1,5 @@
 ﻿using ExploreGambia.API.Models.Domain;
+using ExploreGambia.API.Models.DTOs;
 
 namespace ExploreGambia.API.Repositories
 {
@@ -17,5 +18,7 @@ namespace ExploreGambia.API.Repositories
         Task<Payment?> UpdatePaymentAsync(Guid id, Payment payment);
         Task<Payment?> UpdatePaymentStatusAsync(Guid id, PaymentStatus status, string? providerReference = null);
         Task<Payment?> DeletePaymentAsync(Guid id);
+
+        Task<PaymentSummaryDto> GetPaymentSummaryAsync();
     }
 }

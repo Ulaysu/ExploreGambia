@@ -161,5 +161,12 @@ namespace ExploreGambia.API.Controllers
             return Ok(_mapper.Map<List<PaymentDto>>(payments));
         }
 
+        [HttpGet("payments/summary")]
+        public async Task<IActionResult> GetPaymentSummary()
+        {
+            var summary = await _paymentRepository.GetPaymentSummaryAsync();
+
+            return Ok(summary);
+        }
     }
 }
