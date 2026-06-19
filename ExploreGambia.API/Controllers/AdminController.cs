@@ -15,12 +15,15 @@ namespace ExploreGambia.API.Controllers
         private readonly IAdminRepository _adminRepo;
         private readonly IMapper _mapper;
         private readonly IBookingRepository _bookingRepository;
+        private readonly IPaymentRepository _paymentRepository;
 
-        public AdminController(IAdminRepository adminRepo, IMapper mapper, IBookingRepository bookingRepository)
+        public AdminController(IAdminRepository adminRepo, IMapper mapper, 
+            IBookingRepository bookingRepository, IPaymentRepository paymentRepository)
         {
             _adminRepo = adminRepo;
             _mapper = mapper;
             _bookingRepository = bookingRepository;
+            _paymentRepository = paymentRepository;
         }
 
         [HttpGet("dashboard")]
@@ -133,6 +136,30 @@ namespace ExploreGambia.API.Controllers
             return Ok(_mapper.Map<List<AdminBookingDto>>(bookings));
         }
 
+        [HttpGet("payments")]
+        public async Task<IActionResult> GetAllPayments(
+    [FromQuery] string? paymentMethod,
+    [FromQuery] DateTime? paymentDateFrom,
+    [FromQuery] DateTime? paymentDateTo,
+    [FromQuery] PaymentStatus? status,
+    [FromQuery] string? sortBy,
+    [FromQuery] bool? isAscending,
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 10)
+        {
+            var payments =
+                await _paymentRepository.GetAllPaymentsAsync(
+                    paymentMethod,
+                    paymentDateFrom,
+                    paymentDateTo,
+                    status,
+                    sortBy,
+                    isAscending ?? true,
+                    pageNumber,
+                    pageSize);
+
+            return Ok(_mapper.Map<List<PaymentDto>>(payments));
+        }
 
     }
 }
