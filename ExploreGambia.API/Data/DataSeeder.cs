@@ -18,10 +18,12 @@ namespace ExploreGambia.API.Data
 
         public async Task SeedAsync()
         {
-
             await EnsureDatabaseReadyAsync(_context);
             await EnsureDatabaseReadyAsync(_authContext);
             using var transaction = await _context.Database.BeginTransactionAsync();
+
+            //  ADD THIS RIGHT HERE (BEFORE SEEDING ANYTHING)
+            await CleanInvalidBookings();
 
             try
             {
@@ -39,6 +41,19 @@ namespace ExploreGambia.API.Data
             }
 
 
+        }
+
+        private async Task CleanInvalidBookings()
+        {
+            await _context.Database.ExecuteSqlRawAsync(@"
+        UPDATE ""Bookings""
+        SET ""UserId"" = NULL
+        WHERE ""UserId"" IS NOT NULL
+        AND NOT EXISTS (
+            SELECT 1 FROM ""AspNetUsers"" u
+            WHERE u.""Id"" = ""Bookings"".""UserId""
+        );
+    ");
         }
 
         private static async Task EnsureDatabaseReadyAsync(DbContext dbContext)
