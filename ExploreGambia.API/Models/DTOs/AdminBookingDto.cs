@@ -5,7 +5,7 @@
         public Guid BookingId { get; set; }
         public string TourTitle { get; set; }
         public string Location { get; set; }
-        public string GuideName { get; set; }
+        public string CustomerName { get; set; }
 
         public DateTime BookingDate { get; set; }
         public int NumberOfPeople { get; set; }

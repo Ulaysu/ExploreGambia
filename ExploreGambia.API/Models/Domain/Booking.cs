@@ -8,7 +8,7 @@ namespace ExploreGambia.API.Models.Domain
         [Key]
         public Guid BookingId { get; set; } // Primary Key
         public Guid TourId { get; set; } // Foreign Key (FK) to Tour
-        public string UserId { get; set; } = string.Empty; // FK to AspNetUsers
+        public string? UserId { get; set; } // FK to AspNetUsers
 
 
         public DateTime BookingDate { get; set; } = DateTime.UtcNow; // Timestamp
@@ -23,6 +23,7 @@ namespace ExploreGambia.API.Models.Domain
         // Navigation properties
         public Tour Tour { get; set; }
 
+        public ApplicationUser? User { get; set; }
 
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }

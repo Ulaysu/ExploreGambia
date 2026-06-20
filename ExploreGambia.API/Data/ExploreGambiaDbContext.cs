@@ -20,7 +20,12 @@ namespace ExploreGambia.API.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-          
+            modelBuilder.Entity<Booking>()
+                 .HasOne(b => b.User)
+                 .WithMany()
+                 .HasForeignKey(b => b.UserId)
+                 .IsRequired(false).OnDelete(DeleteBehavior.SetNull); ;
+
 
             modelBuilder.Entity<ApplicationUser>()
                 .ToTable("AspNetUsers", table => table.ExcludeFromMigrations());

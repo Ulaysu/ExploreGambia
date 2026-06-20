@@ -10,12 +10,15 @@ namespace ExploreGambia.API.Repositories
     {
         private const int MaxPageSize = 10;
         private readonly ExploreGambiaDbContext context;
+        private readonly ExploreGambiaAuthDbContext authContext;
         private readonly ILogger<BookingRepository> logger;
 
-        public BookingRepository(ExploreGambiaDbContext context, ILogger<BookingRepository> logger)
+        public BookingRepository(ExploreGambiaDbContext context, ILogger<BookingRepository> logger, 
+            ExploreGambiaAuthDbContext authCcontext)
         {
             this.context = context;
             this.logger = logger;
+            this.authContext = authCcontext;
         }
         public async Task<Booking> CreateBookingAsync(Booking booking)
         {
@@ -62,7 +65,7 @@ namespace ExploreGambia.API.Repositories
             pageNumber = Math.Max(pageNumber, 1);
             pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
-            IQueryable<Booking> query = context.Bookings
+            IQueryable<Booking> query = context.Bookings.Include(b => b.Tour).Include(b => b.User)
                 .AsNoTracking();
 
             // Filters
@@ -85,22 +88,23 @@ namespace ExploreGambia.API.Repositories
                 _ => query.OrderBy(b => b.BookingId)
             };
 
-            // Projection (IMPORTANT PART)
-            return await query
-                .Select(b => new AdminBookingDto
-                {
-                    BookingId = b.BookingId,
-                    TourTitle = b.Tour.Title,
-                    GuideName = b.Tour.TourGuide.FullName,
-                    TotalAmount = b.TotalAmount,
-                    NumberOfPeople = b.NumberOfPeople,
-                    Location = b.Tour.Location,
-                    Status = b.Status.ToString(),
-                    BookingDate = b.BookingDate
-                })
-                .Skip((pageNumber - 1) * pageSize)
+            var bookings = await query.Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+
+               
+
+            return bookings.Select(b => new AdminBookingDto
+            {
+                BookingId = b.BookingId,
+                TourTitle = b.Tour.Title,
+                CustomerName = b.User != null ? $"{b.User.FirstName} {b.User.LastName}": "Guest Customer",
+                TotalAmount = b.TotalAmount,
+                NumberOfPeople = b.NumberOfPeople,
+                Location = b.Tour.Location,
+                Status = b.Status.ToString(),
+                BookingDate = b.BookingDate
+            }).ToList();
         }
 
         /*public async Task<List<Booking>> GetAllBookingsAsync(BookingStatus? status = null, 

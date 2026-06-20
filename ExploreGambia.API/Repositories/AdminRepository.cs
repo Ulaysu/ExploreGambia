@@ -51,9 +51,9 @@ namespace ExploreGambia.API.Repositories
                 result.Add(new AdminUserDto
                 {
                     Id = user.Id,
-                    UserName = user.UserName ?? "",
                     Email = user.Email ?? "",
                     IsActive = user.IsActive,
+                    FullName = $"{user.FirstName} {user.LastName}",
                     Roles = roles
                 });
             }
@@ -74,6 +74,7 @@ namespace ExploreGambia.API.Repositories
             {
                 Id = user.Id,
                 UserName = user.UserName ?? "",
+                FullName = $"{user.FirstName} {user.LastName}",
                 Email = user.Email ?? "",
                 IsActive = user.IsActive,
                 Roles = roles
