@@ -70,7 +70,7 @@ namespace ExploreGambia.API.Controllers
             return Ok(mapper.Map<BookingDto>(booking));
         }
 
-        [Authorize(Roles = "Admin, User")]
+        [Authorize(Roles = "User")]
         [HttpPost]
         public async Task<IActionResult> CreateBooking([FromBody] AddBookingRequestDto addBookingRequestDto)
         {

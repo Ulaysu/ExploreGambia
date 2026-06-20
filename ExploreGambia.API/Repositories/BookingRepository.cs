@@ -1,7 +1,8 @@
 ﻿using ExploreGambia.API.Data;
-using ExploreGambia.API.Models.Domain;
-using Microsoft.EntityFrameworkCore;
 using ExploreGambia.API.Exceptions;
+using ExploreGambia.API.Models.Domain;
+using ExploreGambia.API.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExploreGambia.API.Repositories
 {
@@ -9,12 +10,15 @@ namespace ExploreGambia.API.Repositories
     {
         private const int MaxPageSize = 10;
         private readonly ExploreGambiaDbContext context;
+        private readonly ExploreGambiaAuthDbContext authContext;
         private readonly ILogger<BookingRepository> logger;
 
-        public BookingRepository(ExploreGambiaDbContext context, ILogger<BookingRepository> logger)
+        public BookingRepository(ExploreGambiaDbContext context, ILogger<BookingRepository> logger, 
+            ExploreGambiaAuthDbContext authCcontext)
         {
             this.context = context;
             this.logger = logger;
+            this.authContext = authCcontext;
         }
         public async Task<Booking> CreateBookingAsync(Booking booking)
         {
@@ -49,7 +53,61 @@ namespace ExploreGambia.API.Repositories
                 ).FirstOrDefaultAsync();
         }
 
-        public async Task<List<Booking>> GetAllBookingsAsync(BookingStatus? status = null, 
+        public async Task<List<AdminBookingDto>> GetAllBookingsAsync(
+    BookingStatus? status = null,
+    DateTime? bookingDateFrom = null,
+    DateTime? bookingDateTo = null,
+    string? sortBy = null,
+    bool isAscending = true,
+    int pageNumber = 1,
+    int pageSize = 10)
+        {
+            pageNumber = Math.Max(pageNumber, 1);
+            pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
+
+            IQueryable<Booking> query = context.Bookings.Include(b => b.Tour).Include(b => b.User)
+                .AsNoTracking();
+
+            // Filters
+            if (status.HasValue)
+                query = query.Where(b => b.Status == status);
+
+            if (bookingDateFrom.HasValue)
+                query = query.Where(b => b.BookingDate >= bookingDateFrom);
+
+            if (bookingDateTo.HasValue)
+                query = query.Where(b => b.BookingDate <= bookingDateTo.Value.AddDays(1).AddTicks(-1));
+
+            // Sorting
+            query = sortBy?.ToLower() switch
+            {
+                "bookingdate" => isAscending ? query.OrderBy(b => b.BookingDate) : query.OrderByDescending(b => b.BookingDate),
+                "totalamount" => isAscending ? query.OrderBy(b => b.TotalAmount) : query.OrderByDescending(b => b.TotalAmount),
+                "numberofpeople" => isAscending ? query.OrderBy(b => b.NumberOfPeople) : query.OrderByDescending(b => b.NumberOfPeople),
+                "status" => isAscending ? query.OrderBy(b => b.Status) : query.OrderByDescending(b => b.Status),
+                _ => query.OrderBy(b => b.BookingId)
+            };
+
+            var bookings = await query.Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+               
+
+            return bookings.Select(b => new AdminBookingDto
+            {
+                BookingId = b.BookingId,
+                TourTitle = b.Tour.Title,
+                CustomerName = b.User != null ? $"{b.User.FirstName} {b.User.LastName}": "Guest Customer",
+                TotalAmount = b.TotalAmount,
+                NumberOfPeople = b.NumberOfPeople,
+                Location = b.Tour.Location,
+                Status = b.Status.ToString(),
+                BookingDate = b.BookingDate
+            }).ToList();
+        }
+
+        /*public async Task<List<Booking>> GetAllBookingsAsync(BookingStatus? status = null, 
             DateTime? bookingDateFrom = null, DateTime? bookingDateTo = null, string? sortBy = null, 
             bool isAscending = true, int pageNumber = 1, int pageSize = 10)
         {
@@ -58,7 +116,8 @@ namespace ExploreGambia.API.Repositories
 
            IQueryable<Booking> bookings = context.Bookings
                 .AsNoTracking()
-                .Include(b => b.Tour);
+                .Include(b => b.Tour)
+                .ThenInclude(t => t.TourGuide);
 
             // Apply filtering
             if (status.HasValue)
@@ -113,7 +172,7 @@ namespace ExploreGambia.API.Repositories
             // Apply pagination
             return await bookings.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
-        }
+        }*/
 
         public async Task<Booking?> GetBookingById(Guid id)
         {

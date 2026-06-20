@@ -1,8 +1,9 @@
-﻿using System.Globalization;
-using ExploreGambia.API.Data;
-using ExploreGambia.API.Models.Domain;
-using Microsoft.EntityFrameworkCore;
+﻿using ExploreGambia.API.Data;
 using ExploreGambia.API.Exceptions;
+using ExploreGambia.API.Models.Domain;
+using ExploreGambia.API.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace ExploreGambia.API.Repositories
 {
@@ -184,6 +185,32 @@ namespace ExploreGambia.API.Repositories
             await context.SaveChangesAsync();
 
             return existingPayment;
+        }
+
+        public async Task<PaymentSummaryDto> GetPaymentSummaryAsync()
+        {
+            return new PaymentSummaryDto
+            {
+                TotalPayments =
+                    await context.Payments.CountAsync(),
+
+                SuccessfulPayments =
+                    await context.Payments.CountAsync(
+                        p => p.Status == PaymentStatus.Succeeded),
+
+                PendingPayments =
+                    await context.Payments.CountAsync(
+                        p => p.Status == PaymentStatus.Pending),
+
+                FailedPayments =
+                    await context.Payments.CountAsync(
+                        p => p.Status == PaymentStatus.Failed),
+
+                TotalRevenue =
+                    await context.Payments
+                        .Where(p => p.Status == PaymentStatus.Succeeded)
+                        .SumAsync(p => p.Amount)
+            };
         }
     }
 }

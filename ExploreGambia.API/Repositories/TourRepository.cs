@@ -70,7 +70,7 @@ namespace ExploreGambia.API.Repositories
             pageNumber = Math.Max(pageNumber, 1);
             pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
-            IQueryable<Tour> tours = context.Tours
+            IQueryable<Tour> tours = context.Tours.Where(t => !t.IsDeleted)
                 .AsNoTracking()
                 .Include(t => t.TourGuide);
 
@@ -145,6 +145,7 @@ namespace ExploreGambia.API.Repositories
         public async Task<Tour?> GetTourById(Guid id)
         {
             var tour = await context.Tours
+                .Where(t => !t.IsDeleted)
                 .AsNoTracking()
                 .Include(t => t.TourGuide)
                 .FirstOrDefaultAsync(x => x.TourId == id);
@@ -157,12 +158,12 @@ namespace ExploreGambia.API.Repositories
         {
             return await context.Tours.AsNoTracking().
                 Include(t => t.TourGuide)
-                .Where(t => t.TourGuide.UserId == userId).ToListAsync();
+                .Where(t => t.TourGuide.UserId == userId && !t.IsDeleted).ToListAsync();
         }
 
         public async Task<Tour?> GetTourByIdAndUserIdAsync(Guid tourId, string userId)
         {
-            return await context.Tours
+            return await context.Tours.Where(t => !t.IsDeleted)                 
                 .AsNoTracking()
                 .Include(t => t.TourGuide)
                 .FirstOrDefaultAsync(t =>
