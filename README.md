@@ -26,14 +26,16 @@ The API is built with .NET 8, Entity Framework Core, PostgreSQL, ASP.NET Core Id
 
 - User registration, login, refresh tokens, and current-user profile lookup.
 - Role support through ASP.NET Core Identity roles: `User`, `Admin`, and `Guide`.
-- Tour guide management.
-- Tour catalogue management with filtering, sorting, and pagination.
+- Tour guide management, including authenticated guide profile lookup and profile updates.
+- Tour catalogue management with filtering, sorting, pagination, guide-owned tour views, availability updates, participant lists, and soft-delete/restore support for admins.
 - Booking creation with duplicate active-booking prevention.
 - Booking status lifecycle: `Pending`, `Confirmed`, `Canceled`, `Completed`.
 - Payment lifecycle: `Pending`, `Processing`, `Succeeded`, `Failed`, `Canceled`.
 - Stripe Checkout session creation.
 - Stripe webhook confirmation for successful checkout payments.
 - ModemPay inline/card payment preparation, verification, intent creation, and webhook handling.
+- Admin dashboard, user status management, all-booking/all-payment views, payment summaries, and admin tour restore workflows.
+- Cloudinary-backed media upload endpoint for tour images and other image assets.
 - Swagger/OpenAPI documentation.
 - PostgreSQL connection support for local and Railway-style deployments.
 - Serilog console and rolling file logs.
@@ -72,6 +74,7 @@ Both contexts use the same PostgreSQL connection string but separate migration h
 - AutoMapper
 - Stripe.net
 - ModemPay HTTP client integration
+- CloudinaryDotNet
 - Serilog
 - Swagger / Swashbuckle
 
@@ -79,7 +82,7 @@ Both contexts use the same PostgreSQL connection string but separate migration h
 
 ```text
 ExploreGambia.API/
-  Controllers/          HTTP API controllers
+  Controllers/          HTTP API controllers, including auth, admin, tours, guides, bookings, payments, and media
   CustomActionFilters/  Model validation filter
   Data/                 EF Core DbContexts and seeders
   Exceptions/           Domain-specific exceptions
@@ -91,8 +94,9 @@ ExploreGambia.API/
     Domain/             Entity models and enums
     DTOs/               Request and response DTOs
   Repositories/         Data access contracts and implementations
-  Services/             Business logic and auth services
+  Services/             Business logic, auth services, and Cloudinary media uploads
   Services/Payments/    Stripe and ModemPay integrations
+  Validations/           Custom validation attributes
 ```
 
 ## Configuration
@@ -106,6 +110,9 @@ The API reads sensitive configuration primarily from environment variables. Some
 | `JWT_SECRET` | Signing key for JWT access tokens. |
 | `STRIPE_SECRET_KEY` | Stripe secret API key. Required at startup. |
 | `ConnectionStrings__DefaultConnection` | PostgreSQL connection string. |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name used by media uploads. |
+| `CLOUDINARY_API_KEY` | Cloudinary API key used by media uploads. |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret used by media uploads. |
 
 Instead of `ConnectionStrings__DefaultConnection`, the app can resolve PostgreSQL settings from:
 
@@ -156,6 +163,9 @@ setx STRIPE_SECRET_KEY "sk_test_..."
 setx STRIPE_PUBLISHABLE_KEY "pk_test_..."
 setx STRIPE_SUCCESS_URL "http://localhost:5173/payment/success"
 setx STRIPE_CANCEL_URL "http://localhost:5173/payment/cancel"
+setx CLOUDINARY_CLOUD_NAME "your-cloudinary-cloud-name"
+setx CLOUDINARY_API_KEY "your-cloudinary-api-key"
+setx CLOUDINARY_API_SECRET "your-cloudinary-api-secret"
 setx ConnectionStrings__DefaultConnection "Host=localhost;Port=5432;Database=ExploreGambia;Username=postgres;Password=your_password"
 ```
 
@@ -197,6 +207,7 @@ Main auth endpoints:
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/refresh-token`
 - `GET /api/v1/auth/me`
+- `PUT /api/v1/auth/me`
 
 Include the JWT access token on protected requests:
 
@@ -323,6 +334,22 @@ Expected result:
 
 All endpoint paths below use version `v1`.
 
+
+### Admin
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/api/v1/admin/dashboard` | `Admin` | Get total users, guides, tours, bookings, and revenue. |
+| `GET` | `/api/v1/admin/users` | `Admin` | List all users. |
+| `GET` | `/api/v1/admin/users/{id}` | `Admin` | Get one user. |
+| `PUT` | `/api/v1/admin/users/{id}/status` | `Admin` | Activate or deactivate a user account. |
+| `GET` | `/api/v1/admin/tours` | `Admin` | List all tours for administration, including deleted tours where repository support applies. |
+| `PATCH` | `/api/v1/admin/tours/{id}/delete` | `Admin` | Soft-delete a tour. |
+| `PATCH` | `/api/v1/admin/tours/{id}/restore` | `Admin` | Restore a soft-deleted tour. |
+| `GET` | `/api/v1/admin/bookings` | Currently public in controller | List all bookings with filters and pagination. |
+| `GET` | `/api/v1/admin/payments` | Currently public in controller | List all payments with filters and pagination. |
+| `GET` | `/api/v1/admin/payments/summary` | Currently public in controller | Get payment totals and summary values. |
+
 ### Auth
 
 | Method | Path | Auth | Purpose |
@@ -331,6 +358,7 @@ All endpoint paths below use version `v1`.
 | `POST` | `/api/v1/auth/login` | Public | Login and receive tokens. |
 | `POST` | `/api/v1/auth/refresh-token` | Public | Refresh auth tokens. |
 | `GET` | `/api/v1/auth/me` | Bearer token | Get current authenticated user profile. |
+| `PUT` | `/api/v1/auth/me` | Bearer token | Update the current user's first and last name. |
 
 ### Tours
 
@@ -338,9 +366,13 @@ All endpoint paths below use version `v1`.
 | --- | --- | --- |
 | `GET` | `/api/v1/tours` | List tours with filters, sorting, and pagination. |
 | `GET` | `/api/v1/tours/{id}` | Get one tour. |
-| `POST` | `/api/v1/tours` | Create a tour. |
-| `PUT` | `/api/v1/tours/{id}` | Update a tour. |
-| `DELETE` | `/api/v1/tours/{id}` | Delete a tour. |
+| `POST` | `/api/v1/tours` | Create a tour for the authenticated guide (`Admin`, `Guide`). |
+| `PUT` | `/api/v1/tours/{id}` | Update a guide-owned tour. |
+| `PATCH` | `/api/v1/tours/{id}/availability` | Update availability for a guide-owned tour (`Guide`). |
+| `GET` | `/api/v1/tours/{tourId}/participants` | Get participants for a guide-owned tour (`Guide`). |
+| `GET` | `/api/v1/tours/my` | List tours owned by the current guide (`Guide`). |
+| `GET` | `/api/v1/tours/my/{id}` | Get one current-guide-owned tour (`Guide`). |
+| `DELETE` | `/api/v1/tours/{id}` | Delete a guide-owned tour (`Guide`). |
 
 Supported tour query parameters include:
 
@@ -361,6 +393,8 @@ Supported tour query parameters include:
 | `GET` | `/api/v1/tour-guides` | List tour guides with search, sorting, and pagination. |
 | `GET` | `/api/v1/tour-guides/{id}` | Get one tour guide. |
 | `POST` | `/api/v1/tour-guides` | Create a tour guide. |
+| `GET` | `/api/v1/tour-guides/me` | Get the current guide profile (`Guide`). |
+| `PUT` | `/api/v1/tour-guides/me` | Update the current guide profile (`Guide`). |
 | `PUT` | `/api/v1/tour-guides/{id}` | Update a tour guide. |
 | `DELETE` | `/api/v1/tour-guides/{id}` | Delete a tour guide. |
 
@@ -423,6 +457,15 @@ Supported payment query parameters include:
 - `pageNumber`
 - `pageSize`
 
+
+### Media
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/api/v1/media/upload` | Currently public in controller | Upload an image to Cloudinary and return its secure URL. |
+
+The upload service stores files in the `explore-gambia` Cloudinary folder.
+
 ## Data Model
 
 ### Tour
@@ -442,11 +485,13 @@ Key fields:
 - `ImageUrl`
 - `IsAvailable`
 - `TourGuideId`
+- `IsDeleted`
 
 Relationships:
 
 - many tours belong to one tour guide
 - one tour can have many bookings
+- soft-deleted tours are marked with `IsDeleted` instead of being removed by admin delete/restore workflows
 
 ### TourGuide
 
@@ -531,6 +576,7 @@ The API uses:
 
 Business rules include:
 
+- tours can only be updated, deleted, or have availability/participants viewed by the guide who owns them
 - bookings cannot be created for unavailable tours
 - booking participants cannot exceed a tour's maximum participants
 - users cannot create duplicate active bookings for the same tour
@@ -548,7 +594,7 @@ File logs roll by minute according to the current configuration.
 
 ## Deployment Notes
 
-- Configure `JWT_SECRET`, `STRIPE_SECRET_KEY`, and PostgreSQL connection settings before startup.
+- Configure `JWT_SECRET`, `STRIPE_SECRET_KEY`, Cloudinary credentials, and PostgreSQL connection settings before startup.
 - In production, the app rejects database connection strings that point to `localhost` or `127.0.0.1`.
 - Railway-style `DATABASE_URL` is supported and converted to an Npgsql connection string.
 - Swagger is enabled in both Development and Production in the current configuration.
