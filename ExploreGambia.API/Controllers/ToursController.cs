@@ -93,7 +93,8 @@ namespace ExploreGambia.API.Controllers
 
         // Secured endpoint - Create tour (Admin only)
         [HttpPost]
-        [Authorize(Roles = "Admin,Guide")]
+        
+        [Authorize(Roles = "Guide")]
         public async Task<IActionResult> CreateTour([FromBody] AddTourRequestDto addTourRequestDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
