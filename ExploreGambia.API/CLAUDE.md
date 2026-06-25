@@ -8,6 +8,45 @@ If a user request conflicts with a **MUST FOLLOW** rule, ask for clarification b
 
 ---
 
+## Architecture Decisions
+
+The following decisions are intentional:
+
+- Repository pattern is used for persistence access.
+- AutoMapper is the standard mapping mechanism.
+- API Versioning uses URL segments.
+- Identity is separated into ExploreGambiaAuthDbContext.
+- Payments are persisted before provider workflows begin.
+
+
+## Forbidden New Architectural Patterns
+
+Unless explicitly requested:
+
+Do not introduce:
+
+- MediatR
+- CQRS
+- Event Sourcing
+- Generic Repository abstractions
+- Unit of Work abstractions
+- Vertical Slice Architecture
+- Domain Events
+
+New features should follow existing repository and service patterns.
+
+## New Feature Workflow
+
+Before implementation:
+
+1. Find an existing similar feature.
+2. Reuse the same patterns.
+3. Reuse DTO conventions.
+4. Reuse authorization conventions.
+5. Reuse validation conventions.
+
+Do not invent a new pattern if an existing one already solves the problem.
+
 ## 0) Rule Labels
 
 Every rule in this document uses one of these labels:
