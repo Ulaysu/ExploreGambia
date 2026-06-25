@@ -15,11 +15,25 @@ namespace ExploreGambia.API.Data
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<TourGuide> TourGuides { get; set; }
         public DbSet<Payment> Payments { get; set; } // Added Payments table
+        public DbSet<Review> Reviews { get; set; }
         
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Review Configuration (Newly Added)[cite: 2]
+            modelBuilder.Entity<Review>(entity =>
+            {
+            entity.HasKey(r => r.ReviewId); 
+                entity.Property(r => r.Rating).IsRequired(); 
+                entity.Property(r => r.Comment).HasMaxLength(1000); 
+                
+                // Review <-> Tour (One-to-Many relationship mapping)
+                entity.HasOne(r => r.Tour)
+                      .WithMany() // Keeps domain entity clean without forcing collection navigation on Tour
+                      .HasForeignKey(r => r.TourId)
+                      .OnDelete(DeleteBehavior.Cascade); // Cleans up reviews seamlessly if an experience is deleted
+        });
             modelBuilder.Entity<Booking>()
                  .HasOne(b => b.User)
                  .WithMany()
