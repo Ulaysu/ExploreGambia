@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExploreGambia.API.Migrations
 {
     [DbContext(typeof(ExploreGambiaDbContext))]
-    [Migration("20260625121234_AddReviewsTable")]
+    [Migration("20260625155747_AddReviewsTable")]
     partial class AddReviewsTable
     {
         /// <inheritdoc />
@@ -174,6 +174,9 @@ namespace ExploreGambia.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Comment")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -188,13 +191,21 @@ namespace ExploreGambia.API.Migrations
                     b.Property<Guid>("TourId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("ReviewId");
 
+                    b.HasIndex("BookingId")
+                        .IsUnique();
+
                     b.HasIndex("TourId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
                 });
@@ -317,13 +328,29 @@ namespace ExploreGambia.API.Migrations
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Review", b =>
                 {
+                    b.HasOne("ExploreGambia.API.Models.Domain.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ExploreGambia.API.Models.Domain.Tour", "Tour")
                         .WithMany()
                         .HasForeignKey("TourId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ExploreGambia.API.Models.Domain.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+
                     b.Navigation("Tour");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Tour", b =>
