@@ -20,7 +20,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpPost("reviews")]
-        [Authorize]
+        [Authorize(Roles ="User, Admin")]
         [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -57,7 +57,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpPut("reviews/{reviewId:guid}")]
-        [Authorize]
+        [Authorize(Roles = "User,Admin")]
         [ProducesResponseType(typeof(ReviewDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -77,7 +77,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpDelete("reviews/{reviewId:guid}")]
-        [Authorize]
+        [Authorize(Roles = "User, Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
