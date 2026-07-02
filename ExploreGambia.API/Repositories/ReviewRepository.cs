@@ -1,6 +1,5 @@
-﻿using ExploreGambia.API.Data;
+using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
-using ExploreGambia.API.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExploreGambia.API.Repositories
@@ -9,16 +8,17 @@ namespace ExploreGambia.API.Repositories
     {
         private readonly ExploreGambiaDbContext _dbContext;
 
-        public ReviewRepository( ExploreGambiaDbContext dbContext)
+        public ReviewRepository(ExploreGambiaDbContext dbContext)
         {
             _dbContext = dbContext;
         }
+
         public async Task<Review> CreateReviewAsync(Review review)
         {
             await _dbContext.Reviews.AddAsync(review);
             await _dbContext.SaveChangesAsync();
 
-            // Eagerly load the user relationship after creation so the returned DTO contains the UserName
+            // Eagerly load the user relationship after creation so the returned DTO contains the UserName.
             await _dbContext.Entry(review).Reference(r => r.User).LoadAsync();
 
             return review;
@@ -26,11 +26,12 @@ namespace ExploreGambia.API.Repositories
 
         public async Task DeleteReviewAsync(Review review)
         {
+            // Issue #5 defines review deletion as removal; add soft delete later if moderation/audit requirements emerge.
             _dbContext.Reviews.Remove(review);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<RatingSummaryDto> GetRatingSummaryAsync(Guid tourId)
+        public async Task<RatingSummary> GetRatingSummaryAsync(Guid tourId)
         {
             var reviewsQuery = _dbContext.Reviews
                 .AsNoTracking()
@@ -38,12 +39,11 @@ namespace ExploreGambia.API.Repositories
 
             int totalReviews = await reviewsQuery.CountAsync();
 
-            // Avoid dividing by zero if an experience has no ratings yet
             double averageRating = totalReviews > 0
                 ? await reviewsQuery.AverageAsync(r => r.Rating)
                 : 0.0;
 
-            return new RatingSummaryDto
+            return new RatingSummary
             {
                 AverageRating = Math.Round(averageRating, 1),
                 TotalReviews = totalReviews
@@ -53,7 +53,6 @@ namespace ExploreGambia.API.Repositories
         public async Task<Review?> GetReviewByIdAsync(Guid reviewId)
         {
             return await _dbContext.Reviews
-                .Include(r => r.User)
                 .FirstOrDefaultAsync(r => r.ReviewId == reviewId);
         }
 
@@ -61,7 +60,7 @@ namespace ExploreGambia.API.Repositories
         {
             return await _dbContext.Reviews
                 .AsNoTracking()
-                .Include(r => r.User) // Required for AutoMapper to populate ReviewDto.UserName
+                .Include(r => r.User)
                 .Where(r => r.TourId == tourId)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
@@ -76,8 +75,8 @@ namespace ExploreGambia.API.Repositories
 
         public async Task UpdateReviewAsync(Review review)
         {
-            _dbContext.Reviews.Update(review);
             await _dbContext.SaveChangesAsync();
+            await _dbContext.Entry(review).Reference(r => r.User).LoadAsync();
         }
     }
 }

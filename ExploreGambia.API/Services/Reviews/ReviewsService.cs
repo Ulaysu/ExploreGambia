@@ -61,9 +61,15 @@ namespace ExploreGambia.API.Services.Reviews
             await _reviewRepository.DeleteReviewAsync(review);
         }
 
-        public Task<RatingSummaryDto> GetRatingSummaryAsync(Guid tourId)
+        public async Task<RatingSummaryDto> GetRatingSummaryAsync(Guid tourId)
         {
-            return _reviewRepository.GetRatingSummaryAsync(tourId);
+            var summary = await _reviewRepository.GetRatingSummaryAsync(tourId);
+
+            return new RatingSummaryDto
+            {
+                AverageRating = summary.AverageRating,
+                TotalReviews = summary.TotalReviews
+            };
         }
 
         public async Task<IEnumerable<ReviewDto>> GetReviewsByTourIdAsync(Guid tourId)
