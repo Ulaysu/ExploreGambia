@@ -50,9 +50,10 @@ namespace ExploreGambia.API.Repositories
             };
         }
 
-        public async Task<Review> GetReviewByIdAsync(Guid reviewId)
+        public async Task<Review?> GetReviewByIdAsync(Guid reviewId)
         {
             return await _dbContext.Reviews
+                .Include(r => r.User)
                 .FirstOrDefaultAsync(r => r.ReviewId == reviewId);
         }
 

@@ -23,6 +23,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Stripe;
 using ExploreGambia.API.Models.Configurations;
+using ExploreGambia.API.Services.Reviews;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -139,6 +140,8 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IStripePaymentService, StripePaymentService>();
 builder.Services.AddScoped<IMediaService, CloudinaryMediaService>();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IReviewService, ReviewsService>();
 
 builder.Services.Configure<ModemPayOptions>(options =>
 {

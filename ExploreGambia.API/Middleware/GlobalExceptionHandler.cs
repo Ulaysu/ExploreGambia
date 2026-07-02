@@ -34,7 +34,8 @@ namespace ExploreGambia.API.Middleware
                 if (ex is BookingNotFoundException
                     || ex is TourNotFoundException
                     || ex is TourGuideNotFoundException
-                    || ex is PaymentNotFoundException)
+                    || ex is PaymentNotFoundException
+                    || ex is ReviewNotFoundException)
                 {
                     statusCode = HttpStatusCode.NotFound;
                     errorCode = "resource_not_found";
