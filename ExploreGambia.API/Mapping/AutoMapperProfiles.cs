@@ -8,6 +8,16 @@ namespace ExploreGambia.API.Mapping
     {
         public AutoMapperProfiles()
         {
+            CreateMap<Review, ReviewDto>()
+                .ForMember(dest => dest.ReviewId, opt => opt.MapFrom(src => src.ReviewId))
+                .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Rating))
+                .ForMember(dest => dest.Comment, opt => opt.MapFrom(src => src.Comment))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                // If the User relation is eagerly loaded, pull the readable FullName/Email, 
+                // otherwise fallback gracefully to a standard placeholder.
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src =>
+                    src.User != null ? $"{src.User.FirstName} {src.User.LastName}".Trim() : "Anonymous User"));
+            
             CreateMap<Tour, TourDto>().ReverseMap();
 
             CreateMap<Tour, AdminTourDto>().ForMember( dest => dest.GuideName,

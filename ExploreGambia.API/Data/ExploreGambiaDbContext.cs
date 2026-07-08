@@ -15,11 +15,47 @@ namespace ExploreGambia.API.Data
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<TourGuide> TourGuides { get; set; }
         public DbSet<Payment> Payments { get; set; } // Added Payments table
+        public DbSet<Review> Reviews { get; set; }
         
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // --- Review System Configuration (Newly Added) ---
+            modelBuilder.Entity<Review>(entity =>
+            {
+                entity.HasKey(r => r.ReviewId);
+
+                entity.Property(r => r.Rating)
+                      .IsRequired();
+
+                entity.Property(r => r.Comment)
+                      .HasMaxLength(1000)
+                      .IsRequired();
+
+                // CRITICAL: Unique index enforces the "One review per booking" rule at the DB layer
+                entity.HasIndex(r => r.BookingId)
+                      .IsUnique();
+
+                // Review <-> Booking (One-to-One style constraint from Review side)
+                entity.HasOne(r => r.Booking)
+                      .WithMany() // No collection added to booking to avoid bloating it
+                      .HasForeignKey(r => r.BookingId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Review <-> Tour (Many reviews belong to one Tour/Experience)
+                entity.HasOne(r => r.Tour)
+                      .WithMany()
+                      .HasForeignKey(r => r.TourId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Review <-> ApplicationUser (Many reviews can be written by a User)
+                entity.HasOne(r => r.User)
+                      .WithMany()
+                      .HasForeignKey(r => r.UserId)
+                      .OnDelete(DeleteBehavior.Restrict); // Prevent dropping users if they have historical reviews
+            });
+
             modelBuilder.Entity<Booking>()
                  .HasOne(b => b.User)
                  .WithMany()
