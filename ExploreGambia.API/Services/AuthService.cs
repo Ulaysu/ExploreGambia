@@ -1,6 +1,7 @@
 
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
+using ExploreGambia.API.Exceptions;
 using ExploreGambia.API.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
@@ -207,17 +208,29 @@ namespace ExploreGambia.API.Services
 
         public async Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
         {
+            if (string.IsNullOrWhiteSpace(request.AccessToken))
+                throw new AuthenticationFailedException("Access token is required.");
+
+            if (string.IsNullOrWhiteSpace(request.RefreshToken))
+                throw new AuthenticationFailedException("Refresh token is required.");
+
             var principal = tokenRepository.GetPrincipalFromExpiredToken(request.AccessToken);
             var email = principal.FindFirstValue(ClaimTypes.Email);
 
             var user = await userManager.FindByEmailAsync(email!)
-                ?? throw new UnauthorizedAccessException("Invalid token.");
+                ?? throw new AuthenticationFailedException("Invalid token.");
+
+            if (string.IsNullOrWhiteSpace(user.RefreshToken))
+                throw new AuthenticationFailedException("Invalid refresh token.");
+
+            if (user.RefreshTokenExpiryTime == null)
+                throw new AuthenticationFailedException("Invalid refresh token.");
 
             if (user.RefreshToken != request.RefreshToken)
-                throw new UnauthorizedAccessException("Invalid refresh token.");
+                throw new AuthenticationFailedException("Invalid refresh token.");
 
             if (user.RefreshTokenExpiryTime < DateTime.UtcNow)
-                throw new UnauthorizedAccessException("Refresh token has expired. Please log in again.");
+                throw new AuthenticationFailedException("Refresh token has expired. Please log in again.");
 
             var roles = await userManager.GetRolesAsync(user);
             var newAccessToken = tokenRepository.CreateJWTToken(user, roles.ToList());
