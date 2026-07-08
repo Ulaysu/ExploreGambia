@@ -43,7 +43,7 @@ namespace ExploreGambia.API.Controllers
             return Ok(mapper.Map<List<BookingDto>>(bookings));
         }
 
-        [Authorize(Roles = "User, Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllBookings([FromQuery] BookingStatus? status,
     [FromQuery] DateTime? bookingDateFrom, [FromQuery] DateTime? bookingDateTo, [FromQuery] string? sortBy,
@@ -58,7 +58,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         
-        [Authorize(Roles = "User, Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         [Route("{id:guid}")]
         public async Task<ActionResult<Booking>> GetBookingById([FromRoute] Guid id)

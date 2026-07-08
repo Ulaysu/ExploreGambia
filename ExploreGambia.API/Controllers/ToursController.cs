@@ -123,7 +123,7 @@ namespace ExploreGambia.API.Controllers
         // Secured endpoint - Update tour (Admin only)
         [HttpPut]
         [Route("{id:Guid}")]
-        //[Authorize(Roles = "Admin,Guide")]
+        [Authorize(Roles = "Guide")]
         public async Task<IActionResult> UpdateTourGuide([FromRoute] Guid id, [FromBody] UpdateTourRequestDto updateTourRequestDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
