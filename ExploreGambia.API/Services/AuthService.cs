@@ -248,5 +248,16 @@ namespace ExploreGambia.API.Services
             };
 
         }
+
+        public async Task LogoutAsync(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId)
+                ?? throw new AuthenticationFailedException("User not found.");
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = null;
+
+            await userManager.UpdateAsync(user);
+        }
     }
 }

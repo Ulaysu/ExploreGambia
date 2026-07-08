@@ -8,5 +8,7 @@ namespace ExploreGambia.API.Services
         Task<LoginResponseDto> LoginAsync(LoginRequestDto loginRequestDto);
 
         Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);
+
+        Task LogoutAsync(string userId);
     }
 }   
