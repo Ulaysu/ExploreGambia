@@ -220,6 +220,7 @@ namespace ExploreGambia.API.Services
             var user = await userManager.FindByEmailAsync(email!)
                 ?? throw new AuthenticationFailedException("Invalid token.");
 
+            // A cleared token or expiry means the stored refresh token has been revoked, such as after logout.
             if (string.IsNullOrWhiteSpace(user.RefreshToken))
                 throw new AuthenticationFailedException("Invalid refresh token.");
 
@@ -254,6 +255,7 @@ namespace ExploreGambia.API.Services
             var user = await userManager.FindByIdAsync(userId)
                 ?? throw new AuthenticationFailedException("User not found.");
 
+            // The current auth model stores one active refresh token per user, so clearing both fields revokes it.
             user.RefreshToken = null;
             user.RefreshTokenExpiryTime = null;
 
