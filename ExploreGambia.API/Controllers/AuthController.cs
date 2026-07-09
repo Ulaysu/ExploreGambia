@@ -170,9 +170,14 @@ namespace ExploreGambia.API.Controllers
             return Ok(new { message = "Logged out successfully." });
         }
 
-
+        /// <summary>
+        /// Rotate a valid refresh token and issue a new access token
+        /// </summary>
         [HttpPost("refresh-token")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(RefreshTokenResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
         {
             var result = await authService.RefreshTokenAsync(request);

@@ -188,6 +188,47 @@ namespace ExploreGambia.API.Tests.Services
         }
 
         [Fact]
+        public async Task LoginAsync_WhenCredentialsAreValid_StoresGeneratedRefreshTokenAndExpiry()
+        {
+            var user = new ApplicationUser
+            {
+                Email = "user@example.com",
+                UserName = "user@example.com",
+                IsActive = true
+            };
+
+            var userManager = CreateUserManagerMock();
+            userManager.Setup(manager => manager.FindByEmailAsync(user.Email))
+                .ReturnsAsync(user);
+            userManager.Setup(manager => manager.CheckPasswordAsync(user, "password"))
+                .ReturnsAsync(true);
+            userManager.Setup(manager => manager.GetRolesAsync(user))
+                .ReturnsAsync(new List<string> { "traveller" });
+            userManager.Setup(manager => manager.UpdateAsync(user))
+                .ReturnsAsync(IdentityResult.Success);
+
+            var tokenRepository = new Mock<ITokenRepository>();
+            tokenRepository.Setup(repository => repository.CreateJWTToken(user, It.IsAny<List<string>>()))
+                .Returns("login-access-token");
+            tokenRepository.Setup(repository => repository.GenerateRefreshToken())
+                .Returns("login-refresh-token");
+
+            var service = CreateAuthService(userManager, tokenRepository);
+
+            var response = await service.LoginAsync(new LoginRequestDto
+            {
+                Email = user.Email,
+                Password = "password"
+            });
+
+            Assert.Equal("login-access-token", response.JwtToken);
+            Assert.Equal("login-refresh-token", response.RefreshToken);
+            Assert.Equal("login-refresh-token", user.RefreshToken);
+            Assert.True(user.RefreshTokenExpiryTime > DateTime.UtcNow.AddDays(29));
+            userManager.Verify(manager => manager.UpdateAsync(user), Times.Once);
+        }
+
+        [Fact]
         public async Task RefreshTokenAsync_WhenRefreshTokenIsValid_RotatesRefreshTokenAndExpiry()
         {
             var user = new ApplicationUser
@@ -225,6 +266,53 @@ namespace ExploreGambia.API.Tests.Services
             Assert.Equal("new-refresh-token", response.RefreshToken);
             Assert.Equal("new-refresh-token", user.RefreshToken);
             Assert.True(user.RefreshTokenExpiryTime > DateTime.UtcNow.AddDays(29));
+            userManager.Verify(manager => manager.UpdateAsync(user), Times.Once);
+        }
+
+        [Fact]
+        public async Task RefreshTokenAsync_AfterRotation_RejectsPreviousRefreshToken()
+        {
+            var user = new ApplicationUser
+            {
+                Email = "user@example.com",
+                RefreshToken = "old-refresh-token",
+                RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(10)
+            };
+
+            var userManager = CreateUserManagerMock();
+            userManager.Setup(manager => manager.FindByEmailAsync(user.Email))
+                .ReturnsAsync(user);
+            userManager.Setup(manager => manager.GetRolesAsync(user))
+                .ReturnsAsync(new List<string>());
+            userManager.Setup(manager => manager.UpdateAsync(user))
+                .ReturnsAsync(IdentityResult.Success);
+
+            var tokenRepository = new Mock<ITokenRepository>();
+            tokenRepository.Setup(repository => repository.GetPrincipalFromExpiredToken(It.IsAny<string>()))
+                .Returns(CreatePrincipal(user.Email));
+            tokenRepository.Setup(repository => repository.CreateJWTToken(user, It.IsAny<List<string>>()))
+                .Returns("new-access-token");
+            tokenRepository.Setup(repository => repository.GenerateRefreshToken())
+                .Returns("new-refresh-token");
+
+            var service = CreateAuthService(userManager, tokenRepository);
+
+            await service.RefreshTokenAsync(new RefreshTokenRequestDto
+            {
+                AccessToken = "old-access-token",
+                RefreshToken = "old-refresh-token"
+            });
+
+            // Rotation makes the previously accepted refresh token stale immediately.
+            await Assert.ThrowsAsync<AuthenticationFailedException>(() =>
+                service.RefreshTokenAsync(new RefreshTokenRequestDto
+                {
+                    AccessToken = "old-access-token",
+                    RefreshToken = "old-refresh-token"
+                }));
+
+            Assert.Equal("new-refresh-token", user.RefreshToken);
+            tokenRepository.Verify(repository => repository.GenerateRefreshToken(), Times.Once);
             userManager.Verify(manager => manager.UpdateAsync(user), Times.Once);
         }
 
