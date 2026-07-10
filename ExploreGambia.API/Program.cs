@@ -10,6 +10,7 @@ using ExploreGambia.API.Services;
 using ExploreGambia.API.Services.Payments;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -70,6 +71,14 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+});
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto;
+    options.ForwardLimit = 1;
 });
 
 builder.Services.Configure<RateLimitingOptions>(
@@ -381,6 +390,8 @@ try
     }
 
     app.UseMiddleware<GlobalExceptionHandler>();
+
+    app.UseForwardedHeaders();
 
     app.UseHttpsRedirection();
 
