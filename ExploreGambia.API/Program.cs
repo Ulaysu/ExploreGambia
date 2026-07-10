@@ -93,6 +93,16 @@ var refreshTokenRateLimit = ResolveRateLimitRule(
 
 builder.Services.AddRateLimiter(options =>
 {
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            new { message = "Too many requests. Please try again later." },
+            cancellationToken);
+    };
+
     options.AddPolicy(AuthRateLimitPolicyNames.Login, httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             ResolveClientRateLimitPartitionKey(httpContext),
