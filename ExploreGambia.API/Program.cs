@@ -11,6 +11,7 @@ using ExploreGambia.API.Services.Payments;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +22,7 @@ using System;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Stripe;
 using ExploreGambia.API.Models.Configurations;
 using ExploreGambia.API.OpenApi;
@@ -71,6 +73,41 @@ builder.Services.AddCors(options =>
 
 builder.Services.Configure<RateLimitingOptions>(
     builder.Configuration.GetSection(RateLimitingOptions.SectionName));
+
+var defaultRateLimitingOptions = new RateLimitingOptions();
+var configuredRateLimitingOptions =
+    builder.Configuration
+        .GetSection(RateLimitingOptions.SectionName)
+        .Get<RateLimitingOptions>()
+    ?? defaultRateLimitingOptions;
+
+var loginRateLimit = ResolveRateLimitRule(
+    configuredRateLimitingOptions.Login,
+    defaultRateLimitingOptions.Login);
+var registrationRateLimit = ResolveRateLimitRule(
+    configuredRateLimitingOptions.Registration,
+    defaultRateLimitingOptions.Registration);
+var refreshTokenRateLimit = ResolveRateLimitRule(
+    configuredRateLimitingOptions.RefreshToken,
+    defaultRateLimitingOptions.RefreshToken);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy(AuthRateLimitPolicyNames.Login, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            AuthRateLimitPolicyNames.Login,
+            _ => CreateFixedWindowLimiterOptions(loginRateLimit)));
+
+    options.AddPolicy(AuthRateLimitPolicyNames.Register, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            AuthRateLimitPolicyNames.Register,
+            _ => CreateFixedWindowLimiterOptions(registrationRateLimit)));
+
+    options.AddPolicy(AuthRateLimitPolicyNames.RefreshToken, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            AuthRateLimitPolicyNames.RefreshToken,
+            _ => CreateFixedWindowLimiterOptions(refreshTokenRateLimit)));
+});
 
 
 // Add API Versioning
@@ -416,4 +453,37 @@ static void ValidatePostgresConnectionString(string connectionString)
         throw new InvalidOperationException(
             "PostgreSQL connection string is missing Host. Check the Railway ConnectionStrings__DefaultConnection variable.");
     }
+}
+
+static RateLimitRuleOptions ResolveRateLimitRule(
+    RateLimitRuleOptions? configuredRule,
+    RateLimitRuleOptions defaultRule)
+{
+    if (configuredRule == null)
+    {
+        return defaultRule;
+    }
+
+    return new RateLimitRuleOptions
+    {
+        PermitLimit = configuredRule.PermitLimit > 0
+            ? configuredRule.PermitLimit
+            : defaultRule.PermitLimit,
+        WindowSeconds = configuredRule.WindowSeconds > 0
+            ? configuredRule.WindowSeconds
+            : defaultRule.WindowSeconds
+    };
+}
+
+static FixedWindowRateLimiterOptions CreateFixedWindowLimiterOptions(
+    RateLimitRuleOptions rule)
+{
+    return new FixedWindowRateLimiterOptions
+    {
+        PermitLimit = rule.PermitLimit,
+        Window = TimeSpan.FromSeconds(rule.WindowSeconds),
+        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+        QueueLimit = 0,
+        AutoReplenishment = true
+    };
 }
