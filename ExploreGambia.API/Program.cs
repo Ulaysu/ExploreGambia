@@ -95,17 +95,17 @@ builder.Services.AddRateLimiter(options =>
 {
     options.AddPolicy(AuthRateLimitPolicyNames.Login, httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
-            AuthRateLimitPolicyNames.Login,
+            ResolveClientRateLimitPartitionKey(httpContext),
             _ => CreateFixedWindowLimiterOptions(loginRateLimit)));
 
     options.AddPolicy(AuthRateLimitPolicyNames.Register, httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
-            AuthRateLimitPolicyNames.Register,
+            ResolveClientRateLimitPartitionKey(httpContext),
             _ => CreateFixedWindowLimiterOptions(registrationRateLimit)));
 
     options.AddPolicy(AuthRateLimitPolicyNames.RefreshToken, httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
-            AuthRateLimitPolicyNames.RefreshToken,
+            ResolveClientRateLimitPartitionKey(httpContext),
             _ => CreateFixedWindowLimiterOptions(refreshTokenRateLimit)));
 });
 
@@ -473,6 +473,15 @@ static RateLimitRuleOptions ResolveRateLimitRule(
             ? configuredRule.WindowSeconds
             : defaultRule.WindowSeconds
     };
+}
+
+static string ResolveClientRateLimitPartitionKey(HttpContext httpContext)
+{
+    var remoteIpAddress = httpContext.Connection.RemoteIpAddress?.ToString();
+
+    return string.IsNullOrWhiteSpace(remoteIpAddress)
+        ? "unknown-client"
+        : remoteIpAddress;
 }
 
 static FixedWindowRateLimiterOptions CreateFixedWindowLimiterOptions(
