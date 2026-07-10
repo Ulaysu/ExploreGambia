@@ -206,6 +206,7 @@ Main auth endpoints:
 - `POST /api/v1/auth/register`
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/refresh-token`
+- `POST /api/v1/auth/logout`
 - `GET /api/v1/auth/me`
 - `PUT /api/v1/auth/me`
 
@@ -356,7 +357,8 @@ All endpoint paths below use version `v1`.
 | --- | --- | --- | --- |
 | `POST` | `/api/v1/auth/register` | Public | Register a user. |
 | `POST` | `/api/v1/auth/login` | Public | Login and receive tokens. |
-| `POST` | `/api/v1/auth/refresh-token` | Public | Refresh auth tokens. |
+| `POST` | `/api/v1/auth/refresh-token` | Public | Rotate a valid refresh token and receive new auth tokens. |
+| `POST` | `/api/v1/auth/logout` | Bearer token | Log out the current user and revoke the active refresh token. |
 | `GET` | `/api/v1/auth/me` | Bearer token | Get current authenticated user profile. |
 | `PUT` | `/api/v1/auth/me` | Bearer token | Update the current user's first and last name. |
 
