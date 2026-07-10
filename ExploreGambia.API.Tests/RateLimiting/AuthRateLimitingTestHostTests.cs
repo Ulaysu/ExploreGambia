@@ -54,6 +54,25 @@ namespace ExploreGambia.API.Tests.RateLimiting
             Assert.Equal(5, host.AuthService.LoginCalls);
         }
 
+        [Fact]
+        public async Task RegistrationRequests_ExceedLimit_ReturnTooManyRequests()
+        {
+            var host = new AuthRateLimitingTestHost();
+            var client = host.CreateClient();
+
+            for (var i = 0; i < 3; i++)
+            {
+                var response = await SendRegisterRequestAsync(client);
+
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            var rejectedResponse = await SendRegisterRequestAsync(client);
+
+            await AssertTooManyRequestsAsync(rejectedResponse);
+            Assert.Equal(3, host.AuthService.RegisterCalls);
+        }
+
         private static Task<HttpResponseMessage> SendLoginRequestAsync(HttpClient client)
         {
             return client.PostAsJsonAsync(
@@ -62,6 +81,20 @@ namespace ExploreGambia.API.Tests.RateLimiting
                 {
                     Email = "user@example.com",
                     Password = "password"
+                });
+        }
+
+        private static Task<HttpResponseMessage> SendRegisterRequestAsync(HttpClient client)
+        {
+            return client.PostAsJsonAsync(
+                "/api/v1/auth/register",
+                new RegisterRequestDto
+                {
+                    Email = "new-user@example.com",
+                    Password = "password",
+                    FirstName = "New",
+                    LastName = "User",
+                    Roles = new[] { "User" }
                 });
         }
 
