@@ -92,15 +92,47 @@ namespace ExploreGambia.API.Tests.RateLimiting
             Assert.Equal(10, host.AuthService.RefreshTokenCalls);
         }
 
-        private static Task<HttpResponseMessage> SendLoginRequestAsync(HttpClient client)
+        [Fact]
+        public async Task LoginRateLimit_IsIsolatedByClientIp()
         {
-            return client.PostAsJsonAsync(
-                "/api/v1/auth/login",
-                new LoginRequestDto
+            var host = new AuthRateLimitingTestHost();
+            var client = host.CreateClient();
+
+            for (var i = 0; i < 5; i++)
+            {
+                var response = await SendLoginRequestAsync(client, "10.0.0.1");
+
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            var rejectedResponse = await SendLoginRequestAsync(client, "10.0.0.1");
+            await AssertTooManyRequestsAsync(rejectedResponse);
+
+            var isolatedClientResponse = await SendLoginRequestAsync(client, "10.0.0.2");
+
+            Assert.Equal(HttpStatusCode.OK, isolatedClientResponse.StatusCode);
+            Assert.Equal(6, host.AuthService.LoginCalls);
+        }
+
+        private static Task<HttpResponseMessage> SendLoginRequestAsync(
+            HttpClient client,
+            string? remoteIpAddress = null)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/auth/login")
+            {
+                Content = JsonContent.Create(new LoginRequestDto
                 {
                     Email = "user@example.com",
                     Password = "password"
-                });
+                })
+            };
+
+            if (!string.IsNullOrWhiteSpace(remoteIpAddress))
+            {
+                request.Headers.Add("X-Test-Remote-Ip", remoteIpAddress);
+            }
+
+            return client.SendAsync(request);
         }
 
         private static Task<HttpResponseMessage> SendRegisterRequestAsync(HttpClient client)
