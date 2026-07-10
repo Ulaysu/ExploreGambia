@@ -1,6 +1,6 @@
 # ExploreGambia API
 
-ExploreGambia API is an ASP.NET Core backend for a tour booking platform. It manages tours, tour guides, bookings, authentication, and payments through Stripe and ModemPay.
+ExploreGambia API is an ASP.NET Core backend for a tour booking platform. It manages tours, tour guides, bookings, reviews, authentication, media uploads, and payments through Stripe and ModemPay.
 
 The API is built with .NET 8, Entity Framework Core, PostgreSQL, ASP.NET Core Identity, JWT authentication, API versioning, Swagger, AutoMapper, and Serilog.
 
@@ -19,6 +19,7 @@ The API is built with .NET 8, Entity Framework Core, PostgreSQL, ASP.NET Core Id
 - [API Endpoints](#api-endpoints)
 - [Data Model](#data-model)
 - [Validation And Errors](#validation-and-errors)
+- [Testing](#testing)
 - [Logging](#logging)
 - [Deployment Notes](#deployment-notes)
 
@@ -30,12 +31,14 @@ The API is built with .NET 8, Entity Framework Core, PostgreSQL, ASP.NET Core Id
 - Tour catalogue management with filtering, sorting, pagination, guide-owned tour views, availability updates, participant lists, and soft-delete/restore support for admins.
 - Booking creation with duplicate active-booking prevention.
 - Booking status lifecycle: `Pending`, `Confirmed`, `Canceled`, `Completed`.
+- Tour reviews and rating summaries, tied to users, bookings, and tours.
 - Payment lifecycle: `Pending`, `Processing`, `Succeeded`, `Failed`, `Canceled`.
 - Stripe Checkout session creation.
 - Stripe webhook confirmation for successful checkout payments.
 - ModemPay inline/card payment preparation, verification, intent creation, and webhook handling.
 - Admin dashboard, user status management, all-booking/all-payment views, payment summaries, and admin tour restore workflows.
 - Cloudinary-backed media upload endpoint for tour images and other image assets.
+- xUnit test coverage for authentication token rotation and logout behavior.
 - Swagger/OpenAPI documentation.
 - PostgreSQL connection support for local and Railway-style deployments.
 - Serilog console and rolling file logs.
@@ -81,6 +84,9 @@ Both contexts use the same PostgreSQL connection string but separate migration h
 ## Project Structure
 
 ```text
+ExploreGambia.sln        Solution containing the API and test projects
+ExploreGambia.API.Tests/ xUnit tests for API services
+
 ExploreGambia.API/
   Controllers/          HTTP API controllers, including auth, admin, tours, guides, bookings, payments, and media
   CustomActionFilters/  Model validation filter
@@ -96,6 +102,7 @@ ExploreGambia.API/
   Repositories/         Data access contracts and implementations
   Services/             Business logic, auth services, and Cloudinary media uploads
   Services/Payments/    Stripe and ModemPay integrations
+  Services/Reviews/     Review creation, updates, deletion, and rating summaries
   Validations/           Custom validation attributes
 ```
 
@@ -196,6 +203,12 @@ https://localhost:44331/swagger
 ```
 
 The exact HTTPS port can vary by launch profile. Check `ExploreGambia.API/Properties/launchSettings.json` if your local port differs.
+
+7. Run tests.
+
+```powershell
+dotnet test
+```
 
 ## Authentication
 
@@ -347,9 +360,9 @@ All endpoint paths below use version `v1`.
 | `GET` | `/api/v1/admin/tours` | `Admin` | List all tours for administration, including deleted tours where repository support applies. |
 | `PATCH` | `/api/v1/admin/tours/{id}/delete` | `Admin` | Soft-delete a tour. |
 | `PATCH` | `/api/v1/admin/tours/{id}/restore` | `Admin` | Restore a soft-deleted tour. |
-| `GET` | `/api/v1/admin/bookings` | Currently public in controller | List all bookings with filters and pagination. |
-| `GET` | `/api/v1/admin/payments` | Currently public in controller | List all payments with filters and pagination. |
-| `GET` | `/api/v1/admin/payments/summary` | Currently public in controller | Get payment totals and summary values. |
+| `GET` | `/api/v1/admin/bookings` | `Admin` | List all bookings with filters and pagination. |
+| `GET` | `/api/v1/admin/payments` | `Admin` | List all payments with filters and pagination. |
+| `GET` | `/api/v1/admin/payments/summary` | `Admin` | Get payment totals and summary values. |
 
 ### Auth
 
@@ -368,8 +381,8 @@ All endpoint paths below use version `v1`.
 | --- | --- | --- |
 | `GET` | `/api/v1/tours` | List tours with filters, sorting, and pagination. |
 | `GET` | `/api/v1/tours/{id}` | Get one tour. |
-| `POST` | `/api/v1/tours` | Create a tour for the authenticated guide (`Admin`, `Guide`). |
-| `PUT` | `/api/v1/tours/{id}` | Update a guide-owned tour. |
+| `POST` | `/api/v1/tours` | Create a tour for the authenticated guide (`Guide`). |
+| `PUT` | `/api/v1/tours/{id}` | Update a guide-owned tour (`Guide`). |
 | `PATCH` | `/api/v1/tours/{id}/availability` | Update availability for a guide-owned tour (`Guide`). |
 | `GET` | `/api/v1/tours/{tourId}/participants` | Get participants for a guide-owned tour (`Guide`). |
 | `GET` | `/api/v1/tours/my` | List tours owned by the current guide (`Guide`). |
@@ -394,11 +407,11 @@ Supported tour query parameters include:
 | --- | --- | --- |
 | `GET` | `/api/v1/tour-guides` | List tour guides with search, sorting, and pagination. |
 | `GET` | `/api/v1/tour-guides/{id}` | Get one tour guide. |
-| `POST` | `/api/v1/tour-guides` | Create a tour guide. |
+| `POST` | `/api/v1/tour-guides` | Create a tour guide (`Admin`). |
 | `GET` | `/api/v1/tour-guides/me` | Get the current guide profile (`Guide`). |
 | `PUT` | `/api/v1/tour-guides/me` | Update the current guide profile (`Guide`). |
-| `PUT` | `/api/v1/tour-guides/{id}` | Update a tour guide. |
-| `DELETE` | `/api/v1/tour-guides/{id}` | Delete a tour guide. |
+| `PUT` | `/api/v1/tour-guides/{id}` | Update a tour guide (`Admin`). |
+| `DELETE` | `/api/v1/tour-guides/{id}` | Delete a tour guide (`Admin`). |
 
 Supported guide query parameters include:
 
@@ -415,9 +428,9 @@ Most booking endpoints require a bearer token.
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
 | `GET` | `/api/v1/bookings/my-bookings` | `User`, `Admin` | Get current user's bookings. |
-| `GET` | `/api/v1/bookings` | `User`, `Admin` | List bookings with filters and pagination. |
-| `GET` | `/api/v1/bookings/{id}` | `User`, `Admin` | Get one booking. |
-| `POST` | `/api/v1/bookings` | `Admin`, `User` | Create a booking. |
+| `GET` | `/api/v1/bookings` | `Admin` | List bookings with filters and pagination. |
+| `GET` | `/api/v1/bookings/{id}` | `Admin` | Get one booking. |
+| `POST` | `/api/v1/bookings` | `User` | Create a booking. |
 | `PUT` | `/api/v1/bookings/{id}` | `User` | Update a booking. |
 | `DELETE` | `/api/v1/bookings/{id}` | `Admin` | Delete a booking. |
 
@@ -435,12 +448,12 @@ Supported booking query parameters include:
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
-| `GET` | `/api/v1/payments` | Currently public in controller | List payments with filters and pagination. |
-| `GET` | `/api/v1/payments/{id}` | Currently public in controller | Get one payment. |
-| `POST` | `/api/v1/payments` | Currently public in controller | Create a manual payment record. |
-| `PUT` | `/api/v1/payments/{id}` | Currently public in controller | Update a payment. |
-| `POST` | `/api/v1/payments/{id}/confirm` | Currently public in controller | Confirm a payment manually. |
-| `DELETE` | `/api/v1/payments/{id}` | Currently public in controller | Delete a payment. |
+| `GET` | `/api/v1/payments` | `Admin` | List payments with filters and pagination. |
+| `GET` | `/api/v1/payments/{id}` | `Admin` | Get one payment. |
+| `POST` | `/api/v1/payments` | `Admin` | Create a manual payment record. |
+| `PUT` | `/api/v1/payments/{id}` | `Admin` | Update a payment. |
+| `POST` | `/api/v1/payments/{id}/confirm` | `Admin` | Confirm a payment manually. |
+| `DELETE` | `/api/v1/payments/{id}` | `Admin` | Delete a payment. |
 | `POST` | `/api/v1/payments/bookings/{bookingId}/stripe/checkout` | `User`, `Admin` | Create Stripe Checkout session. |
 | `POST` | `/api/v1/payments/stripe/webhook` | Public webhook | Receive and verify Stripe webhook events. |
 | `POST` | `/api/v1/payments/bookings/{bookingId}/modempay/inline` | `User`, `Admin` | Prepare ModemPay inline payment. |
@@ -460,11 +473,21 @@ Supported payment query parameters include:
 - `pageSize`
 
 
+### Reviews
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/api/v1/reviews` | `User`, `Admin` | Create a review for a booked tour. |
+| `GET` | `/api/v1/tours/{tourId}/reviews` | Public | List reviews for a tour. |
+| `GET` | `/api/v1/tours/{tourId}/ratings` | Public | Get rating summary for a tour. |
+| `PUT` | `/api/v1/reviews/{reviewId}` | `User`, `Admin` | Update a review owned by the current user, or by admin. |
+| `DELETE` | `/api/v1/reviews/{reviewId}` | `User`, `Admin` | Delete a review owned by the current user, or by admin. |
+
 ### Media
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
-| `POST` | `/api/v1/media/upload` | Currently public in controller | Upload an image to Cloudinary and return its secure URL. |
+| `POST` | `/api/v1/media/upload` | `Admin`, `Guide` | Upload an image to Cloudinary and return its secure URL. |
 
 The upload service stores files in the `explore-gambia` Cloudinary folder.
 
@@ -563,6 +586,27 @@ Statuses:
 
 `ProviderReference` stores provider identifiers such as Stripe Checkout Session IDs or ModemPay transaction references.
 
+### Review
+
+Represents a user review for a completed or booked tour.
+
+Key fields:
+
+- `ReviewId`
+- `BookingId`
+- `TourId`
+- `UserId`
+- `Rating`
+- `Comment`
+- `CreatedAt`
+- `UpdatedAt`
+
+Relationships:
+
+- one review belongs to one booking
+- one review belongs to one tour
+- one review belongs to one Identity user
+
 ### ApplicationUser
 
 Identity user model used by ASP.NET Core Identity. Bookings store `UserId` as the Identity user id.
@@ -584,6 +628,23 @@ Business rules include:
 - users cannot create duplicate active bookings for the same tour
 - payment amount must match the booking total
 - canceled or completed bookings cannot accept payments
+- reviews are associated with a booking, tour, and authenticated user
+- review ratings are validated through DTO/business rules
+
+## Testing
+
+The solution includes `ExploreGambia.API.Tests`, an xUnit test project with Moq-based service tests. Current coverage focuses on authentication behavior:
+
+- logout clears the stored refresh token and expiry
+- blank or invalid refresh-token requests are rejected
+- refresh tokens rotate after successful login/refresh
+- previously rotated refresh tokens are rejected
+
+Run the full test suite from the repository root:
+
+```powershell
+dotnet test
+```
 
 ## Logging
 
