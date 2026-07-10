@@ -28,9 +28,11 @@ namespace ExploreGambia.API.Controllers
         /// <summary>
         /// Register a new user with email, password, and optional roles
         /// </summary>
+        [EnableRateLimiting(AuthRateLimitPolicyNames.Register)]
         [HttpPost("register")]
         [ProducesResponseType(typeof(RegisterResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterRequestDto registerRequestDto)
         {
             if (!ModelState.IsValid)      {
