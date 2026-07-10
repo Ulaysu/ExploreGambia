@@ -179,11 +179,13 @@ namespace ExploreGambia.API.Controllers
         /// <summary>
         /// Rotate a valid refresh token and issue a new access token
         /// </summary>
+        [EnableRateLimiting(AuthRateLimitPolicyNames.RefreshToken)]
         [HttpPost("refresh-token")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(RefreshTokenResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
         {
             var result = await authService.RefreshTokenAsync(request);
