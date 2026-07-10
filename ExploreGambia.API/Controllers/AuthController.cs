@@ -148,9 +148,36 @@ namespace ExploreGambia.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Logout the authenticated user and revoke their active refresh token
+        /// </summary>
+        [HttpPost("logout")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> LogoutAsync()
+        {
+            // Use the JWT subject identifier so logout cannot target another user's refresh token.
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new { message = "User ID not found in token claims" });
+            }
+
+            await authService.LogoutAsync(userId);
+
+            return Ok(new { message = "Logged out successfully." });
+        }
+
+        /// <summary>
+        /// Rotate a valid refresh token and issue a new access token
+        /// </summary>
         [HttpPost("refresh-token")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(RefreshTokenResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
         {
             var result = await authService.RefreshTokenAsync(request);

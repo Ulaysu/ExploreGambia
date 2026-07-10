@@ -47,7 +47,7 @@ namespace ExploreGambia.API.Controllers
 
         // Secured endpoint - Create tour guide (Admin only)
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateTourGuideAsync([FromBody] AddTourGuideRequestDto addTourGuideRequestDto)
         {
             var tourGuideDomainModel = mapper.Map<TourGuide>(addTourGuideRequestDto);
@@ -81,7 +81,7 @@ namespace ExploreGambia.API.Controllers
         // Secured endpoint - Update tour guide (Admin only)
         [HttpPut]
         [Route("{id:Guid}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateTourGuide([FromRoute] Guid id, [FromBody] UpdateTourGuideRequestDto updateTourGuide)
         {
             var tourGuideDomainModel = mapper.Map<TourGuide>(updateTourGuide);
@@ -97,7 +97,7 @@ namespace ExploreGambia.API.Controllers
         // Secured endpoint - Delete tour guide (Admin only)
         [HttpDelete]
         [Route("{id:Guid}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTourGuide([FromRoute] Guid id)
         {
             var tourGuideModel = await tourGuideRepository.DeleteTourGuideAsync(id);

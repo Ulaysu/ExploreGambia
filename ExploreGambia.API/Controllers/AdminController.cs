@@ -115,7 +115,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpGet("bookings")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllBookings(
     [FromQuery] BookingStatus? status,
     [FromQuery] DateTime? bookingDateFrom,
@@ -138,6 +138,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpGet("payments")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllPayments(
     [FromQuery] string? paymentMethod,
     [FromQuery] DateTime? paymentDateFrom,
@@ -163,6 +164,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpGet("payments/summary")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPaymentSummary()
         {
             var summary = await _paymentRepository.GetPaymentSummaryAsync();

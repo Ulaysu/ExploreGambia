@@ -47,6 +47,13 @@ namespace ExploreGambia.API.Middleware
                     errorCode = "business_rule_violation";
                     errorMessage = ex.Message;
                 }
+                // Authentication failures use 401 so clients can re-authenticate instead of treating them as authorization denials.
+                else if (ex is AuthenticationFailedException)
+                {
+                    statusCode = HttpStatusCode.Unauthorized;
+                    errorCode = "unauthorized";
+                    errorMessage = ex.Message;
+                }
                 else if (ex is UnauthorizedAccessException)
                 {
                     statusCode = HttpStatusCode.Forbidden;

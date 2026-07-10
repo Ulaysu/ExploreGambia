@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using ExploreGambia.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +20,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpPost("upload")]
+        [Authorize(Roles = "Admin,Guide")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
             var imageUrl = await _mediaService.UploadAsync(file);

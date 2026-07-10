@@ -37,7 +37,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpGet]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllPayments([FromQuery] string? paymentMethod,
     [FromQuery] DateTime? paymentDateFrom,
     [FromQuery] DateTime? paymentDateTo,
@@ -52,7 +52,7 @@ namespace ExploreGambia.API.Controllers
         // Get Payment By Id Get: api/Payments/{id}
         [HttpGet]
         [Route("{id:Guid}")]
-        //[Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPaymentById([FromRoute] Guid id)
         {
 
@@ -63,7 +63,7 @@ namespace ExploreGambia.API.Controllers
 
         // Create Payment
         [HttpPost]
-        //[Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreatePayment([FromBody] AddPaymentRequestDto addPaymentRequestDto)
         {
             var payment = await paymentService.CreatePaymentAsync(addPaymentRequestDto);
@@ -75,7 +75,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpPut("{id}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdatePayment(Guid id, UpdatePaymentRequestDto updatePaymentRequestDto)
         {
             var payment = await paymentService.UpdatePaymentAsync(id, updatePaymentRequestDto);
@@ -85,7 +85,7 @@ namespace ExploreGambia.API.Controllers
         }
 
         [HttpPost("{id:guid}/confirm")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ConfirmPayment([FromRoute] Guid id, [FromBody] ConfirmPaymentRequestDto confirmPaymentRequestDto)
         {
             var payment = await paymentService.ConfirmPaymentAsync(id, confirmPaymentRequestDto);
@@ -220,7 +220,7 @@ namespace ExploreGambia.API.Controllers
         // Delete Payment
         [HttpDelete]
         [Route("{id:Guid}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBooking([FromRoute] Guid id)
         {
             var payment = await paymentRepository.DeletePaymentAsync(id)
