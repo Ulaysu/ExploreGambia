@@ -69,6 +69,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.Configure<RateLimitingOptions>(
+    builder.Configuration.GetSection(RateLimitingOptions.SectionName));
+
 
 // Add API Versioning
 var apiVersioningBuilder = builder.Services.AddApiVersioning(options =>
