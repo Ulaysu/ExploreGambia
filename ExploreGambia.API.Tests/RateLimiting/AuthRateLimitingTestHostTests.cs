@@ -73,6 +73,25 @@ namespace ExploreGambia.API.Tests.RateLimiting
             Assert.Equal(3, host.AuthService.RegisterCalls);
         }
 
+        [Fact]
+        public async Task RefreshTokenRequests_ExceedLimit_ReturnTooManyRequests()
+        {
+            var host = new AuthRateLimitingTestHost();
+            var client = host.CreateClient();
+
+            for (var i = 0; i < 10; i++)
+            {
+                var response = await SendRefreshTokenRequestAsync(client);
+
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            var rejectedResponse = await SendRefreshTokenRequestAsync(client);
+
+            await AssertTooManyRequestsAsync(rejectedResponse);
+            Assert.Equal(10, host.AuthService.RefreshTokenCalls);
+        }
+
         private static Task<HttpResponseMessage> SendLoginRequestAsync(HttpClient client)
         {
             return client.PostAsJsonAsync(
@@ -95,6 +114,17 @@ namespace ExploreGambia.API.Tests.RateLimiting
                     FirstName = "New",
                     LastName = "User",
                     Roles = new[] { "User" }
+                });
+        }
+
+        private static Task<HttpResponseMessage> SendRefreshTokenRequestAsync(HttpClient client)
+        {
+            return client.PostAsJsonAsync(
+                "/api/v1/auth/refresh-token",
+                new RefreshTokenRequestDto
+                {
+                    AccessToken = "expired-access-token",
+                    RefreshToken = "active-refresh-token"
                 });
         }
 
