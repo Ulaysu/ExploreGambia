@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using ExploreGambia.API.Controllers;
 using ExploreGambia.API.Models.DTOs;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ExploreGambia.API.Tests.RateLimiting
 {
@@ -112,6 +114,25 @@ namespace ExploreGambia.API.Tests.RateLimiting
 
             Assert.Equal(HttpStatusCode.OK, isolatedClientResponse.StatusCode);
             Assert.Equal(6, host.AuthService.LoginCalls);
+        }
+
+        [Fact]
+        public void UnaffectedAuthEndpoints_DoNotHaveRateLimitAttributes()
+        {
+            var methodNames = new[]
+            {
+                nameof(AuthController.LogoutAsync),
+                nameof(AuthController.GetCurrentUserAsync),
+                nameof(AuthController.UpdateCurrentUserAsync)
+            };
+
+            foreach (var methodName in methodNames)
+            {
+                var method = typeof(AuthController).GetMethod(methodName);
+
+                Assert.NotNull(method);
+                Assert.Empty(method.GetCustomAttributes(typeof(EnableRateLimitingAttribute), inherit: false));
+            }
         }
 
         private static Task<HttpResponseMessage> SendLoginRequestAsync(
