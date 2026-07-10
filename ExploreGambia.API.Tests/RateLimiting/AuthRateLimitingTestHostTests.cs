@@ -12,16 +12,37 @@ namespace ExploreGambia.API.Tests.RateLimiting
             var host = new AuthRateLimitingTestHost();
             var client = host.CreateClient();
 
-            var response = await client.PostAsJsonAsync(
+            var response = await SendLoginRequestAsync(client);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(1, host.AuthService.LoginCalls);
+        }
+
+        [Fact]
+        public async Task LoginRequests_BelowLimit_ReachAuthenticationLogic()
+        {
+            var host = new AuthRateLimitingTestHost();
+            var client = host.CreateClient();
+
+            for (var i = 0; i < 4; i++)
+            {
+                var response = await SendLoginRequestAsync(client);
+
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            Assert.Equal(4, host.AuthService.LoginCalls);
+        }
+
+        private static Task<HttpResponseMessage> SendLoginRequestAsync(HttpClient client)
+        {
+            return client.PostAsJsonAsync(
                 "/api/v1/auth/login",
                 new LoginRequestDto
                 {
                     Email = "user@example.com",
                     Password = "password"
                 });
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal(1, host.AuthService.LoginCalls);
         }
     }
 }
