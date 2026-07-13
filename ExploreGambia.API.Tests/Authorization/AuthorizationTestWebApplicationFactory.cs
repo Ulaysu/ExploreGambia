@@ -14,8 +14,11 @@ namespace ExploreGambia.API.Tests.Authorization
         public const string JwtIssuer = "ExploreGambia.Authorization.Tests";
         public const string JwtAudience = "ExploreGambia.Authorization.Tests.Client";
 
-        public AuthorizationTestWebApplicationFactory()
+        private readonly Action<IServiceCollection>? configureServices;
+
+        public AuthorizationTestWebApplicationFactory(Action<IServiceCollection>? configureServices = null)
         {
+            this.configureServices = configureServices;
             Environment.SetEnvironmentVariable("JWT_SECRET", JwtSecret);
             Environment.SetEnvironmentVariable("STRIPE_SECRET_KEY", "sk_test_authorization");
         }
@@ -57,6 +60,7 @@ namespace ExploreGambia.API.Tests.Authorization
             {
                 services.RemoveAll<IAuthService>();
                 services.AddSingleton<IAuthService>(AuthService);
+                configureServices?.Invoke(services);
             });
         }
     }
