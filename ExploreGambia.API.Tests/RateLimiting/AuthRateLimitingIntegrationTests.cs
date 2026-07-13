@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace ExploreGambia.API.Tests.RateLimiting
 {
+    [Collection(IntegrationTestCollection.Name)]
     public class AuthRateLimitingIntegrationTests
     {
         [Fact]
