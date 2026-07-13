@@ -11,6 +11,13 @@ namespace ExploreGambia.API.Tests.Authentication
     {
         private const string Password = "Password123!";
 
+        public static IEnumerable<object[]> Roles()
+        {
+            yield return new object[] { "User", "role-user@example.com" };
+            yield return new object[] { "Guide", "role-guide@example.com" };
+            yield return new object[] { "Admin", "role-admin@example.com" };
+        }
+
         [Fact]
         public async Task Login_WithValidCredentials_ReturnsJwtRefreshTokenAndExpectedClaims()
         {
@@ -64,6 +71,76 @@ namespace ExploreGambia.API.Tests.Authentication
                 });
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [MemberData(nameof(Roles))]
+        public async Task AuthMe_WithLoginIssuedJwt_ReturnsAuthenticatedUserIdentity(string role, string email)
+        {
+            using var factory = new JwtAuthLifecycleWebApplicationFactory();
+            var client = factory.CreateClient();
+            var user = await factory.CreateUserAsync(
+                role: role,
+                email: email,
+                password: Password,
+                firstName: role,
+                lastName: "Lifecycle");
+            var login = await factory.LoginAsync(client, user.Email!, Password);
+
+            JwtAuthLifecycleWebApplicationFactory.CreateBearerClient(login.JwtToken, client);
+
+            var response = await client.GetAsync("/api/v1/auth/me");
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var profile = await response.Content.ReadFromJsonAsync<AuthMeResponseDto>();
+
+            Assert.NotNull(profile);
+            Assert.Equal(user.Id, profile.UserId);
+            Assert.Equal(user.Email, profile.Email);
+            Assert.Equal(role, profile.FirstName);
+            Assert.Equal("Lifecycle", profile.LastName);
+            Assert.True(profile.IsAuthenticated);
+            Assert.Contains(role, profile.Roles);
+            Assert.Equal(role, FindClaimValue(
+                JwtAuthLifecycleWebApplicationFactory.ReadJwt(login.JwtToken),
+                ClaimTypes.Role,
+                "role"));
+        }
+
+        [Fact]
+        public async Task RoleProtectedEndpoints_WithLoginIssuedJwt_ApplyRoleAuthorization()
+        {
+            using var factory = new JwtAuthLifecycleWebApplicationFactory();
+            var adminClient = factory.CreateClient();
+            var userClient = factory.CreateClient();
+            var guideClient = factory.CreateClient();
+
+            var admin = await factory.CreateUserAsync("Admin", "protected-admin@example.com", Password);
+            var user = await factory.CreateUserAsync("User", "protected-user@example.com", Password);
+            var guide = await factory.CreateUserAsync("Guide", "protected-guide@example.com", Password);
+
+            var adminLogin = await factory.LoginAsync(adminClient, admin.Email!, Password);
+            var userLogin = await factory.LoginAsync(userClient, user.Email!, Password);
+            var guideLogin = await factory.LoginAsync(guideClient, guide.Email!, Password);
+
+            JwtAuthLifecycleWebApplicationFactory.CreateBearerClient(adminLogin.JwtToken, adminClient);
+            JwtAuthLifecycleWebApplicationFactory.CreateBearerClient(userLogin.JwtToken, userClient);
+            JwtAuthLifecycleWebApplicationFactory.CreateBearerClient(guideLogin.JwtToken, guideClient);
+
+            var adminDashboardResponse = await adminClient.GetAsync("/api/v1/admin/dashboard");
+            var userDashboardResponse = await userClient.GetAsync("/api/v1/admin/dashboard");
+            var userBookingsResponse = await userClient.GetAsync("/api/v1/bookings/my-bookings");
+            var guideBookingsResponse = await guideClient.GetAsync("/api/v1/bookings/my-bookings");
+            var guideProfileResponse = await guideClient.GetAsync("/api/v1/tour-guides/me");
+            var userGuideProfileResponse = await userClient.GetAsync("/api/v1/tour-guides/me");
+
+            Assert.Equal(HttpStatusCode.OK, adminDashboardResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, userDashboardResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, userBookingsResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, guideBookingsResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, guideProfileResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, userGuideProfileResponse.StatusCode);
         }
 
         private static string? FindClaimValue(JwtSecurityToken jwt, params string[] claimTypes)
