@@ -143,6 +143,62 @@ namespace ExploreGambia.API.Tests.Authentication
             Assert.Equal(HttpStatusCode.Forbidden, userGuideProfileResponse.StatusCode);
         }
 
+        [Fact]
+        public async Task RefreshToken_WithValidTokenPair_RotatesRefreshTokenAndRejectsPreviousRefreshToken()
+        {
+            using var factory = new JwtAuthLifecycleWebApplicationFactory();
+            var client = factory.CreateClient();
+            var user = await factory.CreateUserAsync(
+                role: "User",
+                email: "refresh-rotation@example.com",
+                password: Password);
+            var login = await factory.LoginAsync(client, user.Email!, Password);
+
+            await Task.Delay(TimeSpan.FromSeconds(1.1));
+
+            var refreshResponse = await client.PostAsJsonAsync(
+                "/api/v1/auth/refresh-token",
+                new RefreshTokenRequestDto
+                {
+                    AccessToken = login.JwtToken,
+                    RefreshToken = login.RefreshToken
+                });
+
+            Assert.Equal(HttpStatusCode.OK, refreshResponse.StatusCode);
+
+            var refreshedTokens = await refreshResponse.Content.ReadFromJsonAsync<RefreshTokenResponseDto>();
+
+            Assert.NotNull(refreshedTokens);
+            Assert.False(string.IsNullOrWhiteSpace(refreshedTokens.AccessToken));
+            Assert.False(string.IsNullOrWhiteSpace(refreshedTokens.RefreshToken));
+            Assert.NotEqual(login.JwtToken, refreshedTokens.AccessToken);
+            Assert.NotEqual(login.RefreshToken, refreshedTokens.RefreshToken);
+
+            var storedUser = await factory.FindUserByEmailAsync(user.Email!);
+
+            Assert.Equal(refreshedTokens.RefreshToken, storedUser.RefreshToken);
+
+            var oldRefreshTokenResponse = await client.PostAsJsonAsync(
+                "/api/v1/auth/refresh-token",
+                new RefreshTokenRequestDto
+                {
+                    AccessToken = login.JwtToken,
+                    RefreshToken = login.RefreshToken
+                });
+
+            Assert.Equal(HttpStatusCode.Unauthorized, oldRefreshTokenResponse.StatusCode);
+
+            var secondRefreshResponse = await client.PostAsJsonAsync(
+                "/api/v1/auth/refresh-token",
+                new RefreshTokenRequestDto
+                {
+                    AccessToken = refreshedTokens.AccessToken,
+                    RefreshToken = refreshedTokens.RefreshToken
+                });
+
+            Assert.Equal(HttpStatusCode.OK, secondRefreshResponse.StatusCode);
+        }
+
         private static string? FindClaimValue(JwtSecurityToken jwt, params string[] claimTypes)
         {
             return jwt.Claims.FirstOrDefault(claim => claimTypes.Contains(claim.Type))?.Value;
