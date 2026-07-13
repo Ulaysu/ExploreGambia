@@ -199,6 +199,111 @@ namespace ExploreGambia.API.Tests.Authentication
             Assert.Equal(HttpStatusCode.OK, secondRefreshResponse.StatusCode);
         }
 
+        [Fact]
+        public async Task Logout_WithLoginIssuedJwt_InvalidatesStoredRefreshToken()
+        {
+            using var factory = new JwtAuthLifecycleWebApplicationFactory();
+            var client = factory.CreateClient();
+            var user = await factory.CreateUserAsync(
+                role: "User",
+                email: "logout-revocation@example.com",
+                password: Password);
+            var login = await factory.LoginAsync(client, user.Email!, Password);
+
+            JwtAuthLifecycleWebApplicationFactory.CreateBearerClient(login.JwtToken, client);
+
+            var logoutResponse = await client.PostAsync("/api/v1/auth/logout", content: null);
+
+            Assert.Equal(HttpStatusCode.OK, logoutResponse.StatusCode);
+
+            var storedUser = await factory.FindUserByEmailAsync(user.Email!);
+
+            Assert.Null(storedUser.RefreshToken);
+            Assert.Null(storedUser.RefreshTokenExpiryTime);
+
+            var refreshAfterLogoutResponse = await client.PostAsJsonAsync(
+                "/api/v1/auth/refresh-token",
+                new RefreshTokenRequestDto
+                {
+                    AccessToken = login.JwtToken,
+                    RefreshToken = login.RefreshToken
+                });
+
+            Assert.Equal(HttpStatusCode.Unauthorized, refreshAfterLogoutResponse.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("random-refresh-token")]
+        [InlineData(" ")]
+        public async Task RefreshToken_WithInvalidRefreshToken_ReturnsUnauthorized(string invalidRefreshToken)
+        {
+            using var factory = new JwtAuthLifecycleWebApplicationFactory();
+            var client = factory.CreateClient();
+            var user = await factory.CreateUserAsync(
+                role: "User",
+                email: $"invalid-refresh-{Guid.NewGuid():N}@example.com",
+                password: Password);
+            var login = await factory.LoginAsync(client, user.Email!, Password);
+
+            var response = await client.PostAsJsonAsync(
+                "/api/v1/auth/refresh-token",
+                new RefreshTokenRequestDto
+                {
+                    AccessToken = login.JwtToken,
+                    RefreshToken = invalidRefreshToken
+                });
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task RefreshToken_WithMissingRefreshToken_ReturnsUnauthorized()
+        {
+            using var factory = new JwtAuthLifecycleWebApplicationFactory();
+            var client = factory.CreateClient();
+            var user = await factory.CreateUserAsync(
+                role: "User",
+                email: "missing-refresh-token@example.com",
+                password: Password);
+            var login = await factory.LoginAsync(client, user.Email!, Password);
+
+            var response = await client.PostAsJsonAsync(
+                "/api/v1/auth/refresh-token",
+                new
+                {
+                    AccessToken = login.JwtToken
+                });
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task RefreshToken_WithRefreshTokenFromAnotherUser_ReturnsUnauthorized()
+        {
+            using var factory = new JwtAuthLifecycleWebApplicationFactory();
+            var client = factory.CreateClient();
+            var firstUser = await factory.CreateUserAsync(
+                role: "User",
+                email: "mismatched-refresh-first@example.com",
+                password: Password);
+            var secondUser = await factory.CreateUserAsync(
+                role: "User",
+                email: "mismatched-refresh-second@example.com",
+                password: Password);
+            var firstLogin = await factory.LoginAsync(client, firstUser.Email!, Password);
+            var secondLogin = await factory.LoginAsync(client, secondUser.Email!, Password);
+
+            var response = await client.PostAsJsonAsync(
+                "/api/v1/auth/refresh-token",
+                new RefreshTokenRequestDto
+                {
+                    AccessToken = firstLogin.JwtToken,
+                    RefreshToken = secondLogin.RefreshToken
+                });
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
         private static string? FindClaimValue(JwtSecurityToken jwt, params string[] claimTypes)
         {
             return jwt.Claims.FirstOrDefault(claim => claimTypes.Contains(claim.Type))?.Value;
