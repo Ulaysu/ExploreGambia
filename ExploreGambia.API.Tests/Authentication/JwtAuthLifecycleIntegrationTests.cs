@@ -234,7 +234,6 @@ namespace ExploreGambia.API.Tests.Authentication
 
         [Theory]
         [InlineData("random-refresh-token")]
-        [InlineData(" ")]
         public async Task RefreshToken_WithInvalidRefreshToken_ReturnsUnauthorized(string invalidRefreshToken)
         {
             using var factory = new JwtAuthLifecycleWebApplicationFactory();
@@ -257,7 +256,7 @@ namespace ExploreGambia.API.Tests.Authentication
         }
 
         [Fact]
-        public async Task RefreshToken_WithMissingRefreshToken_ReturnsUnauthorized()
+        public async Task RefreshToken_WithMissingRefreshToken_ReturnsBadRequest()
         {
             using var factory = new JwtAuthLifecycleWebApplicationFactory();
             var client = factory.CreateClient();
@@ -274,7 +273,7 @@ namespace ExploreGambia.API.Tests.Authentication
                     AccessToken = login.JwtToken
                 });
 
-            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]

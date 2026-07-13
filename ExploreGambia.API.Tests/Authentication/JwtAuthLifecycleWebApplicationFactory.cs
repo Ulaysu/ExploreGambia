@@ -27,6 +27,8 @@ namespace ExploreGambia.API.Tests.Authentication
         private readonly InMemoryDatabaseRoot databaseRoot = new();
         private readonly string appDatabaseName = $"jwt-auth-lifecycle-app-{Guid.NewGuid()}";
         private readonly string authDatabaseName = $"jwt-auth-lifecycle-auth-{Guid.NewGuid()}";
+        private readonly string? previousJwtSecret;
+        private readonly string? previousStripeSecretKey;
         private readonly ServiceProvider inMemoryServiceProvider =
             new ServiceCollection()
                 .AddEntityFrameworkInMemoryDatabase()
@@ -35,6 +37,9 @@ namespace ExploreGambia.API.Tests.Authentication
 
         public JwtAuthLifecycleWebApplicationFactory()
         {
+            previousJwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
+            previousStripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
+
             Environment.SetEnvironmentVariable("JWT_SECRET", JwtSecret);
             Environment.SetEnvironmentVariable("STRIPE_SECRET_KEY", "sk_test_jwt_lifecycle");
         }
@@ -190,6 +195,18 @@ namespace ExploreGambia.API.Tests.Authentication
         private static string FormatIdentityErrors(IdentityResult result)
         {
             return string.Join(", ", result.Errors.Select(error => error.Description));
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Environment.SetEnvironmentVariable("JWT_SECRET", previousJwtSecret);
+                Environment.SetEnvironmentVariable("STRIPE_SECRET_KEY", previousStripeSecretKey);
+                inMemoryServiceProvider.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }
