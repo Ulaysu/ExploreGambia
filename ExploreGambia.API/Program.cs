@@ -21,6 +21,7 @@ using Npgsql;
 using Serilog;
 using System;
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -75,15 +76,27 @@ builder.Services.AddCors(options =>
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
+    // Render and other reverse proxies send the original client details in
+    // forwarded headers. The rate limiter depends on RemoteIpAddress, so these
+    // headers must be processed before the limiter runs.
     options.ForwardedHeaders =
         ForwardedHeaders.XForwardedFor |
         ForwardedHeaders.XForwardedProto;
+
+    // Only accept the nearest proxy hop. This keeps spoofed client-provided
+    // header chains from influencing the IP address used by rate limiting.
     options.ForwardLimit = 1;
+
+    // Trusted proxy addresses are supplied by deployment configuration so the
+    // app does not hard-code environment-specific infrastructure details.
+    ConfigureTrustedForwardedHeaderSources(options, builder.Configuration);
 });
 
 builder.Services.Configure<RateLimitingOptions>(
     builder.Configuration.GetSection(RateLimitingOptions.SectionName));
 
+// Build concrete limiter rules once at startup. Missing or invalid values fall
+// back to conservative defaults instead of disabling auth endpoint protection.
 var defaultRateLimitingOptions = new RateLimitingOptions();
 var configuredRateLimitingOptions =
     builder.Configuration
@@ -105,6 +118,8 @@ builder.Services.AddRateLimiter(options =>
 {
     options.OnRejected = async (context, cancellationToken) =>
     {
+        // Fixed-window limiters expose RetryAfter when a request is rejected;
+        // forwarding it helps clients back off without changing the JSON body.
         if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
         {
             context.HttpContext.Response.Headers.RetryAfter =
@@ -120,6 +135,8 @@ builder.Services.AddRateLimiter(options =>
             cancellationToken);
     };
 
+    // Auth policies are separated so login, registration, and refresh-token
+    // traffic cannot consume each other's request budgets.
     options.AddPolicy(AuthRateLimitPolicyNames.Login, httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             ResolveClientRateLimitPartitionKey(httpContext),
@@ -374,12 +391,16 @@ try
 {
     var app = builder.Build();
     
-    // Apply migrations and seed data
-    using (var scope = app.Services.CreateScope())
+    if (builder.Configuration.GetValue("DataSeeding:Enabled", true))
     {
-        var services = scope.ServiceProvider;
-        var seeder = services.GetRequiredService<DataSeeder>();
-        await seeder.SeedAsync();  // ✅ Breakpoint here to see exact error
+        // Production startup seeds data by default; integration tests disable
+        // this switch so they can exercise middleware without a live database.
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            var seeder = services.GetRequiredService<DataSeeder>();
+                        await seeder.SeedAsync();
+        }
     }
     
     // Configure the HTTP request pipeline.
@@ -391,6 +412,8 @@ try
 
     app.UseMiddleware<GlobalExceptionHandler>();
 
+    // This must run before anything that reads Connection.RemoteIpAddress,
+    // including endpoint rate-limiting policies.
     app.UseForwardedHeaders();
 
     app.UseHttpsRedirection();
@@ -497,6 +520,8 @@ static RateLimitRuleOptions ResolveRateLimitRule(
 
     return new RateLimitRuleOptions
     {
+        // Treat non-positive config values as absent so an accidental 0 cannot
+        // turn an endpoint into an always-rejected route.
         PermitLimit = configuredRule.PermitLimit > 0
             ? configuredRule.PermitLimit
             : defaultRule.PermitLimit,
@@ -508,6 +533,8 @@ static RateLimitRuleOptions ResolveRateLimitRule(
 
 static string ResolveClientRateLimitPartitionKey(HttpContext httpContext)
 {
+    // ForwardedHeadersMiddleware rewrites RemoteIpAddress when the request came
+    // through a trusted proxy, so this key represents the real client in Render.
     var remoteIpAddress = httpContext.Connection.RemoteIpAddress?.ToString();
 
     return string.IsNullOrWhiteSpace(remoteIpAddress)
@@ -518,6 +545,8 @@ static string ResolveClientRateLimitPartitionKey(HttpContext httpContext)
 static FixedWindowRateLimiterOptions CreateFixedWindowLimiterOptions(
     RateLimitRuleOptions rule)
 {
+    // Queueing auth attempts would make rejected brute-force traffic consume
+    // server resources, so fail fast once the fixed window is full.
     return new FixedWindowRateLimiterOptions
     {
         PermitLimit = rule.PermitLimit,
@@ -526,4 +555,60 @@ static FixedWindowRateLimiterOptions CreateFixedWindowLimiterOptions(
         QueueLimit = 0,
         AutoReplenishment = true
     };
+}
+
+static void ConfigureTrustedForwardedHeaderSources(
+    ForwardedHeadersOptions options,
+    IConfiguration configuration)
+{
+    // Empty lists keep ASP.NET Core's safe default behavior: forwarded headers
+    // are ignored unless the immediate proxy is explicitly trusted.
+    foreach (var knownProxy in configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? [])
+    {
+        if (IPAddress.TryParse(knownProxy, out var proxyAddress))
+        {
+            options.KnownProxies.Add(proxyAddress);
+        }
+    }
+
+    foreach (var knownNetwork in configuration.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? [])
+    {
+        if (TryParseKnownNetwork(knownNetwork, out var network))
+        {
+            options.KnownNetworks.Add(network);
+        }
+    }
+}
+
+static bool TryParseKnownNetwork(
+    string value,
+    out Microsoft.AspNetCore.HttpOverrides.IPNetwork network)
+{
+    network = default!;
+
+    // Deployment config uses CIDR strings such as "10.0.0.0/8"; parsing here
+    // keeps appsettings simple while still validating prefix length bounds.
+    var parts = value.Split('/', 2, StringSplitOptions.TrimEntries);
+    if (parts.Length != 2 ||
+        !IPAddress.TryParse(parts[0], out var prefix) ||
+        !int.TryParse(parts[1], CultureInfo.InvariantCulture, out var prefixLength))
+    {
+        return false;
+    }
+
+    var maxPrefixLength = prefix.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
+        ? 32
+        : 128;
+
+    if (prefixLength < 0 || prefixLength > maxPrefixLength)
+    {
+        return false;
+    }
+
+    network = new Microsoft.AspNetCore.HttpOverrides.IPNetwork(prefix, prefixLength);
+    return true;
+}
+
+public partial class Program
+{
 }
