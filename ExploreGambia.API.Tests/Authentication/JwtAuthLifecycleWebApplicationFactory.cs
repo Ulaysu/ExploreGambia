@@ -22,7 +22,12 @@ namespace ExploreGambia.API.Tests.Authentication
         public const string JwtAudience = "ExploreGambia.JwtLifecycle.Tests.Client";
 
         private readonly InMemoryDatabaseRoot databaseRoot = new();
-        private readonly string databaseName = $"jwt-auth-lifecycle-{Guid.NewGuid()}";
+        private readonly string appDatabaseName = $"jwt-auth-lifecycle-app-{Guid.NewGuid()}";
+        private readonly string authDatabaseName = $"jwt-auth-lifecycle-auth-{Guid.NewGuid()}";
+        private readonly ServiceProvider inMemoryServiceProvider =
+            new ServiceCollection()
+                .AddEntityFrameworkInMemoryDatabase()
+                .BuildServiceProvider();
         private bool databaseInitialized;
 
         public JwtAuthLifecycleWebApplicationFactory()
@@ -125,10 +130,14 @@ namespace ExploreGambia.API.Tests.Authentication
                 services.RemoveAll<DbContextOptions<ExploreGambiaAuthDbContext>>();
 
                 services.AddDbContext<ExploreGambiaDbContext>(options =>
-                    options.UseInMemoryDatabase(databaseName, databaseRoot));
+                    options
+                        .UseInMemoryDatabase(appDatabaseName, databaseRoot)
+                        .UseInternalServiceProvider(inMemoryServiceProvider));
 
                 services.AddDbContext<ExploreGambiaAuthDbContext>(options =>
-                    options.UseInMemoryDatabase(databaseName, databaseRoot));
+                    options
+                        .UseInMemoryDatabase(authDatabaseName, databaseRoot)
+                        .UseInternalServiceProvider(inMemoryServiceProvider));
             });
         }
 
