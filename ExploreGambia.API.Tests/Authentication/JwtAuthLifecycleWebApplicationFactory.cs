@@ -1,6 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Security.Claims;
+using System.Text;
 using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
@@ -12,6 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ExploreGambia.API.Tests.Authentication
 {
@@ -97,6 +100,30 @@ namespace ExploreGambia.API.Tests.Authentication
         public static JwtSecurityToken ReadJwt(string accessToken)
         {
             return new JwtSecurityTokenHandler().ReadJwtToken(accessToken);
+        }
+
+        public static string CreateExpiredAccessToken(ApplicationUser user, string role)
+        {
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Email, user.Email!),
+                new Claim(ClaimTypes.Role, role)
+            };
+
+            var credentials = new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSecret)),
+                SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: JwtIssuer,
+                audience: JwtAudience,
+                claims: claims,
+                notBefore: DateTime.UtcNow.AddMinutes(-30),
+                expires: DateTime.UtcNow.AddMinutes(-10),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         public static HttpClient CreateBearerClient(string accessToken, HttpClient client)

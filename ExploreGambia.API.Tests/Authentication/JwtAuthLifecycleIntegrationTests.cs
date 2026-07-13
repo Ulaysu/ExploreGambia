@@ -304,6 +304,24 @@ namespace ExploreGambia.API.Tests.Authentication
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
 
+        [Fact]
+        public async Task ProtectedEndpoint_WithExpiredAccessToken_ReturnsUnauthorized()
+        {
+            using var factory = new JwtAuthLifecycleWebApplicationFactory();
+            var client = factory.CreateClient();
+            var user = await factory.CreateUserAsync(
+                role: "User",
+                email: "expired-access-token@example.com",
+                password: Password);
+            var expiredToken = JwtAuthLifecycleWebApplicationFactory.CreateExpiredAccessToken(user, "User");
+
+            JwtAuthLifecycleWebApplicationFactory.CreateBearerClient(expiredToken, client);
+
+            var response = await client.GetAsync("/api/v1/auth/me");
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
         private static string? FindClaimValue(JwtSecurityToken jwt, params string[] claimTypes)
         {
             return jwt.Claims.FirstOrDefault(claim => claimTypes.Contains(claim.Type))?.Value;
