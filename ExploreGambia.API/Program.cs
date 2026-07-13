@@ -10,7 +10,9 @@ using ExploreGambia.API.Services;
 using ExploreGambia.API.Services.Payments;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -18,9 +20,11 @@ using Microsoft.OpenApi.Models;
 using Npgsql;
 using Serilog;
 using System;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Stripe;
 using ExploreGambia.API.Models.Configurations;
 using ExploreGambia.API.OpenApi;
@@ -67,6 +71,85 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+});
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    // Render and other reverse proxies send the original client details in
+    // forwarded headers. The rate limiter depends on RemoteIpAddress, so these
+    // headers must be processed before the limiter runs.
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto;
+
+    // Only accept the nearest proxy hop. This keeps spoofed client-provided
+    // header chains from influencing the IP address used by rate limiting.
+    options.ForwardLimit = 1;
+
+    // Trusted proxy addresses are supplied by deployment configuration so the
+    // app does not hard-code environment-specific infrastructure details.
+    ForwardedHeadersConfiguration.ConfigureTrustedSources(options, builder.Configuration);
+});
+
+builder.Services.Configure<RateLimitingOptions>(
+    builder.Configuration.GetSection(RateLimitingOptions.SectionName));
+
+// Build concrete limiter rules once at startup. Missing or invalid values fall
+// back to conservative defaults instead of disabling auth endpoint protection.
+var defaultRateLimitingOptions = new RateLimitingOptions();
+var configuredRateLimitingOptions =
+    builder.Configuration
+        .GetSection(RateLimitingOptions.SectionName)
+        .Get<RateLimitingOptions>()
+    ?? defaultRateLimitingOptions;
+
+var loginRateLimit = ResolveRateLimitRule(
+    configuredRateLimitingOptions.Login,
+    defaultRateLimitingOptions.Login);
+var registrationRateLimit = ResolveRateLimitRule(
+    configuredRateLimitingOptions.Registration,
+    defaultRateLimitingOptions.Registration);
+var refreshTokenRateLimit = ResolveRateLimitRule(
+    configuredRateLimitingOptions.RefreshToken,
+    defaultRateLimitingOptions.RefreshToken);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        // Fixed-window limiters expose RetryAfter when a request is rejected;
+        // forwarding it helps clients back off without changing the JSON body.
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter =
+                ((int)Math.Ceiling(retryAfter.TotalSeconds))
+                .ToString(CultureInfo.InvariantCulture);
+        }
+
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            new { message = "Too many requests. Please try again later." },
+            cancellationToken);
+    };
+
+    // Auth policies are separated so login, registration, and refresh-token
+    // traffic cannot consume each other's request budgets.
+    options.AddPolicy(AuthRateLimitPolicyNames.Login, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            ResolveClientRateLimitPartitionKey(httpContext),
+            _ => CreateFixedWindowLimiterOptions(loginRateLimit)));
+
+    options.AddPolicy(AuthRateLimitPolicyNames.Register, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            ResolveClientRateLimitPartitionKey(httpContext),
+            _ => CreateFixedWindowLimiterOptions(registrationRateLimit)));
+
+    options.AddPolicy(AuthRateLimitPolicyNames.RefreshToken, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            ResolveClientRateLimitPartitionKey(httpContext),
+            _ => CreateFixedWindowLimiterOptions(refreshTokenRateLimit)));
 });
 
 
@@ -307,12 +390,16 @@ try
 {
     var app = builder.Build();
     
-    // Apply migrations and seed data
-    using (var scope = app.Services.CreateScope())
+    if (builder.Configuration.GetValue("DataSeeding:Enabled", true))
     {
-        var services = scope.ServiceProvider;
-        var seeder = services.GetRequiredService<DataSeeder>();
-        await seeder.SeedAsync();  // ✅ Breakpoint here to see exact error
+        // Production startup seeds data by default; integration tests disable
+        // this switch so they can exercise middleware without a live database.
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            var seeder = services.GetRequiredService<DataSeeder>();
+            await seeder.SeedAsync();
+        }
     }
     
     // Configure the HTTP request pipeline.
@@ -324,6 +411,10 @@ try
 
     app.UseMiddleware<GlobalExceptionHandler>();
 
+    // This must run before anything that reads Connection.RemoteIpAddress,
+    // including endpoint rate-limiting policies.
+    app.UseForwardedHeaders();
+
     app.UseHttpsRedirection();
 
     app.UseCors("FrontendPolicy");
@@ -331,6 +422,8 @@ try
     app.UseAuthentication();
 
     app.UseAuthorization();
+
+    app.UseRateLimiter();
 
     app.MapControllers();
 
@@ -413,4 +506,56 @@ static void ValidatePostgresConnectionString(string connectionString)
         throw new InvalidOperationException(
             "PostgreSQL connection string is missing Host. Check the Railway ConnectionStrings__DefaultConnection variable.");
     }
+}
+
+static RateLimitRuleOptions ResolveRateLimitRule(
+    RateLimitRuleOptions? configuredRule,
+    RateLimitRuleOptions defaultRule)
+{
+    if (configuredRule == null)
+    {
+        return defaultRule;
+    }
+
+    return new RateLimitRuleOptions
+    {
+        // Treat non-positive config values as absent so an accidental 0 cannot
+        // turn an endpoint into an always-rejected route.
+        PermitLimit = configuredRule.PermitLimit > 0
+            ? configuredRule.PermitLimit
+            : defaultRule.PermitLimit,
+        WindowSeconds = configuredRule.WindowSeconds > 0
+            ? configuredRule.WindowSeconds
+            : defaultRule.WindowSeconds
+    };
+}
+
+static string ResolveClientRateLimitPartitionKey(HttpContext httpContext)
+{
+    // ForwardedHeadersMiddleware rewrites RemoteIpAddress when the request came
+    // through a trusted proxy, so this key represents the real client in Render.
+    var remoteIpAddress = httpContext.Connection.RemoteIpAddress?.ToString();
+
+    return string.IsNullOrWhiteSpace(remoteIpAddress)
+        ? "unknown-client"
+        : remoteIpAddress;
+}
+
+static FixedWindowRateLimiterOptions CreateFixedWindowLimiterOptions(
+    RateLimitRuleOptions rule)
+{
+    // Queueing auth attempts would make rejected brute-force traffic consume
+    // server resources, so fail fast once the fixed window is full.
+    return new FixedWindowRateLimiterOptions
+    {
+        PermitLimit = rule.PermitLimit,
+        Window = TimeSpan.FromSeconds(rule.WindowSeconds),
+        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+        QueueLimit = 0,
+        AutoReplenishment = true
+    };
+}
+
+public partial class Program
+{
 }

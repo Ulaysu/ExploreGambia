@@ -1,10 +1,12 @@
 ﻿using Asp.Versioning;
+using ExploreGambia.API.Models.Configurations;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace ExploreGambia.API.Controllers
@@ -26,9 +28,11 @@ namespace ExploreGambia.API.Controllers
         /// <summary>
         /// Register a new user with email, password, and optional roles
         /// </summary>
+        [EnableRateLimiting(AuthRateLimitPolicyNames.Register)]
         [HttpPost("register")]
         [ProducesResponseType(typeof(RegisterResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterRequestDto registerRequestDto)
         {
             if (!ModelState.IsValid)      {
@@ -48,9 +52,11 @@ namespace ExploreGambia.API.Controllers
         /// <summary>
         /// Login with email and password
         /// </summary>
+        [EnableRateLimiting(AuthRateLimitPolicyNames.Login)]
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequestDto loginRequestDto)
         {
             if (!ModelState.IsValid)
@@ -173,11 +179,13 @@ namespace ExploreGambia.API.Controllers
         /// <summary>
         /// Rotate a valid refresh token and issue a new access token
         /// </summary>
+        [EnableRateLimiting(AuthRateLimitPolicyNames.RefreshToken)]
         [HttpPost("refresh-token")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(RefreshTokenResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
         {
             var result = await authService.RefreshTokenAsync(request);
