@@ -11,6 +11,7 @@ using Moq;
 
 namespace ExploreGambia.API.Tests.Authorization
 {
+    [Collection(IntegrationTestCollection.Name)]
     public class SharedAuthorizationIntegrationTests
     {
         private static readonly Guid TourId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");

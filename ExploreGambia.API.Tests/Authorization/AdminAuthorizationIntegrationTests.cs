@@ -8,6 +8,7 @@ using Moq;
 
 namespace ExploreGambia.API.Tests.Authorization
 {
+    [Collection(IntegrationTestCollection.Name)]
     public class AdminAuthorizationIntegrationTests
     {
         public static IEnumerable<object[]> AdminEndpoints()

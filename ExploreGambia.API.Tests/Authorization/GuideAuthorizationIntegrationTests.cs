@@ -9,6 +9,7 @@ using Moq;
 
 namespace ExploreGambia.API.Tests.Authorization
 {
+    [Collection(IntegrationTestCollection.Name)]
     public class GuideAuthorizationIntegrationTests
     {
         private static readonly Guid GuideId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
