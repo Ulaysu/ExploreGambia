@@ -16,6 +16,7 @@ namespace ExploreGambia.API.Data
         public DbSet<TourGuide> TourGuides { get; set; }
         public DbSet<Payment> Payments { get; set; } // Added Payments table
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<ProviderVerification> ProviderVerifications { get; set; }
         
 
 
@@ -79,6 +80,58 @@ namespace ExploreGambia.API.Data
                 .WithOne(u => u.TourGuide)
                 .HasForeignKey<TourGuide>(g => g.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ProviderVerification>(entity =>
+            {
+                entity.HasKey(verification => verification.ProviderVerificationId);
+
+                entity.Property(verification => verification.Status)
+                    .HasDefaultValue(VerificationStatus.NotStarted);
+
+                entity.Property(verification => verification.DocumentType)
+                    .HasMaxLength(50);
+
+                entity.Property(verification => verification.IssuingCountry)
+                    .HasMaxLength(2);
+
+                entity.Property(verification => verification.MaskedDocumentNumber)
+                    .HasMaxLength(32);
+
+                entity.Property(verification => verification.TemporaryDocumentFrontKey)
+                    .HasMaxLength(500);
+
+                entity.Property(verification => verification.TemporaryDocumentBackKey)
+                    .HasMaxLength(500);
+
+                entity.Property(verification => verification.ReviewedByUserId)
+                    .HasMaxLength(450);
+
+                entity.Property(verification => verification.ReviewReason)
+                    .HasMaxLength(1000);
+
+                entity.Property(verification => verification.EvidenceDeletionStatus)
+                    .HasDefaultValue(EvidenceDeletionStatus.NotRequired);
+
+                entity.Property(verification => verification.EvidenceDeletionAttempts)
+                    .HasDefaultValue(0);
+
+                entity.Property(verification => verification.LastEvidenceDeletionError)
+                    .HasMaxLength(2000);
+
+                entity.HasOne(verification => verification.TourGuide)
+                    .WithOne(guide => guide.Verification)
+                    .HasForeignKey<ProviderVerification>(verification => verification.TourGuideId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(verification => verification.TourGuideId)
+                    .IsUnique();
+
+                entity.HasIndex(verification => new { verification.Status, verification.SubmittedAt });
+
+                entity.HasIndex(verification => verification.DocumentExpiryDate);
+
+                entity.HasIndex(verification => verification.EvidenceDeletionStatus);
+            });
 
             // Tour <-> TourGuide (One-to-Many)
             modelBuilder.Entity<Tour>()

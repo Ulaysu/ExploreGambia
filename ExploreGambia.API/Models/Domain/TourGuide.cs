@@ -21,5 +21,7 @@
         // Navigation property
         public List<Tour> Tours { get; set; } = new List<Tour>();
 
+        public ProviderVerification? Verification { get; set; }
+
     }
 }
