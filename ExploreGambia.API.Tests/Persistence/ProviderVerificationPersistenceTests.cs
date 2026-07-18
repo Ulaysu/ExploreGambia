@@ -152,6 +152,10 @@ public class ProviderVerificationPersistenceTests
             0,
             entity.FindProperty(nameof(ProviderVerification.EvidenceDeletionAttempts))!.GetDefaultValue());
 
+        var versionProperty = entity.FindProperty(nameof(ProviderVerification.Version));
+        Assert.NotNull(versionProperty);
+        Assert.True(versionProperty.IsConcurrencyToken);
+
         var relationship = Assert.Single(entity.GetForeignKeys());
         Assert.True(relationship.IsRequired);
         Assert.True(relationship.IsUnique);

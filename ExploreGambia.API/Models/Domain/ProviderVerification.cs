@@ -43,5 +43,7 @@ namespace ExploreGambia.API.Models.Domain
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
+
+        public uint Version { get; set; }
     }
 }

@@ -118,6 +118,14 @@ namespace ExploreGambia.API.Data
                 entity.Property(verification => verification.LastEvidenceDeletionError)
                     .HasMaxLength(2000);
 
+                var versionProperty = entity.Property(verification => verification.Version)
+                    .IsConcurrencyToken();
+
+                if (Database.IsNpgsql())
+                {
+                    versionProperty.IsRowVersion();
+                }
+
                 entity.HasOne(verification => verification.TourGuide)
                     .WithOne(guide => guide.Verification)
                     .HasForeignKey<ProviderVerification>(verification => verification.TourGuideId)

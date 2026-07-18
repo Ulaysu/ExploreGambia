@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExploreGambia.API.Migrations
 {
     [DbContext(typeof(ExploreGambiaDbContext))]
-    [Migration("20260718131702_AddProviderVerification")]
+    [Migration("20260718132108_AddProviderVerification")]
     partial class AddProviderVerification
     {
         /// <inheritdoc />
@@ -244,6 +244,12 @@ namespace ExploreGambia.API.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("ProviderVerificationId");
 

@@ -34,7 +34,8 @@ namespace ExploreGambia.API.Migrations
                     LastEvidenceDeletionAttemptAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     LastEvidenceDeletionError = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
