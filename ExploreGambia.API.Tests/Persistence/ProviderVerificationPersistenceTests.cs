@@ -203,8 +203,16 @@ public class ProviderVerificationPersistenceTests
             false,
             nameof(ProviderVerification.Status),
             nameof(ProviderVerification.SubmittedAt));
-        AssertIndex(entity, false, nameof(ProviderVerification.DocumentExpiryDate));
-        AssertIndex(entity, false, nameof(ProviderVerification.EvidenceDeletionStatus));
+        AssertIndex(
+            entity,
+            false,
+            nameof(ProviderVerification.Status),
+            nameof(ProviderVerification.DocumentExpiryDate));
+        AssertIndex(
+            entity,
+            false,
+            nameof(ProviderVerification.EvidenceDeletionStatus),
+            nameof(ProviderVerification.LastEvidenceDeletionAttemptAt));
 
         Assert.Null(entity.FindProperty("FullDocumentNumber"));
         Assert.Null(entity.FindProperty("DocumentImageBytes"));

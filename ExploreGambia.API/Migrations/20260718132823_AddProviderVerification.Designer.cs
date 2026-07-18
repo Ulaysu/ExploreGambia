@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExploreGambia.API.Migrations
 {
     [DbContext(typeof(ExploreGambiaDbContext))]
-    [Migration("20260718132521_AddProviderVerification")]
+    [Migration("20260718132823_AddProviderVerification")]
     partial class AddProviderVerification
     {
         /// <inheritdoc />
@@ -253,12 +253,12 @@ namespace ExploreGambia.API.Migrations
 
                     b.HasKey("ProviderVerificationId");
 
-                    b.HasIndex("DocumentExpiryDate");
-
-                    b.HasIndex("EvidenceDeletionStatus");
-
                     b.HasIndex("TourGuideId")
                         .IsUnique();
+
+                    b.HasIndex("EvidenceDeletionStatus", "LastEvidenceDeletionAttemptAt");
+
+                    b.HasIndex("Status", "DocumentExpiryDate");
 
                     b.HasIndex("Status", "SubmittedAt");
 

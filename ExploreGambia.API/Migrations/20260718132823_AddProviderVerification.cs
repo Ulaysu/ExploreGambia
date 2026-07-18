@@ -52,14 +52,14 @@ namespace ExploreGambia.API.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProviderVerifications_DocumentExpiryDate",
+                name: "IX_ProviderVerifications_EvidenceDeletionStatus_LastEvidenceDe~",
                 table: "ProviderVerifications",
-                column: "DocumentExpiryDate");
+                columns: new[] { "EvidenceDeletionStatus", "LastEvidenceDeletionAttemptAt" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProviderVerifications_EvidenceDeletionStatus",
+                name: "IX_ProviderVerifications_Status_DocumentExpiryDate",
                 table: "ProviderVerifications",
-                column: "EvidenceDeletionStatus");
+                columns: new[] { "Status", "DocumentExpiryDate" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProviderVerifications_Status_SubmittedAt",

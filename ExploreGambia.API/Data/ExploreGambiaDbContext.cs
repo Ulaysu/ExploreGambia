@@ -149,9 +149,17 @@ namespace ExploreGambia.API.Data
 
                 entity.HasIndex(verification => new { verification.Status, verification.SubmittedAt });
 
-                entity.HasIndex(verification => verification.DocumentExpiryDate);
+                entity.HasIndex(verification => new
+                {
+                    verification.Status,
+                    verification.DocumentExpiryDate
+                });
 
-                entity.HasIndex(verification => verification.EvidenceDeletionStatus);
+                entity.HasIndex(verification => new
+                {
+                    verification.EvidenceDeletionStatus,
+                    verification.LastEvidenceDeletionAttemptAt
+                });
             });
 
             // Tour <-> TourGuide (One-to-Many)

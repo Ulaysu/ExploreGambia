@@ -250,12 +250,12 @@ namespace ExploreGambia.API.Migrations
 
                     b.HasKey("ProviderVerificationId");
 
-                    b.HasIndex("DocumentExpiryDate");
-
-                    b.HasIndex("EvidenceDeletionStatus");
-
                     b.HasIndex("TourGuideId")
                         .IsUnique();
+
+                    b.HasIndex("EvidenceDeletionStatus", "LastEvidenceDeletionAttemptAt");
+
+                    b.HasIndex("Status", "DocumentExpiryDate");
 
                     b.HasIndex("Status", "SubmittedAt");
 
