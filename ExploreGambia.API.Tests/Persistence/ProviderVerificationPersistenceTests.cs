@@ -122,6 +122,41 @@ public class ProviderVerificationPersistenceTests
         Assert.InRange(verification.CreatedAt, beforeCreation, DateTime.UtcNow);
     }
 
+    [Theory]
+    [InlineData("status")]
+    [InlineData("evidence-status")]
+    [InlineData("attempts")]
+    public async Task InvalidVerificationState_IsRejectedByDatabase(string invalidField)
+    {
+        await using var database = await CreateDatabaseAsync();
+        var guide = CreateTourGuide();
+        var verification = new ProviderVerification
+        {
+            ProviderVerificationId = Guid.NewGuid(),
+            TourGuide = guide
+        };
+
+        switch (invalidField)
+        {
+            case "status":
+                verification.Status = (VerificationStatus)999;
+                break;
+            case "evidence-status":
+                verification.EvidenceDeletionStatus = (EvidenceDeletionStatus)999;
+                break;
+            case "attempts":
+                verification.EvidenceDeletionAttempts = -1;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(invalidField));
+        }
+
+        guide.Verification = verification;
+        database.Context.TourGuides.Add(guide);
+
+        await Assert.ThrowsAsync<DbUpdateException>(() => database.Context.SaveChangesAsync());
+    }
+
     [Fact]
     public async Task Model_ContainsRequiredConstraintsDefaultsAndIndexes()
     {

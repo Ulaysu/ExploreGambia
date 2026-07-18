@@ -83,6 +83,19 @@ namespace ExploreGambia.API.Data
 
             modelBuilder.Entity<ProviderVerification>(entity =>
             {
+                entity.ToTable(table =>
+                {
+                    table.HasCheckConstraint(
+                        "CK_ProviderVerifications_Status",
+                        "\"Status\" BETWEEN 0 AND 4");
+                    table.HasCheckConstraint(
+                        "CK_ProviderVerifications_EvidenceDeletionStatus",
+                        "\"EvidenceDeletionStatus\" BETWEEN 0 AND 3");
+                    table.HasCheckConstraint(
+                        "CK_ProviderVerifications_EvidenceDeletionAttempts",
+                        "\"EvidenceDeletionAttempts\" >= 0");
+                });
+
                 entity.HasKey(verification => verification.ProviderVerificationId);
 
                 entity.Property(verification => verification.Status)

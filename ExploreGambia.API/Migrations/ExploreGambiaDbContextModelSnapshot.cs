@@ -259,7 +259,14 @@ namespace ExploreGambia.API.Migrations
 
                     b.HasIndex("Status", "SubmittedAt");
 
-                    b.ToTable("ProviderVerifications");
+                    b.ToTable("ProviderVerifications", t =>
+                        {
+                            t.HasCheckConstraint("CK_ProviderVerifications_EvidenceDeletionAttempts", "\"EvidenceDeletionAttempts\" >= 0");
+
+                            t.HasCheckConstraint("CK_ProviderVerifications_EvidenceDeletionStatus", "\"EvidenceDeletionStatus\" BETWEEN 0 AND 3");
+
+                            t.HasCheckConstraint("CK_ProviderVerifications_Status", "\"Status\" BETWEEN 0 AND 4");
+                        });
                 });
 
             modelBuilder.Entity("ExploreGambia.API.Models.Domain.Review", b =>

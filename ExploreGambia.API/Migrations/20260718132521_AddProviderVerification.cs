@@ -40,6 +40,9 @@ namespace ExploreGambia.API.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProviderVerifications", x => x.ProviderVerificationId);
+                    table.CheckConstraint("CK_ProviderVerifications_EvidenceDeletionAttempts", "\"EvidenceDeletionAttempts\" >= 0");
+                    table.CheckConstraint("CK_ProviderVerifications_EvidenceDeletionStatus", "\"EvidenceDeletionStatus\" BETWEEN 0 AND 3");
+                    table.CheckConstraint("CK_ProviderVerifications_Status", "\"Status\" BETWEEN 0 AND 4");
                     table.ForeignKey(
                         name: "FK_ProviderVerifications_TourGuides_TourGuideId",
                         column: x => x.TourGuideId,
