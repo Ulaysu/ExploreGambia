@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExploreGambia.API.Migrations
 {
     [DbContext(typeof(ExploreGambiaDbContext))]
-    [Migration("20260715123450_AddProviderVerification")]
+    [Migration("20260718131702_AddProviderVerification")]
     partial class AddProviderVerification
     {
         /// <inheritdoc />
@@ -422,7 +422,7 @@ namespace ExploreGambia.API.Migrations
                     b.HasOne("ExploreGambia.API.Models.Domain.TourGuide", "TourGuide")
                         .WithOne("Verification")
                         .HasForeignKey("ExploreGambia.API.Models.Domain.ProviderVerification", "TourGuideId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("TourGuide");

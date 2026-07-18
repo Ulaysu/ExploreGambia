@@ -121,7 +121,7 @@ namespace ExploreGambia.API.Data
                 entity.HasOne(verification => verification.TourGuide)
                     .WithOne(guide => guide.Verification)
                     .HasForeignKey<ProviderVerification>(verification => verification.TourGuideId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasIndex(verification => verification.TourGuideId)
                     .IsUnique();

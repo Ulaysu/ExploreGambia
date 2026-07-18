@@ -44,7 +44,7 @@ namespace ExploreGambia.API.Migrations
                         column: x => x.TourGuideId,
                         principalTable: "TourGuides",
                         principalColumn: "TourGuideId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

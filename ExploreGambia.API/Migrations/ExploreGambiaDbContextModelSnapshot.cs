@@ -419,7 +419,7 @@ namespace ExploreGambia.API.Migrations
                     b.HasOne("ExploreGambia.API.Models.Domain.TourGuide", "TourGuide")
                         .WithOne("Verification")
                         .HasForeignKey("ExploreGambia.API.Models.Domain.ProviderVerification", "TourGuideId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("TourGuide");

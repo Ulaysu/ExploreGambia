@@ -83,6 +83,33 @@ public class ProviderVerificationPersistenceTests
     }
 
     [Fact]
+    public async Task TourGuide_WithVerification_CannotBeDeletedBeforeEvidenceCleanup()
+    {
+        await using var database = await CreateDatabaseAsync();
+        var guide = CreateTourGuide();
+        guide.Verification = new ProviderVerification
+        {
+            ProviderVerificationId = Guid.NewGuid(),
+            TourGuide = guide,
+            TemporaryDocumentFrontKey = "private/verification/front.jpg"
+        };
+
+        database.Context.TourGuides.Add(guide);
+        await database.Context.SaveChangesAsync();
+        database.Context.ChangeTracker.Clear();
+
+        var persistedGuide = await database.Context.TourGuides
+            .SingleAsync(candidate => candidate.TourGuideId == guide.TourGuideId);
+        database.Context.TourGuides.Remove(persistedGuide);
+        await Assert.ThrowsAsync<DbUpdateException>(() => database.Context.SaveChangesAsync());
+        database.Context.ChangeTracker.Clear();
+
+        Assert.True(await database.Context.TourGuides.AnyAsync(candidate => candidate.TourGuideId == guide.TourGuideId));
+        Assert.True(await database.Context.ProviderVerifications.AnyAsync(
+            candidate => candidate.TourGuideId == guide.TourGuideId));
+    }
+
+    [Fact]
     public void NewVerification_HasSafeDefaults()
     {
         var beforeCreation = DateTime.UtcNow;
@@ -128,7 +155,7 @@ public class ProviderVerificationPersistenceTests
         var relationship = Assert.Single(entity.GetForeignKeys());
         Assert.True(relationship.IsRequired);
         Assert.True(relationship.IsUnique);
-        Assert.Equal(DeleteBehavior.Cascade, relationship.DeleteBehavior);
+        Assert.Equal(DeleteBehavior.Restrict, relationship.DeleteBehavior);
         Assert.Equal(typeof(TourGuide), relationship.PrincipalEntityType.ClrType);
 
         AssertIndex(entity, true, nameof(ProviderVerification.TourGuideId));
