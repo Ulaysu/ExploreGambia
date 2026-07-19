@@ -3,7 +3,6 @@ using System.Net.Http.Json;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Repositories;
-using ExploreGambia.API.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
@@ -116,11 +115,9 @@ namespace ExploreGambia.API.Tests.Authorization
             {
                 services.RemoveAll<ITourGuideRepository>();
                 services.RemoveAll<ITourRepository>();
-                services.RemoveAll<IUnitOfWork>();
 
                 services.AddSingleton(CreateTourGuideRepository().Object);
                 services.AddSingleton(CreateTourRepository().Object);
-                services.AddSingleton(CreateUnitOfWork().Object);
             });
         }
 
@@ -239,22 +236,10 @@ namespace ExploreGambia.API.Tests.Authorization
                     return tourGuide;
                 });
             repository
-                .Setup(repo => repo.GetTourGuideForDeletionAsync(GuideId))
+                .Setup(repo => repo.DeleteTourGuideAsync(GuideId))
                 .ReturnsAsync(guide);
-            repository
-                .Setup(repo => repo.DeleteTourGuideAsync(guide))
-                .Returns(Task.CompletedTask);
 
             return repository;
-        }
-
-        private static Mock<IUnitOfWork> CreateUnitOfWork()
-        {
-            var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
-            unitOfWork
-                .Setup(candidate => candidate.ExecuteInTransactionAsync(It.IsAny<Func<Task<TourGuide>>>()))
-                .Returns((Func<Task<TourGuide>> operation) => operation());
-            return unitOfWork;
         }
 
         private static Mock<ITourRepository> CreateTourRepository()

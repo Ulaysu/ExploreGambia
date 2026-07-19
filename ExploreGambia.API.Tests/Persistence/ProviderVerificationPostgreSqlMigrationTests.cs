@@ -1,8 +1,6 @@
 using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
-using ExploreGambia.API.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
 using Npgsql;
 
 namespace ExploreGambia.API.Tests.Persistence;
@@ -76,7 +74,6 @@ public class ProviderVerificationPostgreSqlMigrationTests
         }
 
         await AssertConcurrentUpdateIsRejectedAsync(appOptions, verificationId);
-        await AssertGuideLockSerializesVerificationInsertAsync(appOptions);
 
         await using (var rollbackContext = new ExploreGambiaDbContext(appOptions))
         {
@@ -104,41 +101,6 @@ public class ProviderVerificationPostgreSqlMigrationTests
 
         staleCopy.Status = VerificationStatus.Approved;
         await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => secondContext.SaveChangesAsync());
-    }
-
-    private static async Task AssertGuideLockSerializesVerificationInsertAsync(
-        DbContextOptions<ExploreGambiaDbContext> options)
-    {
-        var guideId = Guid.NewGuid();
-        await using (var setupContext = new ExploreGambiaDbContext(options))
-        {
-            setupContext.TourGuides.Add(CreateTourGuide(guideId));
-            await setupContext.SaveChangesAsync();
-        }
-
-        await using var deletionContext = new ExploreGambiaDbContext(options);
-        await using var deletionTransaction = await deletionContext.Database.BeginTransactionAsync();
-        var repository = new TourGuideRepository(
-            deletionContext,
-            NullLogger<TourGuideRepository>.Instance);
-        var lockedGuide = await repository.GetTourGuideForDeletionAsync(guideId);
-        Assert.NotNull(lockedGuide);
-
-        await using var submissionContext = new ExploreGambiaDbContext(options);
-        submissionContext.ProviderVerifications.Add(new ProviderVerification
-        {
-            ProviderVerificationId = Guid.NewGuid(),
-            TourGuideId = guideId
-        });
-        var concurrentInsert = submissionContext.SaveChangesAsync();
-
-        await Task.Delay(250);
-        Assert.False(concurrentInsert.IsCompleted);
-
-        await repository.DeleteTourGuideAsync(lockedGuide);
-        await deletionTransaction.CommitAsync();
-
-        await Assert.ThrowsAsync<DbUpdateException>(() => concurrentInsert);
     }
 
     private static TourGuide CreateTourGuide(Guid guideId)
