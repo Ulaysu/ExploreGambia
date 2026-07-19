@@ -46,6 +46,15 @@ jobs:
       - name: Restore
         run: dotnet restore ExploreGambia.sln
 
+      - name: Audit NuGet dependencies
+        shell: bash
+        run: |
+          audit_output="$(dotnet list ExploreGambia.sln package --vulnerable --include-transitive)"
+          echo "$audit_output"
+          if [[ "$audit_output" == *"has the following vulnerable packages"* ]]; then
+            exit 1
+          fi
+
       - name: Build
         run: dotnet build ExploreGambia.sln --no-restore --configuration Release
 
