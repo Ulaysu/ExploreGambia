@@ -3,6 +3,7 @@ using AutoMapper;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Models.DTOs;
 using ExploreGambia.API.Repositories;
+using ExploreGambia.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +17,16 @@ namespace ExploreGambia.API.Controllers
     public class TourGuideController : ControllerBase
     {
         private readonly ITourGuideRepository tourGuideRepository;
+        private readonly ITourGuideService tourGuideService;
         private readonly IMapper mapper;
 
-        public TourGuideController(ITourGuideRepository tourGuideRepository, IMapper mapper)
+        public TourGuideController(
+            ITourGuideRepository tourGuideRepository,
+            ITourGuideService tourGuideService,
+            IMapper mapper)
         {
             this.tourGuideRepository = tourGuideRepository;
+            this.tourGuideService = tourGuideService;
             this.mapper = mapper;
         }
 
@@ -100,7 +106,7 @@ namespace ExploreGambia.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTourGuide([FromRoute] Guid id)
         {
-            var tourGuideModel = await tourGuideRepository.DeleteTourGuideAsync(id);
+            var tourGuideModel = await tourGuideService.DeleteTourGuideAsync(id);
 
             // Convert Domain Model to DTO
             var tourGuideDto = mapper.Map<TourGuideDto>(tourGuideModel);

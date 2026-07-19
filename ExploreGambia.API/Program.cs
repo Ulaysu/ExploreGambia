@@ -202,6 +202,7 @@ builder.Services.AddAutoMapper(cfg =>
 // Add Repositories
 builder.Services.AddScoped<ITourRepository, TourRepository>();
 builder.Services.AddScoped<ITourGuideRepository, TourGuideRepository>();
+builder.Services.AddScoped<ITourGuideService, TourGuideService>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();

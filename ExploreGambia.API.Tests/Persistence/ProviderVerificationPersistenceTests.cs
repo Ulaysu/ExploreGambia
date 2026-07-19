@@ -1,8 +1,10 @@
 using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
+using ExploreGambia.API.Repositories;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace ExploreGambia.API.Tests.Persistence;
 
@@ -106,6 +108,38 @@ public class ProviderVerificationPersistenceTests
 
         Assert.True(await database.Context.TourGuides.AnyAsync(candidate => candidate.TourGuideId == guide.TourGuideId));
         Assert.True(await database.Context.ProviderVerifications.AnyAsync(
+            candidate => candidate.TourGuideId == guide.TourGuideId));
+    }
+
+    [Fact]
+    public async Task Repository_DeleteGuide_RemovesCleanVerificationInSameSave()
+    {
+        await using var database = await CreateDatabaseAsync();
+        var guide = CreateTourGuide();
+        guide.Verification = new ProviderVerification
+        {
+            ProviderVerificationId = Guid.NewGuid(),
+            TourGuide = guide,
+            Status = VerificationStatus.Approved,
+            EvidenceDeletionStatus = EvidenceDeletionStatus.Completed,
+            EvidenceDeletedAt = DateTime.UtcNow
+        };
+
+        database.Context.TourGuides.Add(guide);
+        await database.Context.SaveChangesAsync();
+        database.Context.ChangeTracker.Clear();
+
+        var repository = new TourGuideRepository(
+            database.Context,
+            NullLogger<TourGuideRepository>.Instance);
+        var persistedGuide = await repository.GetTourGuideForDeletionAsync(guide.TourGuideId);
+
+        Assert.NotNull(persistedGuide);
+        await repository.DeleteTourGuideAsync(persistedGuide);
+
+        Assert.False(await database.Context.TourGuides.AnyAsync(
+            candidate => candidate.TourGuideId == guide.TourGuideId));
+        Assert.False(await database.Context.ProviderVerifications.AnyAsync(
             candidate => candidate.TourGuideId == guide.TourGuideId));
     }
 

@@ -24,17 +24,22 @@ namespace ExploreGambia.API.Repositories
             return tourGuide;
         }
 
-        // Delete a TourGuide by Id
-        public async Task<TourGuide?> DeleteTourGuideAsync(Guid id)
+        public Task<TourGuide?> GetTourGuideForDeletionAsync(Guid id)
         {
-            var existingTourGuide = await context.TourGuides.FirstOrDefaultAsync(x => x.TourGuideId == id);
+            return context.TourGuides
+                .Include(tourGuide => tourGuide.Verification)
+                .FirstOrDefaultAsync(tourGuide => tourGuide.TourGuideId == id);
+        }
 
-            if (existingTourGuide == null) throw new TourGuideNotFoundException(id);
+        public async Task DeleteTourGuideAsync(TourGuide tourGuide)
+        {
+            if (tourGuide.Verification != null)
+            {
+                context.ProviderVerifications.Remove(tourGuide.Verification);
+            }
 
-            context.TourGuides.Remove(existingTourGuide);
+            context.TourGuides.Remove(tourGuide);
             await context.SaveChangesAsync();
-
-            return existingTourGuide;
         }
 
         // Get a list of all TourGuides

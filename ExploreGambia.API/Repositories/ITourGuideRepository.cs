@@ -20,7 +20,9 @@ namespace ExploreGambia.API.Repositories
 
         Task<TourGuide?> UpdateTourGuideAsync(Guid id, TourGuide tourGuide);
 
-        Task<TourGuide?> DeleteTourGuideAsync(Guid id);
+        Task<TourGuide?> GetTourGuideForDeletionAsync(Guid id);
+
+        Task DeleteTourGuideAsync(TourGuide tourGuide);
 
     }
 }

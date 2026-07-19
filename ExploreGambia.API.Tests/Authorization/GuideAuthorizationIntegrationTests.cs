@@ -236,8 +236,11 @@ namespace ExploreGambia.API.Tests.Authorization
                     return tourGuide;
                 });
             repository
-                .Setup(repo => repo.DeleteTourGuideAsync(GuideId))
+                .Setup(repo => repo.GetTourGuideForDeletionAsync(GuideId))
                 .ReturnsAsync(guide);
+            repository
+                .Setup(repo => repo.DeleteTourGuideAsync(guide))
+                .Returns(Task.CompletedTask);
 
             return repository;
         }
