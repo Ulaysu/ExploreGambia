@@ -10,7 +10,7 @@ public class ProviderVerificationPostgreSqlMigrationTests
     private const string PreviousAppMigration = "20260625155747_AddReviewsTable";
 
     [PostgreSqlFact]
-    public async Task Migration_AppliesProtectsConcurrentWritesAndRollsBack()
+    public async Task FreshDatabase_ProductionMigrationOrder_AppliesProtectsConcurrentWritesAndRollsBack()
     {
         var serverConnectionString = Environment.GetEnvironmentVariable(
             PostgreSqlFactAttribute.ConnectionStringEnvironmentVariable)!;

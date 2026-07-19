@@ -18,8 +18,8 @@ namespace ExploreGambia.API.Data
 
         public async Task SeedAsync()
         {
-            await EnsureDatabaseReadyAsync(_context);
             await EnsureDatabaseReadyAsync(_authContext);
+            await EnsureDatabaseReadyAsync(_context);
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             //  ADD THIS RIGHT HERE (BEFORE SEEDING ANYTHING)
