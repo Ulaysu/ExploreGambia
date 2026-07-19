@@ -23,7 +23,7 @@ namespace ExploreGambia.API.Services
                 throw new TourGuideNotFoundException(id);
             }
 
-            if (RequiresEvidenceCleanup(tourGuide.Verification))
+            if (!CanDeleteSafely(tourGuide.Verification))
             {
                 throw new BusinessRuleException(
                     "Tour guide cannot be deleted until identity evidence cleanup is complete.");
@@ -42,18 +42,21 @@ namespace ExploreGambia.API.Services
             return tourGuide;
         }
 
-        private static bool RequiresEvidenceCleanup(ProviderVerification? verification)
+        private static bool CanDeleteSafely(ProviderVerification? verification)
         {
             if (verification == null)
             {
-                return false;
+                return true;
             }
 
-            return verification.Status == VerificationStatus.PendingReview
-                || verification.TemporaryDocumentFrontKey != null
-                || verification.TemporaryDocumentBackKey != null
-                || verification.EvidenceDeletionStatus is EvidenceDeletionStatus.Pending
-                    or EvidenceDeletionStatus.Failed;
+            var hasNoStorageKeys = verification.TemporaryDocumentFrontKey == null
+                && verification.TemporaryDocumentBackKey == null;
+
+            var cleanupWasNotNeeded = verification.Status == VerificationStatus.NotStarted
+                && verification.EvidenceDeletionStatus == EvidenceDeletionStatus.NotRequired;
+            var cleanupCompleted = verification.EvidenceDeletionStatus == EvidenceDeletionStatus.Completed;
+
+            return hasNoStorageKeys && (cleanupWasNotNeeded || cleanupCompleted);
         }
     }
 }

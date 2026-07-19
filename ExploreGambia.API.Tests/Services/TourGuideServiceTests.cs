@@ -26,6 +26,9 @@ namespace ExploreGambia.API.Tests.Services
 
         [Theory]
         [InlineData(VerificationStatus.PendingReview, EvidenceDeletionStatus.NotRequired, null, null)]
+        [InlineData(VerificationStatus.Approved, EvidenceDeletionStatus.NotRequired, null, null)]
+        [InlineData(VerificationStatus.Rejected, EvidenceDeletionStatus.NotRequired, null, null)]
+        [InlineData(VerificationStatus.ReverificationRequired, EvidenceDeletionStatus.NotRequired, null, null)]
         [InlineData(VerificationStatus.Approved, EvidenceDeletionStatus.Pending, null, null)]
         [InlineData(VerificationStatus.Rejected, EvidenceDeletionStatus.Failed, null, null)]
         [InlineData(VerificationStatus.Approved, EvidenceDeletionStatus.NotRequired, "front-key", null)]
@@ -74,6 +77,18 @@ namespace ExploreGambia.API.Tests.Services
         public async Task DeleteTourGuideAsync_WhenGuideHasNoVerification_DeletesGuide()
         {
             var guide = CreateGuide();
+            var repository = CreateRepository(guide);
+            var service = new TourGuideService(repository.Object);
+
+            await service.DeleteTourGuideAsync(guide.TourGuideId);
+
+            repository.Verify(repo => repo.DeleteTourGuideAsync(guide), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteTourGuideAsync_WhenVerificationNeverStarted_DeletesGuide()
+        {
+            var guide = CreateGuide(new ProviderVerification());
             var repository = CreateRepository(guide);
             var service = new TourGuideService(repository.Object);
 
