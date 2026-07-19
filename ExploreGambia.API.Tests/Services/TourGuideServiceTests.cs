@@ -1,4 +1,5 @@
 using ExploreGambia.API.Exceptions;
+using ExploreGambia.API.Data;
 using ExploreGambia.API.Models.Domain;
 using ExploreGambia.API.Repositories;
 using ExploreGambia.API.Services;
@@ -16,7 +17,7 @@ namespace ExploreGambia.API.Tests.Services
             var repository = new Mock<ITourGuideRepository>();
             repository.Setup(repo => repo.GetTourGuideForDeletionAsync(id))
                 .ReturnsAsync((TourGuide?)null);
-            var service = new TourGuideService(repository.Object);
+            var service = CreateService(repository);
 
             await Assert.ThrowsAsync<TourGuideNotFoundException>(
                 () => service.DeleteTourGuideAsync(id));
@@ -47,7 +48,7 @@ namespace ExploreGambia.API.Tests.Services
                 TemporaryDocumentBackKey = backKey
             });
             var repository = CreateRepository(guide);
-            var service = new TourGuideService(repository.Object);
+            var service = CreateService(repository);
 
             await Assert.ThrowsAsync<BusinessRuleException>(
                 () => service.DeleteTourGuideAsync(guide.TourGuideId));
@@ -65,7 +66,7 @@ namespace ExploreGambia.API.Tests.Services
                 EvidenceDeletedAt = DateTime.UtcNow
             });
             var repository = CreateRepository(guide);
-            var service = new TourGuideService(repository.Object);
+            var service = CreateService(repository);
 
             var deletedGuide = await service.DeleteTourGuideAsync(guide.TourGuideId);
 
@@ -78,7 +79,7 @@ namespace ExploreGambia.API.Tests.Services
         {
             var guide = CreateGuide();
             var repository = CreateRepository(guide);
-            var service = new TourGuideService(repository.Object);
+            var service = CreateService(repository);
 
             await service.DeleteTourGuideAsync(guide.TourGuideId);
 
@@ -90,7 +91,7 @@ namespace ExploreGambia.API.Tests.Services
         {
             var guide = CreateGuide(new ProviderVerification());
             var repository = CreateRepository(guide);
-            var service = new TourGuideService(repository.Object);
+            var service = CreateService(repository);
 
             await service.DeleteTourGuideAsync(guide.TourGuideId);
 
@@ -104,10 +105,12 @@ namespace ExploreGambia.API.Tests.Services
             var repository = CreateRepository(guide);
             repository.Setup(repo => repo.DeleteTourGuideAsync(guide))
                 .ThrowsAsync(new DbUpdateConcurrencyException());
-            var service = new TourGuideService(repository.Object);
+            var service = CreateService(repository);
 
-            await Assert.ThrowsAsync<BusinessRuleException>(
+            var exception = await Assert.ThrowsAsync<BusinessRuleException>(
                 () => service.DeleteTourGuideAsync(guide.TourGuideId));
+
+            Assert.IsType<DbUpdateConcurrencyException>(exception.InnerException);
         }
 
         private static TourGuide CreateGuide(ProviderVerification? verification = null)
@@ -137,6 +140,19 @@ namespace ExploreGambia.API.Tests.Services
             repository.Setup(repo => repo.DeleteTourGuideAsync(guide))
                 .Returns(Task.CompletedTask);
             return repository;
+        }
+
+        private static TourGuideService CreateService(Mock<ITourGuideRepository> repository)
+        {
+            return new TourGuideService(repository.Object, new ImmediateUnitOfWork());
+        }
+
+        private sealed class ImmediateUnitOfWork : IUnitOfWork
+        {
+            public Task<T> ExecuteInTransactionAsync<T>(Func<Task<T>> operation)
+            {
+                return operation();
+            }
         }
     }
 }

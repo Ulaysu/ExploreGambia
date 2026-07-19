@@ -26,7 +26,26 @@ namespace ExploreGambia.API.Repositories
 
         public Task<TourGuide?> GetTourGuideForDeletionAsync(Guid id)
         {
-            return context.TourGuides
+            IQueryable<TourGuide> query = context.TourGuides;
+
+            if (context.Database.IsNpgsql())
+            {
+                if (context.Database.CurrentTransaction == null)
+                {
+                    throw new InvalidOperationException(
+                        "A transaction is required when locking a tour guide for deletion.");
+                }
+
+                query = context.TourGuides.FromSqlInterpolated(
+                    $"""
+                    SELECT *
+                    FROM "TourGuides"
+                    WHERE "TourGuideId" = {id}
+                    FOR UPDATE
+                    """);
+            }
+
+            return query
                 .Include(tourGuide => tourGuide.Verification)
                 .FirstOrDefaultAsync(tourGuide => tourGuide.TourGuideId == id);
         }
